@@ -1,8 +1,8 @@
-﻿import { useLocation, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
-import { StatusBadge, PriorityBadge } from '@/components/ui/badges'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { AlertCircle, ArrowLeft, Save, X } from 'lucide-react'
+import { PriorityBadge, StatusBadge } from '@/components/ui/badges'
 import type { Priority, Status } from '@/data/mock-tickets'
-import { ArrowLeft, Save, X, User, Tag, AlertCircle } from 'lucide-react'
 
 interface TicketDraft {
   title: string
@@ -20,6 +20,13 @@ const priorityLabel: Record<Priority, string> = {
   critical: 'Critica',
 }
 
+const statusLabel: Record<Status, string> = {
+  open: 'Aperto',
+  in_progress: 'In lavorazione',
+  resolved: 'Risolto',
+  closed: 'Chiuso',
+}
+
 export function TicketReviewPage() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -33,141 +40,99 @@ export function TicketReviewPage() {
 
   const tags = draft.tags
     .split(',')
-    .map((t) => t.trim())
+    .map((item) => item.trim())
     .filter(Boolean)
 
   const now = new Date().toLocaleString('it-IT')
   const newId = `KFT-00${Math.floor(Math.random() * 90) + 10}`
 
   const handleSave = () => {
-    // Mock save — in una vera app qui si chiamerebbe l'API
     navigate('/tickets', { replace: true })
   }
 
   return (
-    <div className="p-8 max-w-4xl space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="mx-auto max-w-[1400px] px-6 py-6">
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#EDEBE9] pb-4">
         <div>
-          <p className="text-xs text-[#605E5C] mb-1">Nuovo ticket · Anteprima</p>
-          <h1 className="text-2xl font-semibold text-[#201F1E]">Conferma e salva</h1>
+          <p className="text-xs uppercase tracking-[0.18em] text-[#605E5C]">Nuovo documento</p>
+          <h1 className="mt-1 text-[30px] font-light text-[#323130]">Conferma ticket</h1>
         </div>
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={() => navigate(-1)}
-            className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-[#605E5C] border border-[#EDEBE9] rounded-md hover:bg-[#F3F2F1] transition-colors"
+            className="flex items-center gap-1 border border-[#EDEBE9] px-4 py-2 text-sm text-[#605E5C] hover:bg-[#F3F2F1]"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="h-4 w-4" />
             Modifica
           </button>
           <button
+            type="button"
             onClick={() => navigate('/tickets')}
-            className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-red-600 border border-red-100 rounded-md hover:bg-red-50 transition-colors"
+            className="flex items-center gap-1 border border-[#F3D6D8] px-4 py-2 text-sm text-[#A4262C] hover:bg-[#FDF3F4]"
           >
-            <X className="w-4 h-4" />
+            <X className="h-4 w-4" />
             Annulla
           </button>
           <button
+            type="button"
             onClick={handleSave}
-            className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-[#008272] text-white rounded-md hover:bg-[#006B5C] transition-colors"
+            className="flex items-center gap-1 bg-[#009B9B] px-4 py-2 text-sm font-medium text-white hover:bg-[#007575]"
           >
-            <Save className="w-4 h-4" />
-            Salva Ticket
+            <Save className="h-4 w-4" />
+            Salva
           </button>
         </div>
       </div>
 
-      {/* Ticket header card */}
-      <div className="bg-white rounded-lg border border-[#EDEBE9] p-6 space-y-4">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <span className="text-xs font-mono text-[#605E5C]">{newId} · Bozza</span>
-            <h2 className="text-xl font-semibold text-[#201F1E] mt-1">{draft.title || '—'}</h2>
-          </div>
-          <div className="flex gap-2 shrink-0">
-            <PriorityBadge priority={draft.priority} />
-            <StatusBadge status={draft.status} />
-          </div>
-        </div>
-
-        {draft.description ? (
-          <p className="text-sm text-[#605E5C] leading-relaxed">{draft.description}</p>
-        ) : (
-          <p className="text-sm text-[#A19F9D] italic">Nessuna descrizione fornita.</p>
-        )}
-
-        {tags.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap">
-            <Tag className="w-3.5 h-3.5 text-[#A19F9D]" />
-            {tags.map((tag) => (
-              <span key={tag} className="text-xs bg-[#F3F2F1] text-[#605E5C] px-2 py-0.5 rounded-full border border-[#EDEBE9]">
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
+      <div className="mt-4 flex items-start gap-3 bg-[#E6F5F5] px-4 py-3 text-sm text-[#323130]">
+        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#009B9B]" />
+        <p>Verifica i dati del ticket prima di completare il salvataggio.</p>
       </div>
 
-      {/* Details grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Left: metadata */}
-        <div className="bg-white rounded-lg border border-[#EDEBE9] p-5 space-y-4">
-          <h3 className="text-xs font-semibold text-[#A19F9D] uppercase tracking-wider">Dettagli</h3>
-          <dl className="space-y-3 text-sm">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="w-4 h-4 text-[#A19F9D] mt-0.5 shrink-0" />
-              <div>
-                <dt className="text-xs text-[#A19F9D]">Priorità</dt>
-                <dd className="text-[#201F1E] font-medium mt-0.5">{priorityLabel[draft.priority]}</dd>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <User className="w-4 h-4 text-[#A19F9D] mt-0.5 shrink-0" />
-              <div>
-                <dt className="text-xs text-[#A19F9D]">Assegnatario</dt>
-                <dd className="text-[#201F1E] font-medium mt-0.5">{draft.assignee || '—'}</dd>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <User className="w-4 h-4 text-[#A19F9D] mt-0.5 shrink-0" />
-              <div>
-                <dt className="text-xs text-[#A19F9D]">Segnalato da</dt>
-                <dd className="text-[#201F1E] font-medium mt-0.5">Marco Rossi</dd>
-              </div>
-            </div>
-          </dl>
-        </div>
-
-        {/* Right: timestamps */}
-        <div className="bg-white rounded-lg border border-[#EDEBE9] p-5 space-y-4">
-          <h3 className="text-xs font-semibold text-[#A19F9D] uppercase tracking-wider">Informazioni</h3>
-          <dl className="space-y-3 text-sm">
-            <div>
-              <dt className="text-xs text-[#A19F9D]">Data creazione</dt>
-              <dd className="text-[#201F1E] font-medium mt-0.5">{now}</dd>
-            </div>
-            <div>
-              <dt className="text-xs text-[#A19F9D]">ID assegnato</dt>
-              <dd className="text-[#201F1E] font-mono font-medium mt-0.5">{newId}</dd>
-            </div>
-            <div>
-              <dt className="text-xs text-[#A19F9D]">Stato iniziale</dt>
-              <dd className="mt-0.5"><StatusBadge status={draft.status} /></dd>
-            </div>
-          </dl>
-        </div>
-      </div>
-
-      {/* Bottom actions - solo Torna al form, senza duplicare Annulla/Salva */}
-      <div className="flex justify-start pt-2">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 px-5 py-2.5 text-sm font-medium text-[#605E5C] border border-[#EDEBE9] rounded-md hover:bg-[#F3F2F1] transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          ← Torna al form
+      <div className="mt-4 border-b border-[#EDEBE9] text-sm">
+        <button type="button" className="border-b-2 border-[#009B9B] px-1 py-3 text-[#009B9B]">
+          Generale
         </button>
       </div>
+
+      <div className="mt-6 space-y-8">
+        <section className="border-b border-dotted border-[#EDEBE9] pb-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="text-sm text-[#605E5C]">{newId} · Bozza</div>
+              <div className="mt-1 text-xl font-medium text-[#323130]">{draft.title || '—'}</div>
+            </div>
+            <div className="flex items-center gap-2">
+              <PriorityBadge priority={draft.priority} />
+              <StatusBadge status={draft.status} />
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 className="mb-4 text-base font-semibold text-[#323130]">Generale</h2>
+          <div className="grid gap-x-8 gap-y-1 md:grid-cols-2">
+            <ReviewField label="ID assegnato" value={newId} />
+            <ReviewField label="Data creazione" value={now} />
+            <ReviewField label="Priorità" value={priorityLabel[draft.priority]} />
+            <ReviewField label="Stato iniziale" value={statusLabel[draft.status]} />
+            <ReviewField label="Assegnatario" value={draft.assignee || '—'} />
+            <ReviewField label="Segnalato da" value="Marco Rossi" />
+            <ReviewField label="Tag" value={tags.length > 0 ? tags.join(', ') : '—'} />
+            <ReviewField label="Descrizione" value={draft.description || '—'} />
+          </div>
+        </section>
+      </div>
+    </div>
+  )
+}
+
+function ReviewField({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center border-b border-dotted border-[#EDEBE9] py-1.5">
+      <span className="w-48 shrink-0 text-sm text-[#605E5C]">{label}</span>
+      <span className="text-sm text-[#323130]">{value}</span>
     </div>
   )
 }

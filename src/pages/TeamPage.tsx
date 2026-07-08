@@ -7,32 +7,48 @@ export function TeamPage() {
   ]
 
   return (
-    <div className="p-8 space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-neutral-900">Team</h1>
-        <p className="text-sm text-neutral-500 mt-1">Panoramica dei membri del team di supporto</p>
+    <div className="mx-auto max-w-[1600px] px-6 py-6">
+      <div className="border-b border-[#EDEBE9] pb-4">
+        <p className="text-xs uppercase tracking-[0.18em] text-[#605E5C]">Dashboard / Team</p>
+        <h1 className="mt-2 text-[28px] font-light text-[#323130]">Team</h1>
+        <p className="mt-1 text-sm text-[#605E5C]">Panoramica dei membri del team di supporto.</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
-        {members.map((m) => (
-          <div key={m.name} className="bg-white rounded-xl border border-neutral-200 p-5 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-sm font-bold text-white shrink-0">
-              {m.avatar}
-            </div>
-            <div className="flex-1">
-              <p className="font-medium text-neutral-800">{m.name}</p>
-              <p className="text-xs text-neutral-400">{m.role}</p>
-            </div>
-            <div className="text-right shrink-0">
-              <p className="text-xs text-neutral-400">
-                <span className="font-semibold text-neutral-700">{m.open}</span> aperti
-              </p>
-              <p className="text-xs text-neutral-400">
-                <span className="font-semibold text-green-600">{m.resolved}</span> risolti
-              </p>
-            </div>
-          </div>
-        ))}
+      <div className="mt-4 border-b border-[#EDEBE9] bg-white px-6 py-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <button type="button" className="border border-[#EDEBE9] px-3 py-1.5 text-sm text-[#323130] hover:bg-[#F3F2F1]">
+            + Nuovo
+          </button>
+          <button type="button" className="border border-[#EDEBE9] px-3 py-1.5 text-sm text-[#323130] hover:bg-[#F3F2F1]">
+            Filtra
+          </button>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto bg-white">
+        <table className="w-full min-w-[720px] text-sm">
+          <thead>
+            <tr className="bg-[#FAF9F8]">
+              <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Nome</th>
+              <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Ruolo</th>
+              <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Ticket Aperti</th>
+              <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Ticket Risolti</th>
+            </tr>
+          </thead>
+          <tbody>
+            {members.map((member, index) => (
+              <tr key={member.name} className={index % 2 === 0 ? 'bg-white' : 'bg-[#FCFBFA]'}>
+                <td className="px-6 py-3">
+                  <div className="font-medium text-[#323130]">{member.name}</div>
+                  <div className="mt-1 text-xs text-[#605E5C]">{member.avatar}</div>
+                </td>
+                <td className="px-6 py-3 text-[#605E5C]">{member.role}</td>
+                <td className="px-6 py-3 text-[#323130]">{member.open}</td>
+                <td className="px-6 py-3 text-[#323130]">{member.resolved}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   )

@@ -1,8 +1,8 @@
-﻿import { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useState, type ReactNode } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { ArrowLeft, Calendar, CheckCircle2, Tag, User, UserCheck, XCircle } from 'lucide-react'
 import { mockTickets, type Status } from '@/data/mock-tickets'
-import { StatusBadge, PriorityBadge } from '@/components/ui/badges'
-import { ArrowLeft, User, Calendar, Tag, CheckCircle2, UserCheck, XCircle } from 'lucide-react'
+import { PriorityBadge, StatusBadge } from '@/components/ui/badges'
 
 interface Comment {
   text: string
@@ -13,22 +13,18 @@ interface Comment {
 export function TicketDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const ticket = mockTickets.find((t) => t.id === id)
+  const ticket = mockTickets.find((item) => item.id === id)
 
   const [status, setStatus] = useState<Status>(ticket?.status ?? 'open')
   const [assignee, setAssignee] = useState(ticket?.assignee ?? '')
   const [comments, setComments] = useState<Comment[]>([])
   const [commentText, setCommentText] = useState('')
-  const [closed, setClosed] = useState(false)
 
   if (!ticket) {
     return (
       <div className="p-8 text-center">
         <p className="text-[#605E5C]">Ticket non trovato.</p>
-        <button
-          onClick={() => navigate('/tickets')}
-          className="mt-4 text-[#008272] text-sm hover:underline"
-        >
+        <button type="button" onClick={() => navigate('/tickets')} className="mt-4 text-sm text-[#009B9B] hover:underline">
           Torna alla lista
         </button>
       </div>
@@ -46,13 +42,13 @@ export function TicketDetailPage() {
 
   const handleClose = () => {
     setStatus('closed')
-    setClosed(true)
   }
 
   const handleComment = () => {
     if (!commentText.trim()) return
-    setComments([
-      ...comments,
+
+    setComments((current) => [
+      ...current,
       {
         text: commentText.trim(),
         author: 'Marco Rossi',
@@ -63,146 +59,180 @@ export function TicketDetailPage() {
   }
 
   return (
-    <div className="p-8 max-w-4xl space-y-6">
-      <button
-        onClick={() => navigate('/tickets')}
-        className="flex items-center gap-1.5 text-sm text-[#605E5C] hover:text-[#201F1E] transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Torna ai ticket
-      </button>
-
-      <div className="bg-white rounded-lg border border-[#EDEBE9] p-6 space-y-4">
-        <div className="flex items-start justify-between gap-4">
+    <div className="mx-auto max-w-[1600px] px-6 py-6">
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#EDEBE9] pb-4">
+        <div className="flex items-start gap-4">
+          <button
+            type="button"
+            onClick={() => navigate('/tickets')}
+            className="mt-1 flex h-10 w-10 items-center justify-center rounded-full border border-[#EDEBE9] bg-white text-[#323130] hover:bg-[#F3F2F1]"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </button>
           <div>
-            <span className="text-xs font-mono text-[#A19F9D]">{ticket.id}</span>
-            <h1 className="text-xl font-semibold text-[#201F1E] mt-1">{ticket.title}</h1>
-          </div>
-          <div className="flex gap-2 shrink-0">
-            <PriorityBadge priority={ticket.priority} />
-            <StatusBadge status={status} />
+            <p className="text-xs uppercase tracking-[0.18em] text-[#605E5C]">Ticket Card</p>
+            <h1 className="mt-1 text-[30px] font-light text-[#323130]">
+              {ticket.id} · {ticket.title}
+            </h1>
           </div>
         </div>
-        <p className="text-sm text-[#605E5C] leading-relaxed">{ticket.description}</p>
-
-        {ticket.tags.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap">
-            <Tag className="w-3.5 h-3.5 text-[#A19F9D]" />
-            {ticket.tags.map((tag) => (
-              <span
-                key={tag}
-                className="text-xs bg-[#F3F2F1] text-[#605E5C] px-2 py-0.5 rounded-full border border-[#EDEBE9]"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
+        <StatusBadge status={status} />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-white rounded-lg border border-[#EDEBE9] p-5 space-y-3">
-          <h2 className="text-xs font-semibold text-[#A19F9D] uppercase tracking-wider">Dettagli</h2>
-          <dl className="space-y-2 text-sm">
-            <div className="flex items-center gap-2">
-              <User className="w-3.5 h-3.5 text-[#A19F9D]" />
-              <dt className="text-[#A19F9D] w-24">Assegnatario</dt>
-              <dd className="text-[#201F1E]">{assignee || '—'}</dd>
+      <div className="mt-4 border-b border-[#EDEBE9] bg-white px-4 py-3 text-sm text-[#605E5C]">
+        Segnalato: <span className="text-[#323130]">{ticket.reporter}</span>
+        <span className="mx-2 text-[#C8C6C4]">|</span>
+        Data: <span className="text-[#323130]">{new Date(ticket.createdAt).toLocaleDateString('it-IT')}</span>
+        <span className="mx-2 text-[#C8C6C4]">|</span>
+        Assegnatario: <span className="text-[#323130]">{assignee || '—'}</span>
+      </div>
+
+      <div className="mt-4 flex gap-6 border-b border-[#EDEBE9] text-sm">
+        {['Home page', 'Dettagli', 'Commenti', 'Allegati (0)'].map((tab, index) => (
+          <button
+            key={tab}
+            type="button"
+            className={`border-b-2 px-1 py-3 ${
+              index === 0 ? 'border-[#009B9B] text-[#009B9B]' : 'border-transparent text-[#605E5C]'
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      <div className="mt-6 grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="space-y-8">
+          <section>
+            <h2 className="mb-4 text-base font-semibold text-[#323130]">Generale</h2>
+            <div className="grid gap-x-8 gap-y-1 md:grid-cols-2">
+              <FieldRow label="Stato" value={<StatusBadge status={status} />} />
+              <FieldRow label="Priorità" value={<PriorityBadge priority={ticket.priority} />} />
+              <FieldRow label="Assegnatario" value={assignee || '—'} />
+              <FieldRow label="Segnalato da" value={ticket.reporter} />
+              <FieldRow label="Data creazione" value={new Date(ticket.createdAt).toLocaleString('it-IT')} />
+              <FieldRow label="Ultimo aggiornamento" value={new Date(ticket.updatedAt).toLocaleString('it-IT')} />
+              <FieldRow
+                label="Tag"
+                value={
+                  <div className="flex flex-wrap gap-2">
+                    {ticket.tags.map((tag) => (
+                      <span key={tag}>{tag}</span>
+                    ))}
+                  </div>
+                }
+              />
+              <FieldRow label="Categoria" value="Supporto applicativo" />
             </div>
-            <div className="flex items-center gap-2">
-              <User className="w-3.5 h-3.5 text-[#A19F9D]" />
-              <dt className="text-[#A19F9D] w-24">Segnalato da</dt>
-              <dd className="text-[#201F1E]">{ticket.reporter}</dd>
+          </section>
+
+          <section>
+            <h2 className="mb-4 text-base font-semibold text-[#323130]">Descrizione</h2>
+            <div className="border-b border-dotted border-[#EDEBE9] py-2 text-sm leading-6 text-[#323130]">
+              {ticket.description}
             </div>
-            <div className="flex items-center gap-2">
-              <Calendar className="w-3.5 h-3.5 text-[#A19F9D]" />
-              <dt className="text-[#A19F9D] w-24">Creato il</dt>
-              <dd className="text-[#201F1E]">{new Date(ticket.createdAt).toLocaleString('it-IT')}</dd>
+          </section>
+
+          <section>
+            <h2 className="mb-4 text-base font-semibold text-[#323130]">Commenti</h2>
+
+            {comments.length === 0 ? (
+              <div className="border-b border-dotted border-[#EDEBE9] py-6 text-sm text-[#605E5C]">
+                Nessun commento presente.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {comments.map((comment, index) => (
+                  <div key={`${comment.time}-${index}`} className="border-b border-dotted border-[#EDEBE9] pb-4">
+                    <div className="mb-1 text-xs text-[#605E5C]">
+                      {comment.author} · {comment.time}
+                    </div>
+                    <p className="text-sm text-[#323130]">{comment.text}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-6">
+              <label className="mb-2 block text-sm text-[#605E5C]">Nuovo commento</label>
+              <textarea
+                placeholder="Scrivi un commento"
+                rows={4}
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                className="w-full border border-[#EDEBE9] bg-white px-3 py-2 text-sm text-[#323130] outline-none focus:border-[#009B9B]"
+              />
+              <div className="mt-3 flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleComment}
+                  disabled={!commentText.trim()}
+                  className="bg-[#009B9B] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#007575] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Commenta
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Calendar className="w-3.5 h-3.5 text-[#A19F9D]" />
-              <dt className="text-[#A19F9D] w-24">Aggiornato</dt>
-              <dd className="text-[#201F1E]">{new Date(ticket.updatedAt).toLocaleString('it-IT')}</dd>
-            </div>
-          </dl>
+          </section>
         </div>
 
-        <div className="bg-white rounded-lg border border-[#EDEBE9] p-5 space-y-3">
-          <h2 className="text-xs font-semibold text-[#A19F9D] uppercase tracking-wider">Azioni</h2>
+        <aside className="h-fit border border-[#EDEBE9] bg-white p-4 xl:sticky xl:top-32">
+          <h2 className="mb-4 text-sm font-semibold text-[#323130]">Azioni</h2>
           <div className="space-y-2">
             <button
+              type="button"
               onClick={handleTakeOver}
               disabled={status === 'in_progress' || status === 'resolved' || status === 'closed'}
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md border border-[#EDEBE9] hover:bg-[#F3F2F1] transition-colors text-[#201F1E] disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex w-full items-center gap-2 border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] hover:bg-[#F3F2F1] disabled:cursor-not-allowed disabled:opacity-40"
             >
-              <UserCheck className="w-4 h-4 text-[#008272]" />
-              {status === 'in_progress' ? 'Già in lavorazione' : 'Prendi in carico'}
+              <UserCheck className="h-4 w-4 text-[#009B9B]" />
+              Prendi in carico
             </button>
             <button
+              type="button"
               onClick={handleResolve}
               disabled={status === 'resolved' || status === 'closed'}
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md border border-[#EDEBE9] hover:bg-emerald-50 transition-colors text-[#201F1E] disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex w-full items-center gap-2 border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] hover:bg-[#F3F2F1] disabled:cursor-not-allowed disabled:opacity-40"
             >
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              {status === 'resolved' ? 'Già risolto' : 'Segna come risolto'}
+              <CheckCircle2 className="h-4 w-4 text-[#107C10]" />
+              Segna come risolto
             </button>
             <button
+              type="button"
               onClick={handleClose}
-              disabled={closed}
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md border border-red-100 hover:bg-red-50 transition-colors text-red-600 disabled:opacity-40 disabled:cursor-not-allowed"
+              disabled={status === 'closed'}
+              className="flex w-full items-center gap-2 border border-[#F3D6D8] px-3 py-2 text-sm text-[#A4262C] hover:bg-[#FDF3F4] disabled:cursor-not-allowed disabled:opacity-40"
             >
-              <XCircle className="w-4 h-4" />
-              {closed ? 'Ticket chiuso' : 'Chiudi ticket'}
+              <XCircle className="h-4 w-4" />
+              Chiudi ticket
             </button>
           </div>
-        </div>
+
+          <div className="mt-6 border-t border-[#EDEBE9] pt-4 text-sm text-[#605E5C]">
+            <div className="flex items-center gap-2 py-1">
+              <User className="h-4 w-4" />
+              <span>{assignee || 'In attesa di assegnazione'}</span>
+            </div>
+            <div className="flex items-center gap-2 py-1">
+              <Calendar className="h-4 w-4" />
+              <span>{new Date(ticket.updatedAt).toLocaleDateString('it-IT')}</span>
+            </div>
+            <div className="flex items-center gap-2 py-1">
+              <Tag className="h-4 w-4" />
+              <span>{ticket.tags.length} tag</span>
+            </div>
+          </div>
+        </aside>
       </div>
+    </div>
+  )
+}
 
-      <div className="bg-white rounded-lg border border-[#EDEBE9] p-6">
-        <h2 className="text-xs font-semibold text-[#A19F9D] uppercase tracking-wider mb-4">Commenti</h2>
-
-        {comments.length === 0 ? (
-          <div className="text-center py-8 text-sm text-[#A19F9D]">
-            Nessun commento ancora. Aggiungi il primo!
-          </div>
-        ) : (
-          <div className="space-y-4 mb-4">
-            {comments.map((c, i) => (
-              <div key={i} className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#008272] flex items-center justify-center text-xs font-bold text-white shrink-0">
-                  MR
-                </div>
-                <div className="flex-1 bg-[#F8F9FA] rounded-lg px-3 py-2">
-                  <p className="text-xs text-[#A19F9D] mb-1">{c.author} · {c.time}</p>
-                  <p className="text-sm text-[#201F1E]">{c.text}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div className="flex gap-3 mt-4">
-          <div className="w-8 h-8 rounded-full bg-[#008272] flex items-center justify-center text-xs font-bold text-white shrink-0">
-            MR
-          </div>
-          <textarea
-            placeholder="Scrivi un commento..."
-            rows={3}
-            value={commentText}
-            onChange={(e) => setCommentText(e.target.value)}
-            className="flex-1 text-sm border border-[#EDEBE9] rounded-md px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#008272]"
-          />
-        </div>
-        <div className="flex justify-end mt-3">
-          <button
-            onClick={handleComment}
-            disabled={!commentText.trim()}
-            className="px-4 py-2 bg-[#008272] text-white text-sm font-medium rounded-md hover:bg-[#006B5C] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            Commenta
-          </button>
-        </div>
-      </div>
+function FieldRow({ label, value }: { label: string; value: ReactNode }) {
+  return (
+    <div className="flex items-center border-b border-dotted border-[#EDEBE9] py-1.5">
+      <span className="w-48 shrink-0 text-sm text-[#605E5C]">{label}</span>
+      <span className="text-sm text-[#323130]">{value}</span>
     </div>
   )
 }

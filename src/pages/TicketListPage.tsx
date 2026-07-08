@@ -1,13 +1,12 @@
-﻿import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { mockTickets, type Status, type Priority } from '@/data/mock-tickets'
-import { StatusBadge, PriorityBadge } from '@/components/ui/badges'
-import { Search, PlusCircle, SlidersHorizontal } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Filter, Plus, Search } from 'lucide-react'
+import { mockTickets, type Priority, type Status, type Ticket } from '@/data/mock-tickets'
 
 const statusOptions: { value: Status | 'all'; label: string }[] = [
   { value: 'all', label: 'Tutti gli stati' },
   { value: 'open', label: 'Aperti' },
-  { value: 'in_progress', label: 'In Lavorazione' },
+  { value: 'in_progress', label: 'In lavorazione' },
   { value: 'resolved', label: 'Risolti' },
   { value: 'closed', label: 'Chiusi' },
 ]
@@ -20,122 +19,191 @@ const priorityOptions: { value: Priority | 'all'; label: string }[] = [
   { value: 'low', label: 'Bassa' },
 ]
 
+const statusLabel: Record<Status, string> = {
+  open: 'Aperto',
+  in_progress: 'In lavorazione',
+  resolved: 'Risolto',
+  closed: 'Chiuso',
+}
+
+const statusColor: Record<Status, string> = {
+  open: 'text-[#009B9B]',
+  in_progress: 'text-[#8A6E00]',
+  resolved: 'text-[#107C10]',
+  closed: 'text-[#605E5C]',
+}
+
+const priorityLabel: Record<Priority, string> = {
+  low: 'Bassa',
+  medium: 'Media',
+  high: 'Alta',
+  critical: 'Critica',
+}
+
 export function TicketListPage() {
   const navigate = useNavigate()
-  const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<Status | 'all'>('all')
-  const [priorityFilter, setPriorityFilter] = useState<Priority | 'all'>('all')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [search, setSearch] = useState(searchParams.get('q') ?? '')
+  const [statusFilter, setStatusFilter] = useState<Status | 'all'>(
+    (searchParams.get('status') as Status | 'all') ?? 'all'
+  )
+  const [priorityFilter, setPriorityFilter] = useState<Priority | 'all'>(
+    (searchParams.get('priority') as Priority | 'all') ?? 'all'
+  )
+  const [assigneeFilter, setAssigneeFilter] = useState(searchParams.get('assignee') ?? 'all')
 
-  const filtered = mockTickets.filter((t) => {
+  useEffect(() => {
+    const nextParams = new URLSearchParams()
+
+    if (search) nextParams.set('q', search)
+    if (statusFilter !== 'all') nextParams.set('status', statusFilter)
+    if (priorityFilter !== 'all') nextParams.set('priority', priorityFilter)
+    if (assigneeFilter !== 'all') nextParams.set('assignee', assigneeFilter)
+
+    setSearchParams(nextParams, { replace: true })
+  }, [assigneeFilter, priorityFilter, search, setSearchParams, statusFilter])
+
+  const filtered = mockTickets.filter((ticket) => {
     const matchSearch =
       search === '' ||
-      t.title.toLowerCase().includes(search.toLowerCase()) ||
-      t.id.toLowerCase().includes(search.toLowerCase())
-    const matchStatus = statusFilter === 'all' || t.status === statusFilter
-    const matchPriority = priorityFilter === 'all' || t.priority === priorityFilter
-    return matchSearch && matchStatus && matchPriority
+      ticket.title.toLowerCase().includes(search.toLowerCase()) ||
+      ticket.id.toLowerCase().includes(search.toLowerCase())
+    const matchStatus = statusFilter === 'all' || ticket.status === statusFilter
+    const matchPriority = priorityFilter === 'all' || ticket.priority === priorityFilter
+    const matchAssignee =
+      assigneeFilter === 'all' ||
+      (assigneeFilter === 'unassigned' ? !ticket.assignee : ticket.assignee === assigneeFilter)
+
+    return matchSearch && matchStatus && matchPriority && matchAssignee
   })
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-[#201F1E]">Ticket</h1>
-          <p className="text-sm text-[#605E5C] mt-1">{filtered.length} ticket trovati</p>
+    <div className="mx-auto max-w-[1600px] px-6 py-6">
+      <div className="border-b border-[#EDEBE9] pb-4">
+        <p className="text-xs uppercase tracking-[0.18em] text-[#605E5C]">Dashboard / Ticket</p>
+        <div className="mt-2 flex items-end justify-between gap-4">
+          <div>
+            <h1 className="text-[28px] font-light text-[#323130]">Ticket</h1>
+            <p className="mt-1 text-sm text-[#605E5C]">{filtered.length} record visualizzati</p>
+          </div>
         </div>
-        <button
-          onClick={() => navigate('/tickets/new')}
-          className="flex items-center gap-2 px-4 py-2 bg-[#008272] text-white text-sm font-medium rounded-md hover:bg-[#006B5C] transition-colors"
-        >
-          <PlusCircle className="w-4 h-4" />
-          Nuovo Ticket
-        </button>
       </div>
 
-      <div className="bg-white rounded-lg border border-[#EDEBE9] p-4 flex flex-wrap gap-3 items-center">
-        <SlidersHorizontal className="w-4 h-4 text-[#A19F9D] shrink-0" />
-        <div className="relative flex-1 min-w-48">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A19F9D]" />
-          <input
-            type="text"
-            placeholder="Cerca ticket..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-sm border border-[#EDEBE9] rounded-md focus:outline-none focus:ring-2 focus:ring-[#008272]"
-          />
+      <div className="mt-4 border-b border-[#EDEBE9] bg-white px-6 py-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => navigate('/tickets/new')}
+            className="flex items-center gap-1 border border-[#EDEBE9] px-3 py-1.5 text-sm text-[#323130] hover:bg-[#F3F2F1]"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Nuovo
+          </button>
+          <button
+            type="button"
+            className="flex h-8 w-8 items-center justify-center border border-[#EDEBE9] text-[#605E5C] hover:bg-[#F3F2F1]"
+            title="Filtri"
+          >
+            <Filter className="h-3.5 w-3.5" />
+          </button>
+          <div className="flex items-center border border-[#EDEBE9] px-2 text-[#605E5C] focus-within:border-[#009B9B]">
+            <Search className="h-3.5 w-3.5" />
+            <input
+              type="text"
+              placeholder="Cerca ticket"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-44 bg-transparent px-2 py-1.5 text-sm text-[#323130] outline-none"
+            />
+          </div>
+          <span className="mx-1 h-5 w-px bg-[#EDEBE9]" />
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as Status | 'all')}
+            className="border border-[#EDEBE9] bg-white px-3 py-1.5 text-sm text-[#323130] outline-none focus:border-[#009B9B]"
+          >
+            {statusOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <select
+            value={priorityFilter}
+            onChange={(e) => setPriorityFilter(e.target.value as Priority | 'all')}
+            className="border border-[#EDEBE9] bg-white px-3 py-1.5 text-sm text-[#323130] outline-none focus:border-[#009B9B]"
+          >
+            {priorityOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <select
+            value={assigneeFilter}
+            onChange={(e) => setAssigneeFilter(e.target.value)}
+            className="border border-[#EDEBE9] bg-white px-3 py-1.5 text-sm text-[#323130] outline-none focus:border-[#009B9B]"
+          >
+            <option value="all">Tutti gli assegnatari</option>
+            <option value="unassigned">Non assegnati</option>
+            <option value="Marco Rossi">Marco Rossi</option>
+            <option value="Laura Conti">Laura Conti</option>
+            <option value="Andrea Ferri">Andrea Ferri</option>
+          </select>
         </div>
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value as Status | 'all')}
-          className="px-3 py-2 text-sm border border-[#EDEBE9] rounded-md focus:outline-none focus:ring-2 focus:ring-[#008272] bg-white text-[#201F1E]"
-        >
-          {statusOptions.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
-        <select
-          value={priorityFilter}
-          onChange={(e) => setPriorityFilter(e.target.value as Priority | 'all')}
-          className="px-3 py-2 text-sm border border-[#EDEBE9] rounded-md focus:outline-none focus:ring-2 focus:ring-[#008272] bg-white text-[#201F1E]"
-        >
-          {priorityOptions.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
       </div>
 
-      <div className="bg-white rounded-lg border border-[#EDEBE9] overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="overflow-x-auto bg-white">
+        <table className="w-full min-w-[980px] text-sm">
           <thead>
-            <tr className="border-b border-[#EDEBE9] bg-[#FAF9F8]">
-              <th className="text-left px-6 py-3 text-xs font-semibold text-[#605E5C] uppercase tracking-wide">ID</th>
-              <th className="text-left px-6 py-3 text-xs font-semibold text-[#605E5C] uppercase tracking-wide">Titolo</th>
-              <th className="text-left px-6 py-3 text-xs font-semibold text-[#605E5C] uppercase tracking-wide">Priorità</th>
-              <th className="text-left px-6 py-3 text-xs font-semibold text-[#605E5C] uppercase tracking-wide">Stato</th>
-              <th className="text-left px-6 py-3 text-xs font-semibold text-[#605E5C] uppercase tracking-wide">Assegnatario</th>
-              <th className="text-left px-6 py-3 text-xs font-semibold text-[#605E5C] uppercase tracking-wide">Data</th>
+            <tr className="bg-[#FAF9F8]">
+              <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">ID</th>
+              <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Titolo</th>
+              <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Segnalato da</th>
+              <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Priorità</th>
+              <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Stato</th>
+              <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Assegnatario</th>
+              <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Data</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#EDEBE9]">
+          <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-[#A19F9D] text-sm">
-                  Nessun ticket trovato
+                <td colSpan={7} className="px-6 py-16 text-center text-sm text-[#605E5C]">
+                  Nessun ticket trovato con i filtri selezionati.
                 </td>
               </tr>
             ) : (
-              filtered.map((ticket) => (
-                <tr
-                  key={ticket.id}
-                  className="hover:bg-[#F3F2F1] cursor-pointer transition-colors"
-                  onClick={() => navigate(`/tickets/${ticket.id}`)}
-                >
-                  <td className="px-6 py-4 font-mono text-[#A19F9D] text-xs">{ticket.id}</td>
-                  <td className="px-6 py-4">
-                    <span className="font-medium text-[#201F1E]">{ticket.title}</span>
-                    <div className="flex gap-1 mt-1 flex-wrap">
-                      {ticket.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="text-xs bg-[#F3F2F1] text-[#605E5C] px-1.5 py-0.5 rounded border border-[#EDEBE9]"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4"><PriorityBadge priority={ticket.priority} /></td>
-                  <td className="px-6 py-4"><StatusBadge status={ticket.status} /></td>
-                  <td className="px-6 py-4 text-[#605E5C]">{ticket.assignee || '—'}</td>
-                  <td className="px-6 py-4 text-[#A19F9D] text-xs">
-                    {new Date(ticket.createdAt).toLocaleDateString('it-IT')}
-                  </td>
-                </tr>
+              filtered.map((ticket, index) => (
+                <TicketListRow key={ticket.id} ticket={ticket} index={index} />
               ))
             )}
           </tbody>
         </table>
       </div>
     </div>
+  )
+}
+
+function TicketListRow({ ticket, index }: { ticket: Ticket; index: number }) {
+  return (
+    <tr className={index % 2 === 0 ? 'bg-white' : 'bg-[#FCFBFA]'}>
+      <td className="px-6 py-3 align-top">
+        <Link to={`/tickets/${ticket.id}`} className="font-medium text-[#009B9B] hover:text-[#007575]">
+          {ticket.id}
+        </Link>
+      </td>
+      <td className="px-6 py-3 align-top text-[#323130]">
+        <div className="font-medium">{ticket.title}</div>
+        <div className="mt-1 text-xs text-[#605E5C]">{ticket.tags.join(' · ')}</div>
+      </td>
+      <td className="px-6 py-3 align-top text-[#605E5C]">{ticket.reporter}</td>
+      <td className="px-6 py-3 align-top text-[#605E5C]">{priorityLabel[ticket.priority]}</td>
+      <td className={`px-6 py-3 align-top ${statusColor[ticket.status]}`}>{statusLabel[ticket.status]}</td>
+      <td className="px-6 py-3 align-top text-[#605E5C]">{ticket.assignee || '—'}</td>
+      <td className="px-6 py-3 align-top text-[#605E5C]">
+        {new Date(ticket.createdAt).toLocaleDateString('it-IT')}
+      </td>
+    </tr>
   )
 }
