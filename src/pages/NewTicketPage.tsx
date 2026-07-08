@@ -10,7 +10,6 @@ export function NewTicketPage() {
     description: '',
     priority: 'medium' as Priority,
     status: 'open' as Status,
-    assignee: '',
     tags: '',
   })
 
@@ -80,21 +79,6 @@ export function NewTicketPage() {
                   placeholder="Descrivi brevemente il problema"
                   className="w-full bg-transparent text-sm text-[#323130] outline-none placeholder:text-[#A19F9D]"
                 />
-              }
-            />
-            <EditField
-              label="Assegnatario"
-              input={
-                <select
-                  value={form.assignee}
-                  onChange={(e) => setForm({ ...form, assignee: e.target.value })}
-                  className="w-full bg-transparent text-sm text-[#323130] outline-none"
-                >
-                  <option value="">—</option>
-                  <option value="Marco Rossi">Marco Rossi</option>
-                  <option value="Laura Conti">Laura Conti</option>
-                  <option value="Andrea Ferri">Andrea Ferri</option>
-                </select>
               }
             />
             <EditField

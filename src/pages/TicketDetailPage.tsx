@@ -83,8 +83,6 @@ export function TicketDetailPage() {
         Segnalato: <span className="text-[#323130]">{ticket.reporter}</span>
         <span className="mx-2 text-[#C8C6C4]">|</span>
         Data: <span className="text-[#323130]">{new Date(ticket.createdAt).toLocaleDateString('it-IT')}</span>
-        <span className="mx-2 text-[#C8C6C4]">|</span>
-        Assegnatario: <span className="text-[#323130]">{assignee || '—'}</span>
       </div>
 
       <div className="mt-4 flex gap-6 border-b border-[#EDEBE9] text-sm">
@@ -108,7 +106,6 @@ export function TicketDetailPage() {
             <div className="grid gap-x-8 gap-y-1 md:grid-cols-2">
               <FieldRow label="Stato" value={<StatusBadge status={status} />} />
               <FieldRow label="Priorità" value={<PriorityBadge priority={ticket.priority} />} />
-              <FieldRow label="Assegnatario" value={assignee || '—'} />
               <FieldRow label="Segnalato da" value={ticket.reporter} />
               <FieldRow label="Data creazione" value={new Date(ticket.createdAt).toLocaleString('it-IT')} />
               <FieldRow label="Ultimo aggiornamento" value={new Date(ticket.updatedAt).toLocaleString('it-IT')} />
@@ -122,7 +119,6 @@ export function TicketDetailPage() {
                   </div>
                 }
               />
-              <FieldRow label="Categoria" value="Supporto applicativo" />
             </div>
           </section>
 

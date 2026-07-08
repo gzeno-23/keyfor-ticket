@@ -9,7 +9,6 @@ interface TicketDraft {
   description: string
   priority: Priority
   status: Status
-  assignee: string
   tags: string
 }
 
@@ -117,7 +116,6 @@ export function TicketReviewPage() {
             <ReviewField label="Data creazione" value={now} />
             <ReviewField label="Priorità" value={priorityLabel[draft.priority]} />
             <ReviewField label="Stato iniziale" value={statusLabel[draft.status]} />
-            <ReviewField label="Assegnatario" value={draft.assignee || '—'} />
             <ReviewField label="Segnalato da" value="Marco Rossi" />
             <ReviewField label="Tag" value={tags.length > 0 ? tags.join(', ') : '—'} />
             <ReviewField label="Descrizione" value={draft.description || '—'} />
