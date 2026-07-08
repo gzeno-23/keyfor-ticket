@@ -50,13 +50,13 @@ export function TicketReviewPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-6">
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#EDEBE9] pb-4">
+    <div className="mx-auto max-w-2xl px-4 py-4 sm:px-6 sm:py-6">
+      <div className="flex flex-col gap-4 border-b border-[#EDEBE9] pb-4 md:flex-row md:items-start md:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.18em] text-[#605E5C]">Nuovo documento</p>
           <h1 className="mt-1 text-[30px] font-light text-[#323130]">Conferma ticket</h1>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => navigate(-1)}
@@ -84,7 +84,7 @@ export function TicketReviewPage() {
         </div>
       </div>
 
-      <div className="mt-4 flex items-start gap-3 bg-[#E6F5F5] px-4 py-3 text-sm text-[#323130]">
+      <div className="mt-4 flex items-start gap-3 rounded-2xl bg-[#E6F5F5] px-4 py-3 text-sm text-[#323130]">
         <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#009B9B]" />
         <p>Verifica i dati del ticket prima di completare il salvataggio.</p>
       </div>
@@ -128,8 +128,8 @@ export function TicketReviewPage() {
 
 function ReviewField({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center border-b border-dotted border-[#EDEBE9] py-1.5">
-      <span className="w-48 shrink-0 text-sm text-[#605E5C]">{label}</span>
+    <div className="flex flex-col gap-1 border-b border-dotted border-[#EDEBE9] py-2 sm:flex-row sm:items-center">
+      <span className="w-32 shrink-0 text-sm text-[#605E5C] md:w-48">{label}</span>
       <span className="text-sm text-[#323130]">{value}</span>
     </div>
   )

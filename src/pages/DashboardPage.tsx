@@ -1,190 +1,228 @@
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  List,
+  PlusCircle,
+  TrendingUp,
+} from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ChevronRight, TrendingUp, AlertTriangle, CheckCircle2, Clock, PlusCircle, ArrowRight } from 'lucide-react'
-import { mockTickets } from '@/data/mock-tickets'
+import { mockTickets, type Priority, type Status } from '@/data/mock-tickets'
+import { cn } from '@/lib/utils'
 
-const open = mockTickets.filter((t) => t.status === 'open')
-const inProgress = mockTickets.filter((t) => t.status === 'in_progress')
-const resolved = mockTickets.filter((t) => t.status === 'resolved')
-const closed = mockTickets.filter((t) => t.status === 'closed')
-const critical = mockTickets.filter((t) => t.priority === 'critical')
-const total = mockTickets.length
+const statusLabel: Record<Status, string> = {
+  open: 'Aperto',
+  in_progress: 'In corso',
+  resolved: 'Risolto',
+  closed: 'Chiuso',
+}
+
+const priorityLabel: Record<Priority, string> = {
+  low: 'Bassa',
+  medium: 'Media',
+  high: 'Alta',
+  critical: 'Critica',
+}
 
 const recentTickets = [...mockTickets]
   .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
   .slice(0, 5)
 
-const statusLabel: Record<string, string> = {
-  open: 'Aperto', in_progress: 'In lavorazione', resolved: 'Risolto', closed: 'Chiuso',
-}
-const priorityLabel: Record<string, string> = {
-  low: 'Bassa', medium: 'Media', high: 'Alta', critical: 'Critica',
+export function DashboardPage() {
+  const navigate = useNavigate()
+  const open = mockTickets.filter((ticket) => ticket.status === 'open').length
+  const inProgress = mockTickets.filter((ticket) => ticket.status === 'in_progress').length
+  const resolved = mockTickets.filter((ticket) => ticket.status === 'resolved').length
+  const critical = mockTickets.filter((ticket) => ticket.priority === 'critical').length
+
+  const formattedDate = new Intl.DateTimeFormat('it-IT', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date())
+
+  return (
+    <div className="mx-auto max-w-6xl space-y-6 px-4 py-4 sm:px-6 sm:py-6">
+      <section className="rounded-2xl bg-gradient-to-r from-[#009B9B] to-[#00B5B5] p-6 text-white shadow-[0_20px_45px_rgba(0,155,155,0.18)]">
+        <p className="text-sm text-white/70">Benvenuto</p>
+        <h1 className="mt-0.5 text-2xl font-semibold">Ciao, Marco 👋</h1>
+        <p className="mt-1 text-sm text-white/70 capitalize">{formattedDate}</p>
+      </section>
+
+      <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <KpiCard
+          label="Aperti"
+          value={open}
+          color="#009B9B"
+          bg="#E6F5F5"
+          icon={TrendingUp}
+          onClick={() => navigate('/tickets?status=open')}
+        />
+        <KpiCard
+          label="In corso"
+          value={inProgress}
+          color="#F7630C"
+          bg="#FFF4E0"
+          icon={Clock}
+          onClick={() => navigate('/tickets?status=in_progress')}
+        />
+        <KpiCard
+          label="Risolti"
+          value={resolved}
+          color="#107C10"
+          bg="#DFF6DD"
+          icon={CheckCircle2}
+          onClick={() => navigate('/tickets?status=resolved')}
+        />
+        <KpiCard
+          label="Critici"
+          value={critical}
+          color="#A4262C"
+          bg="#FDF3F4"
+          icon={AlertTriangle}
+          onClick={() => navigate('/tickets?priority=critical')}
+        />
+      </section>
+
+      <section>
+        <h2 className="mb-3 text-sm font-semibold text-[#323130]">Azioni rapide</h2>
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+          <ActionButton icon={PlusCircle} label="Nuovo Ticket" sub="Apri segnalazione" to="/tickets/new" primary />
+          <ActionButton icon={List} label="Gestisci Ticket" sub="Visualizza e modifica" to="/tickets" />
+          <ActionButton icon={Clock} label="Storico" sub="Ticket risolti" to="/tickets?status=resolved" />
+        </div>
+      </section>
+
+      <section className="overflow-hidden rounded-2xl border border-[#EDEBE9] bg-white">
+        <div className="flex items-center justify-between gap-3 border-b border-[#EDEBE9] px-4 py-4 sm:px-5">
+          <div>
+            <h2 className="text-sm font-semibold text-[#323130]">Ticket recenti</h2>
+            <p className="mt-0.5 text-xs text-[#605E5C]">Gli aggiornamenti più recenti del team</p>
+          </div>
+          <Link to="/tickets" className="text-xs font-medium text-[#009B9B] hover:text-[#007575]">
+            Vedi tutti
+          </Link>
+        </div>
+
+        <div className="divide-y divide-[#EDEBE9]">
+          {recentTickets.map((ticket) => (
+            <Link
+              key={ticket.id}
+              to={`/tickets/${ticket.id}`}
+              className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-[#F8F9FA] sm:px-5"
+            >
+              <div className="flex-1 min-w-0">
+                <p className="truncate text-sm font-medium text-[#323130]">{ticket.title}</p>
+                <p className="mt-0.5 text-xs text-[#605E5C]">
+                  {ticket.id} · {new Date(ticket.updatedAt).toLocaleDateString('it-IT')}
+                </p>
+              </div>
+              <div className="flex shrink-0 flex-col items-end gap-1">
+                <StatusDot status={ticket.status} />
+                <PriorityText priority={ticket.priority} />
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+    </div>
+  )
 }
 
-function BcTile({ label, value, barColor, pct, onClick }: {
-  label: string; value: number; barColor: string; pct: number; onClick: () => void
+function KpiCard({
+  label,
+  value,
+  color,
+  bg,
+  icon: Icon,
+  onClick,
+}: {
+  label: string
+  value: number
+  color: string
+  bg: string
+  icon: typeof TrendingUp
+  onClick: () => void
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="min-w-[140px] bg-[#009B9B] p-3 text-left text-white transition-colors hover:bg-[#007575] group"
+      className="w-full rounded-xl border border-[#EDEBE9] bg-white p-4 text-left transition-shadow hover:shadow-md"
     >
-      <p className="truncate text-xs font-medium opacity-90">{label}</p>
-      <p className="my-2 text-4xl font-light">{value}</p>
-      <div className="mb-1.5 h-1 w-full bg-white/25">
-        <div className="h-1 transition-all" style={{ width: `${pct}%`, backgroundColor: barColor }} />
+      <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg" style={{ backgroundColor: bg }}>
+        <Icon className="h-5 w-5" style={{ color }} />
       </div>
-      <ChevronRight className="h-3.5 w-3.5 opacity-50 group-hover:opacity-100 transition-opacity" />
+      <p className="text-2xl font-semibold text-[#323130]">{value}</p>
+      <p className="mt-0.5 text-xs text-[#605E5C]">{label}</p>
     </button>
   )
 }
 
-export function DashboardPage() {
+function ActionButton({
+  icon: Icon,
+  label,
+  sub,
+  to,
+  primary = false,
+}: {
+  icon: typeof PlusCircle
+  label: string
+  sub: string
+  to: string
+  primary?: boolean
+}) {
   const navigate = useNavigate()
-  const pct = (n: number) => Math.max(10, Math.round((n / Math.max(total, 1)) * 100))
 
   return (
-    <div className="mx-auto max-w-[1600px] px-6 py-6 space-y-8">
-
-      {/* Page header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-[#605E5C]">Role Center</p>
-          <h1 className="mt-0.5 text-[28px] font-light text-[#323130]">Dashboard</h1>
-        </div>
-        <button
-          type="button"
-          onClick={() => navigate('/tickets/new')}
-          className="flex items-center gap-2 bg-[#009B9B] px-4 py-2 text-sm font-medium text-white hover:bg-[#007575] transition-colors"
-        >
-          <PlusCircle className="h-4 w-4" />
-          Nuovo Ticket
-        </button>
+    <button
+      type="button"
+      onClick={() => navigate(to)}
+      className={cn(
+        'flex items-center gap-3 rounded-xl border p-4 text-left transition-all hover:shadow-md',
+        primary ? 'border-[#009B9B] bg-[#009B9B] text-white' : 'border-[#EDEBE9] bg-white text-[#323130]'
+      )}
+    >
+      <div
+        className={cn(
+          'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
+          primary ? 'bg-white/20' : 'bg-[#E6F5F5]'
+        )}
+      >
+        <Icon className={cn('h-5 w-5', primary ? 'text-white' : 'text-[#009B9B]')} />
       </div>
-
-      {/* KPI summary strip */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-[#EDEBE9] border border-[#EDEBE9]">
-        {[
-          { label: 'Aperti', value: open.length, icon: TrendingUp, color: '#009B9B', bg: '#E6F5F5' },
-          { label: 'In Lavorazione', value: inProgress.length, icon: Clock, color: '#F7630C', bg: '#FFF4E0' },
-          { label: 'Risolti', value: resolved.length, icon: CheckCircle2, color: '#107C10', bg: '#DFF6DD' },
-          { label: 'Critici', value: critical.length, icon: AlertTriangle, color: '#A4262C', bg: '#FDF3F4' },
-        ].map(({ label, value, icon: Icon, color, bg }) => (
-          <div key={label} className="bg-white px-5 py-4 flex items-center gap-4">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: bg }}>
-              <Icon className="w-5 h-5" style={{ color }} />
-            </div>
-            <div>
-              <p className="text-2xl font-light text-[#323130]">{value}</p>
-              <p className="text-xs text-[#605E5C]">{label}</p>
-            </div>
-          </div>
-        ))}
+      <div className="min-w-0">
+        <p className={cn('text-sm font-semibold', primary ? 'text-white' : 'text-[#323130]')}>{label}</p>
+        <p className={cn('text-xs', primary ? 'text-white/70' : 'text-[#605E5C]')}>{sub}</p>
       </div>
+    </button>
+  )
+}
 
-      {/* Tiles BC + shortcut */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6">
+function StatusDot({ status }: { status: Status }) {
+  const colorMap: Record<Status, string> = {
+    open: 'bg-[#009B9B]',
+    in_progress: 'bg-[#F7630C]',
+    resolved: 'bg-[#107C10]',
+    closed: 'bg-[#A19F9D]',
+  }
 
-        {/* Tiles */}
-        <div className="space-y-6">
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-[#323130]">Attività</h2>
-              <Link to="/tickets" className="text-xs text-[#009B9B] hover:underline flex items-center gap-0.5">
-                Vedi tutti <ArrowRight className="h-3 w-3" />
-              </Link>
-            </div>
-
-            {/* Apertura */}
-            <div className="mb-5">
-              <p className="text-xs text-[#605E5C] mb-2 uppercase tracking-wide">Apertura</p>
-              <div className="flex flex-wrap gap-2">
-                <BcTile label="Ticket Aperti" value={open.length} barColor="#4CAF50" pct={pct(open.length)} onClick={() => navigate('/tickets?status=open')} />
-                <BcTile label="Critici" value={critical.length} barColor="#F7630C" pct={pct(critical.length)} onClick={() => navigate('/tickets?priority=critical')} />
-                <BcTile label="Non assegnati" value={mockTickets.filter(t => !t.assignee).length} barColor="#50E6FF" pct={pct(mockTickets.filter(t => !t.assignee).length)} onClick={() => navigate('/tickets')} />
-              </div>
-            </div>
-
-            {/* In lavorazione */}
-            <div className="mb-5">
-              <p className="text-xs text-[#605E5C] mb-2 uppercase tracking-wide">In Lavorazione</p>
-              <div className="flex flex-wrap gap-2">
-                <BcTile label="In Progress" value={inProgress.length} barColor="#FFB900" pct={pct(inProgress.length)} onClick={() => navigate('/tickets?status=in_progress')} />
-                <BcTile label="Alta Priorità" value={mockTickets.filter(t => t.priority === 'high').length} barColor="#FFD335" pct={pct(mockTickets.filter(t => t.priority === 'high').length)} onClick={() => navigate('/tickets?priority=high')} />
-              </div>
-            </div>
-
-            {/* Risoluzione */}
-            <div>
-              <p className="text-xs text-[#605E5C] mb-2 uppercase tracking-wide">Risoluzione</p>
-              <div className="flex flex-wrap gap-2">
-                <BcTile label="Risolti" value={resolved.length} barColor="#92C353" pct={pct(resolved.length)} onClick={() => navigate('/tickets?status=resolved')} />
-                <BcTile label="Chiusi" value={closed.length} barColor="#C8C6C4" pct={pct(closed.length)} onClick={() => navigate('/tickets?status=closed')} />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick actions card */}
-        <div className="bg-white border border-[#EDEBE9] h-fit">
-          <div className="border-b border-[#EDEBE9] bg-[#FAF9F8] px-4 py-3">
-            <p className="text-sm font-semibold text-[#323130]">Azioni rapide</p>
-          </div>
-          <div className="divide-y divide-[#EDEBE9]">
-            {[
-              { label: '+ Nuovo Ticket', to: '/tickets/new', teal: true },
-              { label: 'Lista ticket aperti', to: '/tickets?status=open', teal: false },
-              { label: 'Ticket critici', to: '/tickets?priority=critical', teal: false },
-              { label: 'Ticket in lavorazione', to: '/tickets?status=in_progress', teal: false },
-              { label: 'Storico risolti', to: '/tickets?status=resolved', teal: false },
-            ].map(({ label, to, teal }) => (
-              <Link
-                key={to}
-                to={to}
-                className={`flex items-center justify-between px-4 py-3 text-sm transition-colors hover:bg-[#F3F2F1] ${
-                  teal ? 'font-medium text-[#009B9B]' : 'text-[#323130]'
-                }`}
-              >
-                {label}
-                <ChevronRight className="h-3.5 w-3.5 text-[#A19F9D]" />
-              </Link>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Recent tickets */}
-      <div className="bg-white border border-[#EDEBE9]">
-        <div className="border-b border-[#EDEBE9] bg-[#FAF9F8] px-5 py-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-[#323130]">Ticket Recenti</h2>
-          <Link to="/tickets" className="text-xs text-[#009B9B] hover:underline">Vedi tutti →</Link>
-        </div>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-[#FAF9F8] text-left border-b border-[#EDEBE9]">
-              {['ID', 'Titolo', 'Stato', 'Priorità', 'Aggiornato'].map(h => (
-                <th key={h} className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {recentTickets.map((ticket, i) => (
-              <tr key={ticket.id} className={`border-b border-[#EDEBE9] hover:bg-[#F3F2F1] transition-colors ${i % 2 === 1 ? 'bg-[#FCFBFA]' : 'bg-white'}`}>
-                <td className="px-5 py-3">
-                  <Link to={`/tickets/${ticket.id}`} className="font-medium text-[#009B9B] hover:text-[#007575] hover:underline">
-                    {ticket.id}
-                  </Link>
-                </td>
-                <td className="px-5 py-3 text-[#323130] max-w-xs truncate">{ticket.title}</td>
-                <td className="px-5 py-3 text-[#605E5C]">{statusLabel[ticket.status]}</td>
-                <td className="px-5 py-3 text-[#605E5C]">{priorityLabel[ticket.priority]}</td>
-                <td className="px-5 py-3 text-[#605E5C] text-xs">{new Date(ticket.updatedAt).toLocaleDateString('it-IT')}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
+  return (
+    <div className="flex items-center gap-1.5">
+      <span className={cn('h-2.5 w-2.5 rounded-full', colorMap[status])} />
+      <span className="text-xs text-[#605E5C]">{statusLabel[status]}</span>
     </div>
   )
+}
+
+function PriorityText({ priority }: { priority: Priority }) {
+  const colorMap: Record<Priority, string> = {
+    low: 'text-[#605E5C]',
+    medium: 'text-[#0078D4]',
+    high: 'text-[#F7630C]',
+    critical: 'text-[#A4262C]',
+  }
+
+  return <span className={cn('text-xs font-medium', colorMap[priority])}>{priorityLabel[priority]}</span>
 }

@@ -59,9 +59,9 @@ export function TicketDetailPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1600px] px-6 py-6">
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#EDEBE9] pb-4">
-        <div className="flex items-start gap-4">
+    <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 sm:py-6">
+      <div className="flex flex-col gap-4 border-b border-[#EDEBE9] pb-4 md:flex-row md:items-start md:justify-between">
+        <div className="flex items-start gap-3 sm:gap-4">
           <button
             type="button"
             onClick={() => navigate('/tickets')}
@@ -71,21 +71,23 @@ export function TicketDetailPage() {
           </button>
           <div>
             <p className="text-xs uppercase tracking-[0.18em] text-[#605E5C]">Ticket Card</p>
-            <h1 className="mt-1 text-[30px] font-light text-[#323130]">
+            <h1 className="mt-1 text-2xl font-light text-[#323130] md:text-[30px]">
               {ticket.id} · {ticket.title}
             </h1>
           </div>
         </div>
-        <StatusBadge status={status} />
+        <div className="md:pt-1">
+          <StatusBadge status={status} />
+        </div>
       </div>
 
-      <div className="mt-4 border-b border-[#EDEBE9] bg-white px-4 py-3 text-sm text-[#605E5C]">
+      <div className="mt-4 rounded-2xl border border-[#EDEBE9] bg-white px-4 py-3 text-sm text-[#605E5C]">
         Segnalato: <span className="text-[#323130]">{ticket.reporter}</span>
-        <span className="mx-2 text-[#C8C6C4]">|</span>
+        <span className="mx-2 hidden text-[#C8C6C4] sm:inline">|</span>
         Data: <span className="text-[#323130]">{new Date(ticket.createdAt).toLocaleDateString('it-IT')}</span>
       </div>
 
-      <div className="mt-4 flex gap-6 border-b border-[#EDEBE9] text-sm">
+      <div className="mt-4 flex gap-4 overflow-x-auto border-b border-[#EDEBE9] text-sm">
         {['Home page', 'Dettagli', 'Commenti', 'Allegati (0)'].map((tab, index) => (
           <button
             key={tab}
@@ -99,11 +101,11 @@ export function TicketDetailPage() {
         ))}
       </div>
 
-      <div className="mt-6 grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-8">
           <section>
             <h2 className="mb-4 text-base font-semibold text-[#323130]">Generale</h2>
-            <div className="grid gap-x-8 gap-y-1 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-x-8 gap-y-1 md:grid-cols-2">
               <FieldRow label="Stato" value={<StatusBadge status={status} />} />
               <FieldRow label="Priorità" value={<PriorityBadge priority={ticket.priority} />} />
               <FieldRow label="Segnalato da" value={ticket.reporter} />
@@ -172,7 +174,7 @@ export function TicketDetailPage() {
           </section>
         </div>
 
-        <aside className="h-fit border border-[#EDEBE9] bg-white p-4 xl:sticky xl:top-32">
+        <aside className="h-fit rounded-2xl border border-[#EDEBE9] bg-white p-4 xl:sticky xl:top-32">
           <h2 className="mb-4 text-sm font-semibold text-[#323130]">Azioni</h2>
           <div className="space-y-2">
             <button
@@ -226,9 +228,9 @@ export function TicketDetailPage() {
 
 function FieldRow({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="flex items-center border-b border-dotted border-[#EDEBE9] py-1.5">
-      <span className="w-48 shrink-0 text-sm text-[#605E5C]">{label}</span>
-      <span className="text-sm text-[#323130]">{value}</span>
+    <div className="flex flex-col gap-1 border-b border-dotted border-[#EDEBE9] py-2 sm:flex-row sm:items-center">
+      <span className="w-32 shrink-0 text-sm text-[#605E5C] md:w-48">{label}</span>
+      <span className="min-w-0 text-sm text-[#323130]">{value}</span>
     </div>
   )
 }
