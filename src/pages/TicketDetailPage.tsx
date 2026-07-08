@@ -1,12 +1,25 @@
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { mockTickets } from '@/data/mock-tickets'
+import { mockTickets, type Status } from '@/data/mock-tickets'
 import { StatusBadge, PriorityBadge } from '@/components/ui/badges'
-import { ArrowLeft, User, Calendar, Tag } from 'lucide-react'
+import { ArrowLeft, User, Calendar, Tag, CheckCircle2, UserCheck, XCircle } from 'lucide-react'
+
+interface Comment {
+  text: string
+  author: string
+  time: string
+}
 
 export function TicketDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const ticket = mockTickets.find((t) => t.id === id)
+
+  const [status, setStatus] = useState<Status>(ticket?.status ?? 'open')
+  const [assignee, setAssignee] = useState(ticket?.assignee ?? '')
+  const [comments, setComments] = useState<Comment[]>([])
+  const [commentText, setCommentText] = useState('')
+  const [closed, setClosed] = useState(false)
 
   if (!ticket) {
     return (
@@ -14,12 +27,39 @@ export function TicketDetailPage() {
         <p className="text-[#605E5C]">Ticket non trovato.</p>
         <button
           onClick={() => navigate('/tickets')}
-          className="mt-4 text-[#0070F2] text-sm hover:underline"
+          className="mt-4 text-[#0078D4] text-sm hover:underline"
         >
           Torna alla lista
         </button>
       </div>
     )
+  }
+
+  const handleTakeOver = () => {
+    setStatus('in_progress')
+    setAssignee('Marco Rossi')
+  }
+
+  const handleResolve = () => {
+    setStatus('resolved')
+  }
+
+  const handleClose = () => {
+    setStatus('closed')
+    setClosed(true)
+  }
+
+  const handleComment = () => {
+    if (!commentText.trim()) return
+    setComments([
+      ...comments,
+      {
+        text: commentText.trim(),
+        author: 'Marco Rossi',
+        time: new Date().toLocaleString('it-IT'),
+      },
+    ])
+    setCommentText('')
   }
 
   return (
@@ -40,7 +80,7 @@ export function TicketDetailPage() {
           </div>
           <div className="flex gap-2 shrink-0">
             <PriorityBadge priority={ticket.priority} />
-            <StatusBadge status={ticket.status} />
+            <StatusBadge status={status} />
           </div>
         </div>
         <p className="text-sm text-[#605E5C] leading-relaxed">{ticket.description}</p>
@@ -67,7 +107,7 @@ export function TicketDetailPage() {
             <div className="flex items-center gap-2">
               <User className="w-3.5 h-3.5 text-[#A19F9D]" />
               <dt className="text-[#A19F9D] w-24">Assegnatario</dt>
-              <dd className="text-[#201F1E]">{ticket.assignee || '—'}</dd>
+              <dd className="text-[#201F1E]">{assignee || '—'}</dd>
             </div>
             <div className="flex items-center gap-2">
               <User className="w-3.5 h-3.5 text-[#A19F9D]" />
@@ -90,14 +130,29 @@ export function TicketDetailPage() {
         <div className="bg-white rounded-lg border border-[#EDEBE9] p-5 space-y-3">
           <h2 className="text-xs font-semibold text-[#A19F9D] uppercase tracking-wider">Azioni</h2>
           <div className="space-y-2">
-            <button className="w-full text-left px-3 py-2 text-sm rounded-md border border-[#EDEBE9] hover:bg-[#F3F2F1] transition-colors text-[#201F1E]">
-              Prendi in carico
+            <button
+              onClick={handleTakeOver}
+              disabled={status === 'in_progress' || status === 'resolved' || status === 'closed'}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md border border-[#EDEBE9] hover:bg-[#F3F2F1] transition-colors text-[#201F1E] disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <UserCheck className="w-4 h-4 text-[#0078D4]" />
+              {status === 'in_progress' ? 'Già in lavorazione' : 'Prendi in carico'}
             </button>
-            <button className="w-full text-left px-3 py-2 text-sm rounded-md border border-[#EDEBE9] hover:bg-[#F3F2F1] transition-colors text-[#201F1E]">
-              Segna come risolto
+            <button
+              onClick={handleResolve}
+              disabled={status === 'resolved' || status === 'closed'}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md border border-[#EDEBE9] hover:bg-emerald-50 transition-colors text-[#201F1E] disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              {status === 'resolved' ? 'Già risolto' : 'Segna come risolto'}
             </button>
-            <button className="w-full text-left px-3 py-2 text-sm rounded-md border border-red-100 hover:bg-red-50 transition-colors text-red-600">
-              Chiudi ticket
+            <button
+              onClick={handleClose}
+              disabled={closed}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md border border-red-100 hover:bg-red-50 transition-colors text-red-600 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <XCircle className="w-4 h-4" />
+              {closed ? 'Ticket chiuso' : 'Chiudi ticket'}
             </button>
           </div>
         </div>
@@ -105,21 +160,45 @@ export function TicketDetailPage() {
 
       <div className="bg-white rounded-lg border border-[#EDEBE9] p-6">
         <h2 className="text-xs font-semibold text-[#A19F9D] uppercase tracking-wider mb-4">Commenti</h2>
-        <div className="text-center py-8 text-sm text-[#A19F9D]">
-          Nessun commento ancora. Aggiungi il primo!
-        </div>
+
+        {comments.length === 0 ? (
+          <div className="text-center py-8 text-sm text-[#A19F9D]">
+            Nessun commento ancora. Aggiungi il primo!
+          </div>
+        ) : (
+          <div className="space-y-4 mb-4">
+            {comments.map((c, i) => (
+              <div key={i} className="flex gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#0078D4] flex items-center justify-center text-xs font-bold text-white shrink-0">
+                  MR
+                </div>
+                <div className="flex-1 bg-[#F8F9FA] rounded-lg px-3 py-2">
+                  <p className="text-xs text-[#A19F9D] mb-1">{c.author} · {c.time}</p>
+                  <p className="text-sm text-[#201F1E]">{c.text}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         <div className="flex gap-3 mt-4">
-          <div className="w-8 h-8 rounded-full bg-[#0070F2] flex items-center justify-center text-xs font-bold text-white shrink-0">
+          <div className="w-8 h-8 rounded-full bg-[#0078D4] flex items-center justify-center text-xs font-bold text-white shrink-0">
             MR
           </div>
           <textarea
             placeholder="Scrivi un commento..."
             rows={3}
-            className="flex-1 text-sm border border-[#EDEBE9] rounded-md px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#0070F2]"
+            value={commentText}
+            onChange={(e) => setCommentText(e.target.value)}
+            className="flex-1 text-sm border border-[#EDEBE9] rounded-md px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#0078D4]"
           />
         </div>
         <div className="flex justify-end mt-3">
-          <button className="px-4 py-2 bg-[#0070F2] text-white text-sm font-medium rounded-md hover:bg-[#0062D9] transition-colors">
+          <button
+            onClick={handleComment}
+            disabled={!commentText.trim()}
+            className="px-4 py-2 bg-[#0078D4] text-white text-sm font-medium rounded-md hover:bg-[#106EBE] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
             Commenta
           </button>
         </div>

@@ -6,9 +6,13 @@ export function AppLayout() {
   const [collapsed, setCollapsed] = useState(false)
 
   return (
-    <div className="flex h-screen bg-[#F3F2F1] overflow-hidden">
+    <div className="min-h-screen bg-[#F8F9FA]">
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
-      <main className="flex-1 overflow-y-auto">
+      <main
+        className={`transition-[margin-left] duration-300 ease-in-out min-h-screen ${
+          collapsed ? 'ml-16' : 'ml-64'
+        }`}
+      >
         <Outlet />
       </main>
     </div>

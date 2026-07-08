@@ -158,26 +158,14 @@ export function TicketReviewPage() {
         </div>
       </div>
 
-      {/* Bottom actions */}
-      <div className="flex justify-end gap-3 pt-2">
+      {/* Bottom actions - solo Torna al form, senza duplicare Annulla/Salva */}
+      <div className="flex justify-start pt-2">
         <button
           onClick={() => navigate(-1)}
-          className="px-5 py-2.5 text-sm font-medium text-[#605E5C] border border-[#EDEBE9] rounded-md hover:bg-[#F3F2F1] transition-colors"
+          className="flex items-center gap-1.5 px-5 py-2.5 text-sm font-medium text-[#605E5C] border border-[#EDEBE9] rounded-md hover:bg-[#F3F2F1] transition-colors"
         >
+          <ArrowLeft className="w-4 h-4" />
           ← Torna al form
-        </button>
-        <button
-          onClick={() => navigate('/tickets')}
-          className="px-5 py-2.5 text-sm font-medium text-red-600 border border-red-100 rounded-md hover:bg-red-50 transition-colors"
-        >
-          Annulla
-        </button>
-        <button
-          onClick={handleSave}
-          className="px-5 py-2.5 text-sm font-medium bg-[#0070F2] text-white rounded-md hover:bg-[#0062D9] transition-colors flex items-center gap-2"
-        >
-          <Save className="w-4 h-4" />
-          Salva Ticket
         </button>
       </div>
     </div>
