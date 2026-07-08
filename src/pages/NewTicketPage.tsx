@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Priority, Status } from '@/data/mock-tickets'
 
@@ -38,7 +38,7 @@ export function NewTicketPage() {
             placeholder="Descrivi brevemente il problema..."
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
-            className="w-full px-3 py-2 text-sm border border-[#EDEBE9] rounded-md focus:outline-none focus:ring-2 focus:ring-[#0070F2] focus:border-[#0070F2]"
+            className="w-full px-3 py-2 text-sm border border-[#EDEBE9] rounded-md focus:outline-none focus:ring-2 focus:ring-[#008272] focus:border-[#008272]"
           />
         </div>
 
@@ -49,7 +49,7 @@ export function NewTicketPage() {
             placeholder="Fornisci i dettagli del problema, i passi per riprodurlo, il comportamento atteso..."
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
-            className="w-full px-3 py-2 text-sm border border-[#EDEBE9] rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-[#0070F2] focus:border-[#0070F2]"
+            className="w-full px-3 py-2 text-sm border border-[#EDEBE9] rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-[#008272] focus:border-[#008272]"
           />
         </div>
 
@@ -59,7 +59,7 @@ export function NewTicketPage() {
             <select
               value={form.priority}
               onChange={(e) => setForm({ ...form, priority: e.target.value as Priority })}
-              className="w-full px-3 py-2 text-sm border border-[#EDEBE9] rounded-md focus:outline-none focus:ring-2 focus:ring-[#0070F2] bg-white text-[#201F1E]"
+              className="w-full px-3 py-2 text-sm border border-[#EDEBE9] rounded-md focus:outline-none focus:ring-2 focus:ring-[#008272] bg-white text-[#201F1E]"
             >
               <option value="low">Bassa</option>
               <option value="medium">Media</option>
@@ -72,7 +72,7 @@ export function NewTicketPage() {
             <select
               value={form.status}
               onChange={(e) => setForm({ ...form, status: e.target.value as Status })}
-              className="w-full px-3 py-2 text-sm border border-[#EDEBE9] rounded-md focus:outline-none focus:ring-2 focus:ring-[#0070F2] bg-white text-[#201F1E]"
+              className="w-full px-3 py-2 text-sm border border-[#EDEBE9] rounded-md focus:outline-none focus:ring-2 focus:ring-[#008272] bg-white text-[#201F1E]"
             >
               <option value="open">Aperto</option>
               <option value="in_progress">In Lavorazione</option>
@@ -85,7 +85,7 @@ export function NewTicketPage() {
           <select
             value={form.assignee}
             onChange={(e) => setForm({ ...form, assignee: e.target.value })}
-            className="w-full px-3 py-2 text-sm border border-[#EDEBE9] rounded-md focus:outline-none focus:ring-2 focus:ring-[#0070F2] bg-white text-[#201F1E]"
+            className="w-full px-3 py-2 text-sm border border-[#EDEBE9] rounded-md focus:outline-none focus:ring-2 focus:ring-[#008272] bg-white text-[#201F1E]"
           >
             <option value="">— Non assegnato —</option>
             <option value="Marco Rossi">Marco Rossi</option>
@@ -101,7 +101,7 @@ export function NewTicketPage() {
             placeholder="es. bug, ui, urgente (separati da virgola)"
             value={form.tags}
             onChange={(e) => setForm({ ...form, tags: e.target.value })}
-            className="w-full px-3 py-2 text-sm border border-[#EDEBE9] rounded-md focus:outline-none focus:ring-2 focus:ring-[#0070F2] focus:border-[#0070F2]"
+            className="w-full px-3 py-2 text-sm border border-[#EDEBE9] rounded-md focus:outline-none focus:ring-2 focus:ring-[#008272] focus:border-[#008272]"
           />
         </div>
 
@@ -115,7 +115,7 @@ export function NewTicketPage() {
           </button>
           <button
             type="submit"
-            className="px-4 py-2 text-sm font-medium bg-[#0070F2] text-white rounded-md hover:bg-[#0062D9] transition-colors"
+            className="px-4 py-2 text-sm font-medium bg-[#008272] text-white rounded-md hover:bg-[#006B5C] transition-colors"
           >
             Continua →
           </button>

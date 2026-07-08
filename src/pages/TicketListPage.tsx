@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { mockTickets, type Status, type Priority } from '@/data/mock-tickets'
 import { StatusBadge, PriorityBadge } from '@/components/ui/badges'
@@ -45,7 +45,7 @@ export function TicketListPage() {
         </div>
         <button
           onClick={() => navigate('/tickets/new')}
-          className="flex items-center gap-2 px-4 py-2 bg-[#0070F2] text-white text-sm font-medium rounded-md hover:bg-[#0062D9] transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-[#008272] text-white text-sm font-medium rounded-md hover:bg-[#006B5C] transition-colors"
         >
           <PlusCircle className="w-4 h-4" />
           Nuovo Ticket
@@ -61,13 +61,13 @@ export function TicketListPage() {
             placeholder="Cerca ticket..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-sm border border-[#EDEBE9] rounded-md focus:outline-none focus:ring-2 focus:ring-[#0070F2]"
+            className="w-full pl-9 pr-3 py-2 text-sm border border-[#EDEBE9] rounded-md focus:outline-none focus:ring-2 focus:ring-[#008272]"
           />
         </div>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as Status | 'all')}
-          className="px-3 py-2 text-sm border border-[#EDEBE9] rounded-md focus:outline-none focus:ring-2 focus:ring-[#0070F2] bg-white text-[#201F1E]"
+          className="px-3 py-2 text-sm border border-[#EDEBE9] rounded-md focus:outline-none focus:ring-2 focus:ring-[#008272] bg-white text-[#201F1E]"
         >
           {statusOptions.map((o) => (
             <option key={o.value} value={o.value}>{o.label}</option>
@@ -76,7 +76,7 @@ export function TicketListPage() {
         <select
           value={priorityFilter}
           onChange={(e) => setPriorityFilter(e.target.value as Priority | 'all')}
-          className="px-3 py-2 text-sm border border-[#EDEBE9] rounded-md focus:outline-none focus:ring-2 focus:ring-[#0070F2] bg-white text-[#201F1E]"
+          className="px-3 py-2 text-sm border border-[#EDEBE9] rounded-md focus:outline-none focus:ring-2 focus:ring-[#008272] bg-white text-[#201F1E]"
         >
           {priorityOptions.map((o) => (
             <option key={o.value} value={o.value}>{o.label}</option>

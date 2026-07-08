@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from 'react-router-dom'
+﻿import { useLocation, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { StatusBadge, PriorityBadge } from '@/components/ui/badges'
 import type { Priority, Status } from '@/data/mock-tickets'
@@ -69,7 +69,7 @@ export function TicketReviewPage() {
           </button>
           <button
             onClick={handleSave}
-            className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-[#0070F2] text-white rounded-md hover:bg-[#0062D9] transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-[#008272] text-white rounded-md hover:bg-[#006B5C] transition-colors"
           >
             <Save className="w-4 h-4" />
             Salva Ticket

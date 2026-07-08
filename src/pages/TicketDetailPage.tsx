@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { mockTickets, type Status } from '@/data/mock-tickets'
 import { StatusBadge, PriorityBadge } from '@/components/ui/badges'
@@ -27,7 +27,7 @@ export function TicketDetailPage() {
         <p className="text-[#605E5C]">Ticket non trovato.</p>
         <button
           onClick={() => navigate('/tickets')}
-          className="mt-4 text-[#0078D4] text-sm hover:underline"
+          className="mt-4 text-[#008272] text-sm hover:underline"
         >
           Torna alla lista
         </button>
@@ -135,7 +135,7 @@ export function TicketDetailPage() {
               disabled={status === 'in_progress' || status === 'resolved' || status === 'closed'}
               className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md border border-[#EDEBE9] hover:bg-[#F3F2F1] transition-colors text-[#201F1E] disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <UserCheck className="w-4 h-4 text-[#0078D4]" />
+              <UserCheck className="w-4 h-4 text-[#008272]" />
               {status === 'in_progress' ? 'Già in lavorazione' : 'Prendi in carico'}
             </button>
             <button
@@ -169,7 +169,7 @@ export function TicketDetailPage() {
           <div className="space-y-4 mb-4">
             {comments.map((c, i) => (
               <div key={i} className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#0078D4] flex items-center justify-center text-xs font-bold text-white shrink-0">
+                <div className="w-8 h-8 rounded-full bg-[#008272] flex items-center justify-center text-xs font-bold text-white shrink-0">
                   MR
                 </div>
                 <div className="flex-1 bg-[#F8F9FA] rounded-lg px-3 py-2">
@@ -182,7 +182,7 @@ export function TicketDetailPage() {
         )}
 
         <div className="flex gap-3 mt-4">
-          <div className="w-8 h-8 rounded-full bg-[#0078D4] flex items-center justify-center text-xs font-bold text-white shrink-0">
+          <div className="w-8 h-8 rounded-full bg-[#008272] flex items-center justify-center text-xs font-bold text-white shrink-0">
             MR
           </div>
           <textarea
@@ -190,14 +190,14 @@ export function TicketDetailPage() {
             rows={3}
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
-            className="flex-1 text-sm border border-[#EDEBE9] rounded-md px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#0078D4]"
+            className="flex-1 text-sm border border-[#EDEBE9] rounded-md px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#008272]"
           />
         </div>
         <div className="flex justify-end mt-3">
           <button
             onClick={handleComment}
             disabled={!commentText.trim()}
-            className="px-4 py-2 bg-[#0078D4] text-white text-sm font-medium rounded-md hover:bg-[#106EBE] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-[#008272] text-white text-sm font-medium rounded-md hover:bg-[#006B5C] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Commenta
           </button>

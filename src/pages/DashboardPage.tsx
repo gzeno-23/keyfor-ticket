@@ -1,4 +1,4 @@
-import { mockTickets } from '@/data/mock-tickets'
+﻿import { mockTickets } from '@/data/mock-tickets'
 import { StatusBadge, PriorityBadge } from '@/components/ui/badges'
 import { Ticket, Clock, CheckCircle2, AlertCircle } from 'lucide-react'
 
@@ -7,8 +7,8 @@ const stats = [
     label: 'Ticket Aperti',
     value: mockTickets.filter((t) => t.status === 'open').length,
     icon: Ticket,
-    color: 'text-[#0070F2]',
-    bg: 'bg-[#EFF6FF]',
+    color: 'text-[#008272]',
+    bg: 'bg-[#E6F4F1]',
   },
   {
     label: 'In Lavorazione',
