@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { PlusCircle, Edit3, Clock, ChevronRight, Ticket } from 'lucide-react'
+import { PlusCircle, Clock, Ticket } from 'lucide-react'
 import { mockTickets } from '@/data/mock-tickets'
 
 const openCount = mockTickets.filter((t) => t.status === 'open').length
@@ -10,27 +10,23 @@ const choices = [
   {
     id: 'new',
     icon: PlusCircle,
-    label: 'Crea nuovo ticket',
-    description: 'Apri una nuova segnalazione o richiesta di supporto',
-    badge: null,
+    label: 'Crea',
     color: '#009B9B',
-    to: '/tickets/new',
+    to: '/request-type',
   },
   {
     id: 'manage',
-    icon: Edit3,
-    label: 'Gestisci ticket',
-    description: 'Visualizza, modifica e aggiorna i ticket esistenti',
-    badge: `${openCount + inProgressCount} aperti`,
+    icon: Ticket,
+    label: 'Visualizza',
+    badge: `${openCount + inProgressCount} aperte`,
     color: '#0078D4',
-    to: '/tickets',
+    to: '/dashboard?status=open',
   },
   {
     id: 'history',
     icon: Clock,
-    label: 'Storico ticket',
-    description: 'Consulta lo storico di tutti i ticket risolti e chiusi',
-    badge: `${resolvedCount} chiusi`,
+    label: 'Storico',
+    badge: `${resolvedCount} chiuse`,
     color: '#5C2E91',
     to: '/tickets?status=resolved',
   },
@@ -41,78 +37,44 @@ export function HubPage() {
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] flex flex-col">
-      {/* Top bar minimal */}
-      <header className="bg-white border-b border-[#EDEBE9] px-8 py-4 flex items-center gap-3">
-        <div className="w-8 h-8 rounded-md bg-[#009B9B] flex items-center justify-center">
+      {/* Top bar — BC dark style */}
+      <header className="bg-[#1F1F1F] px-6 py-0 h-12 flex items-center gap-3">
+        <div className="w-7 h-7 rounded-sm bg-[#009B9B] flex items-center justify-center">
           <Ticket className="w-4 h-4 text-white" />
         </div>
-        <span className="font-semibold text-[#323130] text-sm">KeyFor Ticket</span>
-        <span className="text-[#C8C6C4] mx-1">|</span>
-        <span className="text-sm text-[#605E5C]">Seleziona operazione</span>
-        <div className="ml-auto flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-[#009B9B] flex items-center justify-center text-xs font-bold text-white">
+        <span className="font-semibold text-white text-sm tracking-wide">Key Ticket</span>
+        <div className="ml-auto">
+          <div className="w-8 h-8 rounded-full bg-[#009B9B] flex items-center justify-center text-xs font-bold text-white select-none">
             MR
           </div>
-          <span className="text-sm text-[#605E5C]">Marco Rossi</span>
         </div>
       </header>
 
       {/* Content */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
-        <div className="text-center mb-12">
-          <p className="text-xs uppercase tracking-[0.18em] text-[#605E5C] mb-2">Benvenuto</p>
-          <h1 className="text-3xl font-light text-[#323130]">Cosa vuoi fare?</h1>
-          <p className="text-sm text-[#605E5C] mt-2">Seleziona un'operazione per continuare</p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 w-full max-w-3xl">
-          {choices.map(({ id, icon: Icon, label, description, badge, color, to }) => (
+        <div className="flex flex-col gap-8 items-center">
+          {choices.map(({ id, icon: Icon, label, badge, color, to }) => (
             <button
               key={id}
               type="button"
               onClick={() => navigate(to)}
-              className="group text-left bg-white border border-[#EDEBE9] hover:border-[#009B9B] hover:shadow-md transition-all duration-200 flex flex-col"
+              className="flex flex-col items-center gap-3 group"
             >
-              {/* Color strip */}
-              <div className="h-1.5 w-full" style={{ backgroundColor: color }} />
-
-              <div className="p-6 flex flex-col gap-4 flex-1">
-                <div
-                  className="w-12 h-12 rounded-lg flex items-center justify-center"
-                  style={{ backgroundColor: `${color}18` }}
-                >
-                  <Icon className="w-6 h-6" style={{ color }} />
-                </div>
-
-                <div className="flex-1">
-                  <p className="text-base font-semibold text-[#323130]">{label}</p>
-                  <p className="text-sm text-[#605E5C] mt-1 leading-relaxed">{description}</p>
-                </div>
-
+              <div
+                className="w-16 h-16 rounded-full flex items-center justify-center transition-transform hover:scale-110"
+                style={{ backgroundColor: `${color}18` }}
+              >
+                <Icon className="w-8 h-8" style={{ color }} />
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-semibold text-[#323130]">{label}</p>
                 {badge && (
-                  <span
-                    className="self-start text-xs font-medium px-2 py-1"
-                    style={{ backgroundColor: `${color}18`, color }}
-                  >
-                    {badge}
-                  </span>
+                  <p className="text-xs text-[#605E5C] mt-0.5">{badge}</p>
                 )}
-
-                <div className="flex items-center gap-1 text-sm font-medium mt-1 group-hover:gap-2 transition-all" style={{ color }}>
-                  Apri <ChevronRight className="w-4 h-4" />
-                </div>
               </div>
             </button>
           ))}
         </div>
-
-        <button
-          type="button"
-          onClick={() => navigate('/dashboard')}
-          className="mt-10 text-sm text-[#605E5C] hover:text-[#009B9B] transition-colors"
-        >
-          Vai alla Dashboard →
-        </button>
       </div>
     </div>
   )

@@ -1,28 +1,35 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { LoginPage } from '@/pages/LoginPage'
 import { HubPage } from '@/pages/HubPage'
-import { DashboardPage } from '@/pages/DashboardPage'
+import { RequestTypePage } from '@/pages/RequestTypePage'
+import { SpostaDataPage } from '@/pages/SpostaDataPage'
 import { TicketListPage } from '@/pages/TicketListPage'
 import { TicketDetailPage } from '@/pages/TicketDetailPage'
+import { EditTicketPage } from '@/pages/EditTicketPage'
 import { NewTicketPage } from '@/pages/NewTicketPage'
 import { TicketReviewPage } from '@/pages/TicketReviewPage'
+import { NotificationsPage } from '@/pages/NotificationsPage'
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         {/* Pagine senza TopNav */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/hub" element={<HubPage />} />
+        <Route path="/request-type" element={<RequestTypePage />} />
 
         {/* Pagine con TopNav */}
         <Route element={<AppLayout />}>
-          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/richieste/sposta-data" element={<SpostaDataPage />} />
+          <Route path="/dashboard" element={<TicketListPage />} />
           <Route path="/tickets" element={<TicketListPage />} />
           <Route path="/tickets/new" element={<NewTicketPage />} />
           <Route path="/tickets/new/review" element={<TicketReviewPage />} />
           <Route path="/tickets/:id" element={<TicketDetailPage />} />
+          <Route path="/tickets/:id/edit" element={<EditTicketPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/settings" element={<div className="p-8 text-[#605E5C]">Impostazioni (coming soon)</div>} />
         </Route>
 
@@ -30,7 +37,7 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   )
 }
 

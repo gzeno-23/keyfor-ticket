@@ -1,22 +1,15 @@
 import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { AlertCircle, ArrowLeft, Save, X } from 'lucide-react'
-import { PriorityBadge, StatusBadge } from '@/components/ui/badges'
-import type { Priority, Status } from '@/data/mock-tickets'
+import { StatusBadge } from '@/components/ui/badges'
+import type { Status } from '@/data/mock-tickets'
+import { BackButton } from '@/components/ui/back-button'
 
 interface TicketDraft {
   title: string
   description: string
-  priority: Priority
   status: Status
   tags: string
-}
-
-const priorityLabel: Record<Priority, string> = {
-  low: 'Bassa',
-  medium: 'Media',
-  high: 'Alta',
-  critical: 'Critica',
 }
 
 const statusLabel: Record<Status, string> = {
@@ -52,9 +45,12 @@ export function TicketReviewPage() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-4 sm:px-6 sm:py-6">
       <div className="flex flex-col gap-4 border-b border-[#EDEBE9] pb-4 md:flex-row md:items-start md:justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-[#605E5C]">Nuovo documento</p>
-          <h1 className="mt-1 text-[30px] font-light text-[#323130]">Conferma ticket</h1>
+        <div className="flex items-start gap-3 sm:gap-4">
+          <BackButton />
+          <div>
+            <p className="text-xs uppercase tracking-[0.18em] text-[#605E5C]">Nuovo documento</p>
+            <h1 className="mt-1 text-[30px] font-light text-[#323130]">Conferma ticket</h1>
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
@@ -103,7 +99,6 @@ export function TicketReviewPage() {
               <div className="mt-1 text-xl font-medium text-[#323130]">{draft.title || '—'}</div>
             </div>
             <div className="flex items-center gap-2">
-              <PriorityBadge priority={draft.priority} />
               <StatusBadge status={draft.status} />
             </div>
           </div>
@@ -114,7 +109,6 @@ export function TicketReviewPage() {
           <div className="grid gap-x-8 gap-y-1 md:grid-cols-2">
             <ReviewField label="ID assegnato" value={newId} />
             <ReviewField label="Data creazione" value={now} />
-            <ReviewField label="Priorità" value={priorityLabel[draft.priority]} />
             <ReviewField label="Stato iniziale" value={statusLabel[draft.status]} />
             <ReviewField label="Segnalato da" value="Marco Rossi" />
             <ReviewField label="Tag" value={tags.length > 0 ? tags.join(', ') : '—'} />

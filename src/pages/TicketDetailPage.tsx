@@ -1,8 +1,9 @@
 import { useState, type ReactNode } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Calendar, CheckCircle2, Tag, User, UserCheck, XCircle } from 'lucide-react'
+import { Calendar, CheckCircle2, Edit, Tag, User, UserCheck, XCircle } from 'lucide-react'
 import { mockTickets, type Status } from '@/data/mock-tickets'
-import { PriorityBadge, StatusBadge } from '@/components/ui/badges'
+import { StatusBadge } from '@/components/ui/badges'
+import { BackButton } from '@/components/ui/back-button'
 
 interface Comment {
   text: string
@@ -62,13 +63,7 @@ export function TicketDetailPage() {
     <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 sm:py-6">
       <div className="flex flex-col gap-4 border-b border-[#EDEBE9] pb-4 md:flex-row md:items-start md:justify-between">
         <div className="flex items-start gap-3 sm:gap-4">
-          <button
-            type="button"
-            onClick={() => navigate('/tickets')}
-            className="mt-1 flex h-10 w-10 items-center justify-center rounded-full border border-[#EDEBE9] bg-white text-[#323130] hover:bg-[#F3F2F1]"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </button>
+          <BackButton to="/tickets" />
           <div>
             <p className="text-xs uppercase tracking-[0.18em] text-[#605E5C]">Ticket Card</p>
             <h1 className="mt-1 text-2xl font-light text-[#323130] md:text-[30px]">
@@ -107,7 +102,6 @@ export function TicketDetailPage() {
             <h2 className="mb-4 text-base font-semibold text-[#323130]">Generale</h2>
             <div className="grid grid-cols-1 gap-x-8 gap-y-1 md:grid-cols-2">
               <FieldRow label="Stato" value={<StatusBadge status={status} />} />
-              <FieldRow label="Priorità" value={<PriorityBadge priority={ticket.priority} />} />
               <FieldRow label="Segnalato da" value={ticket.reporter} />
               <FieldRow label="Data creazione" value={new Date(ticket.createdAt).toLocaleString('it-IT')} />
               <FieldRow label="Ultimo aggiornamento" value={new Date(ticket.updatedAt).toLocaleString('it-IT')} />
@@ -177,6 +171,16 @@ export function TicketDetailPage() {
         <aside className="h-fit rounded-2xl border border-[#EDEBE9] bg-white p-4 xl:sticky xl:top-32">
           <h2 className="mb-4 text-sm font-semibold text-[#323130]">Azioni</h2>
           <div className="space-y-2">
+            {status === 'open' && (
+              <button
+                type="button"
+                onClick={() => navigate(`/tickets/${ticket.id}/edit`)}
+                className="flex w-full items-center gap-2 border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] hover:bg-[#F3F2F1]"
+              >
+                <Edit className="h-4 w-4 text-[#009B9B]" />
+                Modifica
+              </button>
+            )}
             <button
               type="button"
               onClick={handleTakeOver}

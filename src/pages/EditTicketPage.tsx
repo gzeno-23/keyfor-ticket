@@ -1,0 +1,78 @@
+import { useState, type FormEvent } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { mockTickets } from '@/data/mock-tickets'
+import { BackButton } from '@/components/ui/back-button'
+
+export function EditTicketPage() {
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const ticket = mockTickets.find((item) => item.id === id)
+
+  const [form, setForm] = useState({
+    title: ticket?.title ?? '',
+    description: ticket?.description ?? '',
+  })
+
+  if (!ticket) {
+    return (
+      <div className="p-8 text-center">
+        <p className="text-[#605E5C]">Ticket non trovato.</p>
+      </div>
+    )
+  }
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault()
+    navigate(`/tickets/${ticket.id}`)
+  }
+
+  return (
+    <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
+      <div className="flex items-center gap-3 border-b border-[#EDEBE9] pb-4">
+        <BackButton to={`/tickets/${ticket.id}`} className="mt-0" />
+        <div>
+          <h1 className="text-2xl font-light text-[#323130]">Modifica Ticket</h1>
+          <p className="mt-0.5 text-xs text-[#605E5C]">{ticket.id}</p>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-[#323130] mb-2">Titolo</label>
+          <input
+            type="text"
+            value={form.title}
+            onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+            className="w-full border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] outline-none focus:border-[#009B9B]"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-[#323130] mb-2">Descrizione</label>
+          <textarea
+            value={form.description}
+            onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+            rows={8}
+            className="w-full border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] outline-none focus:border-[#009B9B]"
+          />
+        </div>
+
+        <div className="flex justify-end gap-2 border-t border-[#EDEBE9] pt-4">
+          <button
+            type="button"
+            onClick={() => navigate(`/tickets/${ticket.id}`)}
+            className="border border-[#EDEBE9] px-4 py-2 text-sm font-medium text-[#323130] hover:bg-[#F3F2F1]"
+          >
+            Annulla
+          </button>
+          <button
+            type="submit"
+            className="bg-[#009B9B] px-4 py-2 text-sm font-medium text-white hover:bg-[#007575]"
+          >
+            Salva
+          </button>
+        </div>
+      </form>
+    </div>
+  )
+}

@@ -1,14 +1,13 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AlertCircle, ArrowLeft } from 'lucide-react'
-import type { Priority, Status } from '@/data/mock-tickets'
+import type { Status } from '@/data/mock-tickets'
+import { BackButton } from '@/components/ui/back-button'
 
 export function NewTicketPage() {
   const navigate = useNavigate()
   const [form, setForm] = useState({
     title: '',
     description: '',
-    priority: 'medium' as Priority,
     status: 'open' as Status,
     tags: '',
   })
@@ -22,13 +21,7 @@ export function NewTicketPage() {
     <div className="mx-auto max-w-2xl px-4 py-4 sm:px-6 sm:py-6">
       <div className="flex flex-col gap-4 border-b border-[#EDEBE9] pb-4 md:flex-row md:items-start md:justify-between">
         <div className="flex items-start gap-3 sm:gap-4">
-          <button
-            type="button"
-            onClick={() => navigate('/tickets')}
-            className="mt-1 flex h-10 w-10 items-center justify-center rounded-full border border-[#EDEBE9] bg-white text-[#323130] hover:bg-[#F3F2F1]"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </button>
+          <BackButton to="/tickets" />
           <div>
             <p className="text-xs uppercase tracking-[0.18em] text-[#605E5C]">Nuovo documento</p>
             <h1 className="mt-1 text-[30px] font-light text-[#323130]">Nuovo Ticket</h1>
@@ -50,11 +43,6 @@ export function NewTicketPage() {
             Salva
           </button>
         </div>
-      </div>
-
-      <div className="mt-4 flex items-start gap-3 rounded-2xl bg-[#009B9B] px-4 py-3 text-sm text-white">
-        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-        <p>Completa i dati del ticket. Alla schermata successiva potrai confermare il documento prima del salvataggio finale.</p>
       </div>
 
       <div className="mt-4 border-b border-[#EDEBE9] text-sm">
@@ -79,21 +67,6 @@ export function NewTicketPage() {
                   placeholder="Descrivi brevemente il problema"
                   className="w-full bg-transparent text-sm text-[#323130] outline-none placeholder:text-[#A19F9D]"
                 />
-              }
-            />
-            <EditField
-              label="Priorità"
-              input={
-                <select
-                  value={form.priority}
-                  onChange={(e) => setForm({ ...form, priority: e.target.value as Priority })}
-                  className="w-full bg-transparent text-sm text-[#323130] outline-none"
-                >
-                  <option value="low">Bassa</option>
-                  <option value="medium">Media</option>
-                  <option value="high">Alta</option>
-                  <option value="critical">Critica</option>
-                </select>
               }
             />
             <EditField

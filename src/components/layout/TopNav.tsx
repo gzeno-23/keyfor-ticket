@@ -1,5 +1,5 @@
 import { Bell, HelpCircle, Search, Settings, Ticket, LayoutDashboard, List, PlusCircle } from 'lucide-react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 
 const navItems = [
@@ -9,17 +9,19 @@ const navItems = [
 ]
 
 export function TopNav() {
+  const navigate = useNavigate()
+
   return (
-    <header className="sticky top-0 z-30 bg-white border-b border-[#EDEBE9] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-      <div className="mx-auto flex h-14 max-w-[1600px] items-center gap-3 px-4 md:gap-4 md:px-6">
+    <header className="sticky top-0 z-30 bg-[#1F1F1F] shadow-sm">
+      <div className="mx-auto flex h-12 max-w-[1600px] items-center gap-3 px-4 md:gap-4 md:px-6">
         <div className="flex items-center gap-2.5 shrink-0">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[#009B9B]">
+          <div className="flex h-7 w-7 items-center justify-center rounded-sm bg-[#009B9B]">
             <Ticket className="h-4 w-4 text-white" />
           </div>
-          <span className="text-sm font-semibold text-[#323130]">KeyFor Ticket</span>
+          <span className="text-sm font-semibold text-white">Key Ticket</span>
         </div>
 
-        <div className="hidden h-5 w-px shrink-0 bg-[#EDEBE9] md:block" />
+        <div className="hidden h-5 w-px shrink-0 bg-white/20 md:block" />
 
         <nav className="hidden items-center gap-1 md:flex">
           {navItems.map(({ to, label, icon: Icon, end }) => (
@@ -32,7 +34,7 @@ export function TopNav() {
                   'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all',
                   isActive
                     ? 'bg-[#009B9B] text-white shadow-sm'
-                    : 'text-[#605E5C] hover:bg-[#F3F2F1] hover:text-[#323130]'
+                    : 'text-white/70 hover:bg-white/10 hover:text-white'
                 )
               }
             >
@@ -46,29 +48,38 @@ export function TopNav() {
 
         <div className="hidden items-center gap-0.5 md:flex">
           {[
-            { label: 'Cerca', icon: Search },
-            { label: 'Notifiche', icon: Bell },
-            { label: 'Impostazioni', icon: Settings },
-            { label: 'Guida', icon: HelpCircle },
-          ].map(({ label, icon: Icon }) => (
+            { label: 'Cerca', icon: Search, onClick: () => {} },
+            { label: 'Notifiche', icon: Bell, onClick: () => navigate('/notifications') },
+            { label: 'Impostazioni', icon: Settings, onClick: () => navigate('/settings') },
+            { label: 'Guida', icon: HelpCircle, onClick: () => {} },
+          ].map(({ label, icon: Icon, onClick }) => (
             <button
               key={label}
               type="button"
               title={label}
-              className="flex h-8 w-8 items-center justify-center rounded-md text-[#605E5C] hover:bg-[#F3F2F1] hover:text-[#323130] transition-colors"
+              onClick={onClick}
+              className="flex h-8 w-8 items-center justify-center rounded-md text-white/60 hover:bg-white/10 hover:text-white transition-colors"
             >
               <Icon className="h-4 w-4" />
             </button>
           ))}
 
-          <div className="ml-2 w-px h-5 bg-[#EDEBE9]" />
+          <div className="ml-2 w-px h-5 bg-white/20" />
 
           <div className="ml-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#009B9B] text-xs font-semibold text-white cursor-pointer hover:bg-[#007575] transition-colors" title="Marco Rossi">
             MR
           </div>
         </div>
 
-        <div className="flex flex-1 justify-end md:hidden">
+        <div className="flex flex-1 items-center justify-end gap-2 md:hidden">
+          <button
+            type="button"
+            title="Notifiche"
+            onClick={() => navigate('/notifications')}
+            className="flex h-9 w-9 items-center justify-center rounded-md text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+          >
+            <Bell className="h-4 w-4" />
+          </button>
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#009B9B] text-xs font-semibold text-white shadow-sm">
             MR
           </div>
