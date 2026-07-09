@@ -50,10 +50,8 @@ export function RequestTypePage() {
       {/* Content */}
       <div className="flex-1 flex flex-col px-6 py-12">
         <div className="mb-8">
-          <div className="flex items-center gap-2">
-            <BackButton to="/hub" className="mt-0" />
-            <h1 className="text-3xl font-light text-[#323130]">Nuova richiesta</h1>
-          </div>
+          <BackButton to="/hub" className="mt-0" />
+          <h1 className="mt-3 text-3xl font-light text-[#323130]">Nuova richiesta</h1>
           <p className="mt-2 text-sm text-[#605E5C]">Scegli richiesta</p>
         </div>
 

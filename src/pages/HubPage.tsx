@@ -61,10 +61,10 @@ export function HubPage() {
               className="flex flex-col items-center gap-3 group"
             >
               <div
-                className="w-16 h-16 rounded-full flex items-center justify-center transition-transform hover:scale-110"
+                className="w-20 h-20 rounded-full flex items-center justify-center transition-transform hover:scale-110"
                 style={{ backgroundColor: `${color}18` }}
               >
-                <Icon className="w-8 h-8" style={{ color }} />
+                <Icon className="w-10 h-10" style={{ color }} />
               </div>
               <div className="text-center">
                 <p className="text-sm font-semibold text-[#323130]">{label}</p>

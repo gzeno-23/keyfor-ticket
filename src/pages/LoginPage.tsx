@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Ticket, ArrowRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -8,8 +8,8 @@ export function LoginPage() {
     <div className="min-h-screen bg-[#F8F9FA] flex flex-col items-center justify-center px-4">
       <div className="flex flex-col items-center gap-5">
         {/* Logo */}
-        <div className="w-20 h-20 rounded-2xl bg-[#009B9B] flex items-center justify-center shadow-lg">
-          <Ticket className="w-11 h-11 text-white" />
+        <div className="w-36 h-36 flex items-center justify-center">
+          <img src="/login-symbol.png" alt="Key Ticket logo" className="w-full h-full object-contain" />
         </div>
 
         {/* Title */}
