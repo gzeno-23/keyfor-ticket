@@ -1,8 +1,9 @@
 import { useState, type ChangeEvent, type ReactNode } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Calendar, CheckCircle2, Edit, Tag, User, UserCheck, XCircle } from 'lucide-react'
+import { Calendar, CheckCircle2, Edit, User, UserCheck, XCircle } from 'lucide-react'
 import { mockTickets, type Status } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
+import { StatusBadge } from '@/components/ui/badges'
 
 interface Comment {
   text: string
@@ -22,7 +23,7 @@ interface FileAttachment {
   fileUrl: string
 }
 
-type TicketTab = 'details' | 'comments' | 'attachments'
+type TicketTab = 'details' | 'comments' | 'attachments' | 'actions'
 
 export function TicketDetailPage() {
   const { id } = useParams()
@@ -127,14 +128,26 @@ export function TicketDetailPage() {
       </div>
 
       <div className="mt-4 rounded-2xl border border-[#EDEBE9] bg-white px-4 py-3 text-sm">
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div>
-            <p className="text-xs font-semibold text-[#201F1E]">Segnalato da</p>
-            <p className="mt-0.5 text-[#323130]">{ticket.reporter}</p>
+        <div className="grid gap-x-8 gap-y-2 sm:grid-cols-2">
+          <div className="flex items-center gap-2">
+            <p className="text-xs font-semibold text-[#201F1E]">Numero richiesta</p>
+            <p className="text-[#323130]">{ticket.id}</p>
           </div>
-          <div>
+          <div className="flex items-center gap-2">
+            <p className="text-xs font-semibold text-[#201F1E]">Segnalato da</p>
+            <p className="text-[#323130]">{ticket.reporter}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <p className="text-xs font-semibold text-[#201F1E]">Presa in carico da</p>
+            <p className="text-[#323130]">{assignee || 'In attesa di assegnazione'}</p>
+          </div>
+          <div className="flex items-center gap-2">
             <p className="text-xs font-semibold text-[#201F1E]">Data richiesta</p>
-            <p className="mt-0.5 text-[#323130]">{new Date(ticket.createdAt).toLocaleDateString('it-IT')}</p>
+            <p className="text-[#323130]">{new Date(ticket.createdAt).toLocaleDateString('it-IT')}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <p className="text-xs font-semibold text-[#201F1E]">Stato</p>
+            <StatusBadge status={status} />
           </div>
         </div>
       </div>
@@ -144,6 +157,7 @@ export function TicketDetailPage() {
           { id: 'details' as TicketTab, label: 'Dettagli' },
           { id: 'comments' as TicketTab, label: `Commenti (${comments.length})` },
           { id: 'attachments' as TicketTab, label: `Allegati (${attachedFiles.length + attachedImages.length})` },
+          { id: 'actions' as TicketTab, label: 'Azioni' },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -158,33 +172,15 @@ export function TicketDetailPage() {
         ))}
       </div>
 
-      <div className={`mt-6 grid grid-cols-1 gap-6 ${activeTab === 'details' ? 'xl:grid-cols-[minmax(0,1fr)_320px]' : ''}`}>
+      <div className="mt-6 grid grid-cols-1 gap-6">
         <div className="space-y-8">
           {activeTab === 'details' && (
             <>
               <section>
-                <h2 className="mb-4 text-base font-semibold text-[#323130]">Generale</h2>
                 <div className="grid grid-cols-1 gap-x-8 gap-y-1 md:grid-cols-2">
                   <FieldRow label="Segnalato da" value={ticket.reporter} />
                   <FieldRow label="Data creazione" value={new Date(ticket.createdAt).toLocaleString('it-IT')} />
                   <FieldRow label="Ultimo aggiornamento" value={new Date(ticket.updatedAt).toLocaleString('it-IT')} />
-                  <FieldRow
-                    label="Tag"
-                    value={
-                      <div className="flex flex-wrap gap-2">
-                        {ticket.tags.map((tag) => (
-                          <span key={tag}>{tag}</span>
-                        ))}
-                      </div>
-                    }
-                  />
-                </div>
-              </section>
-
-              <section>
-                <h2 className="mb-4 text-base font-semibold text-[#323130]">Descrizione</h2>
-                <div className="border-b border-dotted border-[#EDEBE9] py-2 text-sm leading-6 text-[#323130]">
-                  {ticket.description}
                 </div>
               </section>
             </>
@@ -310,67 +306,63 @@ export function TicketDetailPage() {
               </div>
             </section>
           )}
+
+          {activeTab === 'actions' && (
+            <section className="max-w-sm rounded-2xl border border-[#EDEBE9] bg-white p-4">
+              <h2 className="mb-4 text-sm font-semibold text-[#323130]">Azioni</h2>
+              <div className="space-y-2">
+                {status === 'open' && (
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/tickets/${ticket.id}/edit`)}
+                    className="flex w-full items-center gap-2 border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] hover:bg-[#F3F2F1]"
+                  >
+                    <Edit className="h-4 w-4 text-[#009B9B]" />
+                    Modifica
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={handleTakeOver}
+                  disabled={status === 'in_progress' || status === 'resolved' || status === 'closed'}
+                  className="flex w-full items-center gap-2 border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] hover:bg-[#F3F2F1] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <UserCheck className="h-4 w-4 text-[#009B9B]" />
+                  Prendi in carico
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResolve}
+                  disabled={status === 'resolved' || status === 'closed'}
+                  className="flex w-full items-center gap-2 border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] hover:bg-[#F3F2F1] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <CheckCircle2 className="h-4 w-4 text-[#107C10]" />
+                  Segna come risolto
+                </button>
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  disabled={status === 'closed'}
+                  className="flex w-full items-center gap-2 border border-[#F3D6D8] px-3 py-2 text-sm text-[#A4262C] hover:bg-[#FDF3F4] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <XCircle className="h-4 w-4" />
+                  Chiudi ticket
+                </button>
+              </div>
+
+              <div className="mt-6 border-t border-[#EDEBE9] pt-4 text-sm text-[#605E5C]">
+                <div className="flex items-center gap-2 py-1">
+                  <User className="h-4 w-4" />
+                  <span>{assignee || 'In attesa di assegnazione'}</span>
+                </div>
+                <div className="flex items-center gap-2 py-1">
+                  <Calendar className="h-4 w-4" />
+                  <span>{new Date(ticket.updatedAt).toLocaleDateString('it-IT')}</span>
+                </div>
+              </div>
+            </section>
+          )}
         </div>
-
-        {activeTab === 'details' && (
-        <aside className="h-fit rounded-2xl border border-[#EDEBE9] bg-white p-4 xl:sticky xl:top-32">
-          <h2 className="mb-4 text-sm font-semibold text-[#323130]">Azioni</h2>
-          <div className="space-y-2">
-            {status === 'open' && (
-              <button
-                type="button"
-                onClick={() => navigate(`/tickets/${ticket.id}/edit`)}
-                className="flex w-full items-center gap-2 border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] hover:bg-[#F3F2F1]"
-              >
-                <Edit className="h-4 w-4 text-[#009B9B]" />
-                Modifica
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={handleTakeOver}
-              disabled={status === 'in_progress' || status === 'resolved' || status === 'closed'}
-              className="flex w-full items-center gap-2 border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] hover:bg-[#F3F2F1] disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <UserCheck className="h-4 w-4 text-[#009B9B]" />
-              Prendi in carico
-            </button>
-            <button
-              type="button"
-              onClick={handleResolve}
-              disabled={status === 'resolved' || status === 'closed'}
-              className="flex w-full items-center gap-2 border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] hover:bg-[#F3F2F1] disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <CheckCircle2 className="h-4 w-4 text-[#107C10]" />
-              Segna come risolto
-            </button>
-            <button
-              type="button"
-              onClick={handleClose}
-              disabled={status === 'closed'}
-              className="flex w-full items-center gap-2 border border-[#F3D6D8] px-3 py-2 text-sm text-[#A4262C] hover:bg-[#FDF3F4] disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <XCircle className="h-4 w-4" />
-              Chiudi ticket
-            </button>
-          </div>
-
-          <div className="mt-6 border-t border-[#EDEBE9] pt-4 text-sm text-[#605E5C]">
-            <div className="flex items-center gap-2 py-1">
-              <User className="h-4 w-4" />
-              <span>{assignee || 'In attesa di assegnazione'}</span>
-            </div>
-            <div className="flex items-center gap-2 py-1">
-              <Calendar className="h-4 w-4" />
-              <span>{new Date(ticket.updatedAt).toLocaleDateString('it-IT')}</span>
-            </div>
-            <div className="flex items-center gap-2 py-1">
-              <Tag className="h-4 w-4" />
-              <span>{ticket.tags.length} tag</span>
-            </div>
-          </div>
-        </aside>
-        )}
       </div>
     </div>
   )

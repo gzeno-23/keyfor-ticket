@@ -1,9 +1,10 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { AlertCircle, MoveLeft, Save, X } from 'lucide-react'
 import { StatusBadge } from '@/components/ui/badges'
 import type { Status } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
+import { CancelConfirmDialog } from '@/components/ui/CancelConfirmDialog'
 
 interface TicketDraft {
   title: string
@@ -23,6 +24,7 @@ export function TicketReviewPage() {
   const location = useLocation()
   const navigate = useNavigate()
   const draft = location.state?.ticket as TicketDraft | undefined
+  const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false)
 
   useEffect(() => {
     if (!draft) navigate('/tickets/new', { replace: true })
@@ -40,6 +42,15 @@ export function TicketReviewPage() {
 
   const handleSave = () => {
     navigate('/tickets', { replace: true })
+  }
+
+  const handleCancel = () => {
+    setIsCancelConfirmOpen(true)
+  }
+
+  const handleConfirmCancel = () => {
+    setIsCancelConfirmOpen(false)
+    navigate('/tickets')
   }
 
   return (
@@ -63,7 +74,7 @@ export function TicketReviewPage() {
           </button>
           <button
             type="button"
-            onClick={() => navigate('/tickets')}
+            onClick={handleCancel}
             className="flex items-center gap-1 border border-[#F3D6D8] px-4 py-2 text-sm text-[#A4262C] hover:bg-[#FDF3F4]"
           >
             <X className="h-4 w-4" />
@@ -80,15 +91,15 @@ export function TicketReviewPage() {
         </div>
       </div>
 
+      <CancelConfirmDialog
+        open={isCancelConfirmOpen}
+        onClose={() => setIsCancelConfirmOpen(false)}
+        onConfirm={handleConfirmCancel}
+      />
+
       <div className="mt-4 flex items-start gap-3 rounded-2xl bg-[#E6F5F5] px-4 py-3 text-sm text-[#323130]">
         <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#009B9B]" />
         <p>Verifica i dati del ticket prima di completare il salvataggio.</p>
-      </div>
-
-      <div className="mt-4 border-b border-[#EDEBE9] text-sm">
-        <button type="button" className="border-b-2 border-[#009B9B] px-1 py-3 text-[#009B9B]">
-          Generale
-        </button>
       </div>
 
       <div className="mt-6 space-y-8">
@@ -103,9 +114,7 @@ export function TicketReviewPage() {
             </div>
           </div>
         </section>
-
         <section>
-          <h2 className="mb-4 text-base font-semibold text-[#323130]">Generale</h2>
           <div className="grid gap-x-8 gap-y-1 md:grid-cols-2">
             <ReviewField label="ID assegnato" value={newId} />
             <ReviewField label="Data creazione" value={now} />

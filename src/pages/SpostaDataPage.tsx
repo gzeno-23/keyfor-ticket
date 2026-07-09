@@ -2,6 +2,7 @@ import { useState, type ChangeEvent, type FormEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Search, X } from 'lucide-react'
 import { BackButton } from '@/components/ui/back-button'
+import { CancelConfirmDialog } from '@/components/ui/CancelConfirmDialog'
 import { getRequestTypeColor } from '@/lib/request-type'
 
 // ── Mock BC data ──────────────────────────────────────────────────────────────
@@ -73,8 +74,8 @@ function LookupDialog({
     : items
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="relative mx-4 flex w-full max-w-lg flex-col bg-white shadow-2xl" style={{ maxHeight: '80vh' }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+      <div className="relative mx-4 flex w-full max-w-lg flex-col bg-white shadow-2xl" style={{ maxHeight: '80vh' }} onClick={(event) => event.stopPropagation()}>
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[#EDEBE9] px-5 py-3">
           <h2 className="text-sm font-semibold text-[#323130]">{title}</h2>
@@ -136,19 +137,26 @@ function LookupDialog({
 
 // ── Lookup trigger ────────────────────────────────────────────────────────────
 function LookupField({
+  name,
   label,
   value,
   onOpen,
   onClear,
+  required = false,
 }: {
+  name: string
   label: string
   value: string
   onOpen: () => void
   onClear: () => void
+  required?: boolean
 }) {
   return (
     <div className="flex flex-col gap-1 py-2 sm:flex-row sm:items-center">
-      <span className="w-40 shrink-0 text-sm font-semibold text-[#201F1E]">{label}</span>
+      <span className="w-40 shrink-0 text-sm font-semibold text-[#201F1E]">
+        {label}
+        {required && <span className="ml-1 text-[#A4262C]">*</span>}
+      </span>
       <div className="flex min-w-0 flex-1 items-center gap-2">
         <button type="button" onClick={onOpen} className="flex-1 text-left text-sm">
           {value
@@ -156,6 +164,15 @@ function LookupField({
             : <span className="text-[#A19F9D]">Seleziona {label.toLowerCase()}...</span>
           }
         </button>
+        <input
+          tabIndex={-1}
+          aria-hidden="true"
+          readOnly
+          value={value}
+          name={name}
+          required={required}
+          className="sr-only"
+        />
         {value ? (
           <button type="button" onClick={onClear} className="text-[#A19F9D] hover:text-[#605E5C]">
             <X className="h-3.5 w-3.5" />
@@ -171,12 +188,17 @@ function LookupField({
 }
 
 // ── Date field ────────────────────────────────────────────────────────────────
-function DateField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+function DateField({ name, label, value, onChange, required = false }: { name: string; label: string; value: string; onChange: (v: string) => void; required?: boolean }) {
   return (
     <div className="flex flex-col gap-1 py-2 sm:flex-row sm:items-center">
-      <span className="w-40 shrink-0 text-sm font-semibold text-[#201F1E]">{label}</span>
+      <span className="w-40 shrink-0 text-sm font-semibold text-[#201F1E]">
+        {label}
+        {required && <span className="ml-1 text-[#A4262C]">*</span>}
+      </span>
       <input
         type="date"
+        name={name}
+        required={required}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="min-w-0 flex-1 bg-transparent text-sm text-[#323130] outline-none [color-scheme:light]"
@@ -197,6 +219,7 @@ export function SpostaDataPage() {
   const [attachedImages, setAttachedImages] = useState<ImageAttachment[]>([])
   const [comments, setComments] = useState<NoteItem[]>([])
   const [commentText, setCommentText] = useState('')
+  const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false)
 
   const clientiItems: LookupItem[] = BC_CLIENTI.map((c) => ({ codice: c.codice, label: c.nome }))
   const articoliItems: LookupItem[] = BC_ARTICOLI.map((a) => ({ codice: a.codice, label: `${a.codice} — ${a.descrizione}` }))
@@ -209,6 +232,15 @@ export function SpostaDataPage() {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     navigate('/dashboard')
+  }
+
+  const handleCancel = () => {
+    setIsCancelConfirmOpen(true)
+  }
+
+  const handleConfirmCancel = () => {
+    setIsCancelConfirmOpen(false)
+    navigate('/request-type')
   }
 
   const handleFileAttach = (event: ChangeEvent<HTMLInputElement>) => {
@@ -291,6 +323,7 @@ export function SpostaDataPage() {
   const requestKey = pathname.split('/').pop() ?? 'sposta-data'
   const currentRequest = requestConfig[requestKey] ?? requestConfig['sposta-data']
   const currentRequestColor = getRequestTypeColor(currentRequest.label)
+  const isDetailsComplete = Boolean(form.cliente && form.articolo && form.vecchiaData && form.nuovaData)
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
@@ -330,7 +363,7 @@ export function SpostaDataPage() {
             activeTab === 'comments' ? 'border-[#009B9B] text-[#009B9B]' : 'border-transparent text-[#605E5C]'
           }`}
         >
-          Commenti ({comments.length})
+          Note ({comments.length})
         </button>
         <button
           type="button"
@@ -346,19 +379,23 @@ export function SpostaDataPage() {
       {activeTab === 'details' && (
         <form id="sposta-data-form" onSubmit={handleSubmit} className="mt-6 space-y-1">
           <LookupField
+            name="cliente"
             label="Nome cliente"
             value={form.cliente}
             onOpen={() => setOpenDialog('cliente')}
             onClear={() => setForm((f) => ({ ...f, cliente: '' }))}
+            required
           />
           <LookupField
+            name="articolo"
             label="Numero articolo"
             value={form.articolo}
             onOpen={() => setOpenDialog('articolo')}
             onClear={() => setForm((f) => ({ ...f, articolo: '' }))}
+            required
           />
-          <DateField label="Vecchia data" value={form.vecchiaData} onChange={(v) => setForm((f) => ({ ...f, vecchiaData: v }))} />
-          <DateField label="Nuova data" value={form.nuovaData} onChange={(v) => setForm((f) => ({ ...f, nuovaData: v }))} />
+          <DateField name="vecchiaData" label="Vecchia data" value={form.vecchiaData} onChange={(v) => setForm((f) => ({ ...f, vecchiaData: v }))} required />
+          <DateField name="nuovaData" label="Nuova data" value={form.nuovaData} onChange={(v) => setForm((f) => ({ ...f, nuovaData: v }))} required />
         </form>
       )}
 
@@ -430,12 +467,11 @@ export function SpostaDataPage() {
 
       {activeTab === 'comments' && (
         <div className="mt-6 rounded-xl border border-[#EDEBE9] bg-white p-4">
-          <p className="text-sm font-semibold text-[#323130]">Commenti</p>
           <textarea
             rows={4}
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
-            placeholder="Scrivi un commento..."
+            placeholder="Scrivi una nota..."
             className="mt-3 w-full border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] outline-none focus:border-[#009B9B]"
           />
           <div className="mt-3 flex justify-end">
@@ -445,20 +481,22 @@ export function SpostaDataPage() {
               disabled={!commentText.trim()}
               className="bg-[#009B9B] px-4 py-2 text-sm font-medium text-white hover:bg-[#007575] disabled:cursor-not-allowed disabled:opacity-40"
             >
-              Aggiungi commento
+              Aggiungi nota
             </button>
           </div>
 
           <div className="mt-4 space-y-3">
-            {comments.length === 0 ? (
-              <p className="text-sm text-[#605E5C]">Nessun commento presente.</p>
-            ) : (
+            {comments.length > 0 && (
               comments.map((comment) => (
                 <div key={comment.id} className="rounded-md border border-[#EDEBE9] px-3 py-2">
-                  <p className="text-sm text-[#323130]">{comment.text}</p>
-                  <div className="mt-1 flex items-center justify-between text-[11px] text-[#A19F9D]">
-                    <span>{comment.createdAt}</span>
-                    <button type="button" onClick={() => handleDeleteComment(comment.id)} className="text-[#A4262C] hover:underline">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm text-[#323130]">{comment.text}</p>
+                      <div className="mt-1 text-[11px] text-[#A19F9D]">
+                        <span>{comment.createdAt}</span>
+                      </div>
+                    </div>
+                    <button type="button" onClick={() => handleDeleteComment(comment.id)} className="shrink-0 self-center text-[11px] text-[#A4262C] hover:underline">
                       Elimina
                     </button>
                   </div>
@@ -472,7 +510,8 @@ export function SpostaDataPage() {
       <div className="mt-10 flex justify-end gap-3 border-t border-[#EDEBE9] pt-6">
         <button
           type="button"
-          onClick={() => navigate('/request-type')}
+          onClick={handleCancel}
+          hidden={activeTab !== 'details'}
           className="border border-[#EDEBE9] px-6 py-2 text-sm text-[#605E5C] hover:bg-[#F3F2F1] transition-colors"
         >
           Annulla
@@ -480,11 +519,19 @@ export function SpostaDataPage() {
         <button
           type="submit"
           form="sposta-data-form"
-          className="bg-[#009B9B] px-6 py-2 text-sm font-medium text-white hover:bg-[#007575] transition-colors"
+          hidden={activeTab !== 'details'}
+          disabled={!isDetailsComplete}
+          className="bg-[#009B9B] px-6 py-2 text-sm font-medium text-white hover:bg-[#007575] transition-colors disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Salva
+          Invia
         </button>
       </div>
+
+      <CancelConfirmDialog
+        open={isCancelConfirmOpen}
+        onClose={() => setIsCancelConfirmOpen(false)}
+        onConfirm={handleConfirmCancel}
+      />
 
       {openDialog === 'cliente' && (
         <LookupDialog
@@ -504,8 +551,8 @@ export function SpostaDataPage() {
       )}
 
       {isInfoOpen && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 px-4">
-          <div className="w-full max-w-md rounded-lg border border-[#EDEBE9] bg-white p-5 shadow-2xl">
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 px-4" onClick={() => setIsInfoOpen(false)}>
+          <div className="w-full max-w-md rounded-lg border border-[#EDEBE9] bg-white p-5 shadow-2xl" onClick={(event) => event.stopPropagation()}>
             <h3 className="text-base font-semibold text-[#323130]">{currentRequest.label}</h3>
             <p className="mt-2 text-sm leading-6 text-[#605E5C]">
               {currentRequest.info}

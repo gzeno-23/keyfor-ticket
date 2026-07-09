@@ -29,7 +29,7 @@ export function TopNav() {
       >
         Key Ticket
       </button>
-      <div className="ml-auto flex items-center gap-0">
+      <div className="ml-auto flex items-center gap-2">
         <button
           type="button"
           title="Notifiche"
@@ -44,5 +44,4 @@ export function TopNav() {
     </header>
   )
 }
-
 

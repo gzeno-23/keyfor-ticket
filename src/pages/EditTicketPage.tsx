@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { mockTickets } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
+import { CancelConfirmDialog } from '@/components/ui/CancelConfirmDialog'
 
 export function EditTicketPage() {
   const { id } = useParams()
@@ -12,6 +13,7 @@ export function EditTicketPage() {
     title: ticket?.title ?? '',
     description: ticket?.description ?? '',
   })
+  const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false)
 
   if (!ticket) {
     return (
@@ -23,6 +25,15 @@ export function EditTicketPage() {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
+    navigate(`/tickets/${ticket.id}`)
+  }
+
+  const handleCancel = () => {
+    setIsCancelConfirmOpen(true)
+  }
+
+  const handleConfirmCancel = () => {
+    setIsCancelConfirmOpen(false)
     navigate(`/tickets/${ticket.id}`)
   }
 
@@ -60,7 +71,7 @@ export function EditTicketPage() {
         <div className="flex justify-end gap-2 border-t border-[#EDEBE9] pt-4">
           <button
             type="button"
-            onClick={() => navigate(`/tickets/${ticket.id}`)}
+            onClick={handleCancel}
             className="border border-[#EDEBE9] px-4 py-2 text-sm font-medium text-[#323130] hover:bg-[#F3F2F1]"
           >
             Annulla
@@ -73,6 +84,12 @@ export function EditTicketPage() {
           </button>
         </div>
       </form>
+
+      <CancelConfirmDialog
+        open={isCancelConfirmOpen}
+        onClose={() => setIsCancelConfirmOpen(false)}
+        onConfirm={handleConfirmCancel}
+      />
     </div>
   )
 }

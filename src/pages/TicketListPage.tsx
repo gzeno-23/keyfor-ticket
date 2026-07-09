@@ -6,20 +6,6 @@ import { mockTickets, type Status, type Ticket } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
 import { getRequestTypeColor } from '@/lib/request-type'
 
-const statusLabel: Record<Status, string> = {
-  open: 'Aperto',
-  in_progress: 'In lavorazione',
-  resolved: 'Risolto',
-  closed: 'Chiuso',
-}
-
-const statusColor: Record<Status, string> = {
-  open: 'text-[#009B9B]',
-  in_progress: 'text-[#8A6E00]',
-  resolved: 'text-[#107C10]',
-  closed: 'text-[#605E5C]',
-}
-
 export function TicketListPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -44,7 +30,8 @@ export function TicketListPage() {
     return matchSearch && matchStatus
   })
 
-  const pageTitle = 'Richieste'
+  const pageTitle = statusFilter === 'open' ? 'Richieste aperte' : 'Richieste'
+  const pageSubtitle = statusFilter === 'open' ? 'Seleziona una richiesta per gestirla' : ''
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
@@ -54,7 +41,7 @@ export function TicketListPage() {
             <BackButton />
             <div>
               <h1 className="text-3xl font-light text-[#323130]">{pageTitle}</h1>
-              <p className="mt-1 text-sm text-[#605E5C]">{filtered.length} record visualizzati</p>
+              {pageSubtitle && <p className="mt-1 text-sm text-[#605E5C]">{pageSubtitle}</p>}
             </div>
           </div>
           <div />
@@ -164,7 +151,9 @@ function TicketListRow({ ticket, index }: { ticket: Ticket; index: number }) {
       <td className="px-6 py-3 align-top text-[#605E5C]">
         {new Date(ticket.createdAt).toLocaleDateString('it-IT')}
       </td>
-      <td className={`px-6 py-3 align-top ${statusColor[ticket.status]}`}>{statusLabel[ticket.status]}</td>
+      <td className="px-6 py-3 align-top">
+        <StatusBadge status={ticket.status} />
+      </td>
     </tr>
   )
 }

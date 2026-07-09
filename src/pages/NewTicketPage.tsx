@@ -2,6 +2,7 @@ import { useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Status } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
+import { CancelConfirmDialog } from '@/components/ui/CancelConfirmDialog'
 
 export function NewTicketPage() {
   const navigate = useNavigate()
@@ -11,10 +12,20 @@ export function NewTicketPage() {
     status: 'open' as Status,
     tags: '',
   })
+  const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false)
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     navigate('/tickets/new/review', { state: { ticket: form } })
+  }
+
+  const handleCancel = () => {
+    setIsCancelConfirmOpen(true)
+  }
+
+  const handleConfirmCancel = () => {
+    setIsCancelConfirmOpen(false)
+    navigate('/tickets')
   }
 
   return (
@@ -30,7 +41,7 @@ export function NewTicketPage() {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => navigate('/tickets')}
+            onClick={handleCancel}
             className="border border-[#EDEBE9] px-4 py-2 text-sm text-[#605E5C] hover:bg-[#F3F2F1]"
           >
             Annulla
@@ -45,15 +56,14 @@ export function NewTicketPage() {
         </div>
       </div>
 
-      <div className="mt-4 border-b border-[#EDEBE9] text-sm">
-        <button type="button" className="border-b-2 border-[#009B9B] px-1 py-3 text-[#009B9B]">
-          Generale
-        </button>
-      </div>
+      <CancelConfirmDialog
+        open={isCancelConfirmOpen}
+        onClose={() => setIsCancelConfirmOpen(false)}
+        onConfirm={handleConfirmCancel}
+      />
 
       <form id="new-ticket-form" onSubmit={handleSubmit} className="mt-6 space-y-8">
         <section>
-          <h2 className="mb-4 text-base font-semibold text-[#323130]">Generale</h2>
           <div className="grid gap-x-8 gap-y-1 md:grid-cols-2">
             <EditField
               label="Titolo"

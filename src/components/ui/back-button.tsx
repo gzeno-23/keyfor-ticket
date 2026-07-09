@@ -15,7 +15,12 @@ export function BackButton({ to = -1, className }: BackButtonProps) {
       navigate(to)
       return
     }
-    navigate(to)
+    const historyIndex = (window.history.state as { idx?: number } | null)?.idx ?? 0
+    if (historyIndex > 0) {
+      navigate(-1)
+      return
+    }
+    navigate(to, { replace: true })
   }
 
   return (
