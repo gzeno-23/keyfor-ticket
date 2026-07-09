@@ -9,7 +9,7 @@ export function LoginPage() {
       <div className="flex flex-col items-center gap-5">
         {/* Logo */}
         <div className="w-36 h-36 flex items-center justify-center">
-          <img src="/login-symbol.png" alt="Key Ticket logo" className="w-full h-full object-contain" />
+          <img src={`${import.meta.env.BASE_URL}login-symbol.png`} alt="Key Ticket logo" className="w-full h-full object-contain" />
         </div>
 
         {/* Title */}
