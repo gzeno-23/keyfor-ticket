@@ -521,7 +521,7 @@ export function SpostaDataPage() {
           form="sposta-data-form"
           hidden={activeTab !== 'details'}
           disabled={!isDetailsComplete}
-          className="bg-[#009B9B] px-6 py-2 text-sm font-medium text-white hover:bg-[#007575] transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+          className="bg-[#009B9B] px-6 py-2 text-sm font-medium text-white hover:bg-[#007575] transition-colors disabled:cursor-not-allowed disabled:bg-[#E5E7E9] disabled:text-[#605E5C] disabled:hover:bg-[#E5E7E9]"
         >
           Invia
         </button>

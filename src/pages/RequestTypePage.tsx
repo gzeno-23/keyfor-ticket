@@ -1,8 +1,18 @@
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import { MoveRight, Bell } from 'lucide-react'
 import { BackButton } from '@/components/ui/back-button'
 import { UserProfileMenu } from '@/components/layout/UserProfileMenu'
 import { resetNotificationsForDemo, useNotifications } from '@/lib/notifications'
+
+type RequestArea = 'ordini' | 'magazzino' | 'logistica' | 'amministrazione'
+
+const requestAreaTabs: { id: RequestArea; label: string }[] = [
+  { id: 'ordini', label: 'Ordini' },
+  { id: 'magazzino', label: 'Magazzino' },
+  { id: 'logistica', label: 'Logistica' },
+  { id: 'amministrazione', label: 'Amministrazione' },
+]
 
 const requestTypes = [
   {
@@ -31,11 +41,21 @@ const requestTypes = [
   },
 ]
 
+const requestTypeByArea: Record<RequestArea, string[]> = {
+  ordini: ['sposta-data', 'non-conformita', 'sollecito', 'giacenza'],
+  magazzino: ['non-conformita', 'giacenza', 'sollecito'],
+  logistica: ['sposta-data', 'sollecito', 'giacenza'],
+  amministrazione: ['non-conformita', 'sollecito'],
+}
+
 export function RequestTypePage() {
   const location = useLocation()
   const navigate = useNavigate()
   const { unreadCount } = useNotifications()
+  const [activeArea, setActiveArea] = useState<RequestArea>('ordini')
   const currentPath = `${location.pathname}${location.search}`
+  const activeRequestTypeIds = requestTypeByArea[activeArea]
+  const filteredRequestTypes = requestTypes.filter((request) => activeRequestTypeIds.includes(request.id))
   const handleLogout = () => {
     resetNotificationsForDemo()
     navigate('/login')
@@ -84,8 +104,23 @@ export function RequestTypePage() {
           </div>
         </div>
 
-        <div className="space-y-3">
-          {requestTypes.map(({ id, label, color, to }) => (
+        <div className="mt-4 flex items-center gap-6 overflow-x-auto border-b border-[#EDEBE9] text-sm">
+          {requestAreaTabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveArea(tab.id)}
+              className={`shrink-0 border-b-2 px-1 py-3 ${
+                activeArea === tab.id ? 'border-[#009B9B] text-[#009B9B]' : 'border-transparent text-[#605E5C]'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-5 space-y-5">
+          {filteredRequestTypes.map(({ id, label, color, to }) => (
             <button
               key={id}
               type="button"
@@ -104,9 +139,13 @@ export function RequestTypePage() {
               </div>
             </button>
           ))}
+          {filteredRequestTypes.length === 0 && (
+            <div className="rounded-xl border border-[#EDEBE9] bg-white p-4 text-sm text-[#605E5C]">
+              Nessuna tipologia disponibile in questa area.
+            </div>
+          )}
         </div>
       </div>
     </div>
   )
 }
-

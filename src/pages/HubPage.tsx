@@ -82,7 +82,7 @@ export function HubPage() {
               <div className="w-20 h-20 rounded-full bg-white/90 flex items-center justify-center">
                 <img src={iconSrc} alt="" className="h-10 w-10" />
               </div>
-              <p className="text-base sm:text-lg font-semibold text-[#201F1E]">{label}</p>
+              <p className="text-base sm:text-lg font-bold text-white">{label}</p>
             </div>
           </button>
         ))}

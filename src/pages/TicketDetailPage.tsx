@@ -1,6 +1,6 @@
 import { useState, type ChangeEvent, type ReactNode } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Calendar, CheckCircle2, Edit, User, UserCheck, XCircle } from 'lucide-react'
+import { CheckCircle2, Edit, UserCheck, XCircle } from 'lucide-react'
 import { mockTickets, type Status } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
 import { StatusBadge } from '@/components/ui/badges'
@@ -318,7 +318,7 @@ export function TicketDetailPage() {
                     className="flex w-full items-center gap-2 border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] hover:bg-[#F3F2F1]"
                   >
                     <Edit className="h-4 w-4 text-[#009B9B]" />
-                    Modifica
+                    Sollecita
                   </button>
                 )}
                 <button
@@ -348,17 +348,6 @@ export function TicketDetailPage() {
                   <XCircle className="h-4 w-4" />
                   Chiudi ticket
                 </button>
-              </div>
-
-              <div className="mt-6 border-t border-[#EDEBE9] pt-4 text-sm text-[#605E5C]">
-                <div className="flex items-center gap-2 py-1">
-                  <User className="h-4 w-4" />
-                  <span>{assignee || 'In attesa di assegnazione'}</span>
-                </div>
-                <div className="flex items-center gap-2 py-1">
-                  <Calendar className="h-4 w-4" />
-                  <span>{new Date(ticket.updatedAt).toLocaleDateString('it-IT')}</span>
-                </div>
               </div>
             </section>
           )}
