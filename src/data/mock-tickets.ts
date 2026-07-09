@@ -3,6 +3,7 @@ export type Status = 'open' | 'in_progress' | 'resolved' | 'closed'
 export interface Ticket {
   id: string
   requestType?: 'Sposta Data' | 'Non Conformità' | 'Sollecito' | 'Giacenza Articolo'
+  customerName: string
   title: string
   description: string
   status: Status
@@ -17,6 +18,7 @@ export const mockTickets: Ticket[] = [
   {
     id: 'KFT-001',
     requestType: 'Sollecito',
+    customerName: 'Alfa Distribuzione S.r.l.',
     title: 'Impossibile accedere al portale clienti',
     description: 'Gli utenti riportano un errore 403 quando tentano di accedere al portale clienti dopo il recente aggiornamento.',
     status: 'open',
@@ -29,6 +31,7 @@ export const mockTickets: Ticket[] = [
   {
     id: 'KFT-002',
     requestType: 'Non Conformità',
+    customerName: 'Beta Forniture S.p.A.',
     title: 'Esportazione report PDF non funziona',
     description: 'Il pulsante "Esporta PDF" nella sezione report non genera il file correttamente, mostra una pagina vuota.',
     status: 'in_progress',
@@ -41,6 +44,7 @@ export const mockTickets: Ticket[] = [
   {
     id: 'KFT-003',
     requestType: 'Giacenza Articolo',
+    customerName: 'Gamma Logistica S.r.l.',
     title: 'Aggiornare logo aziendale',
     description: 'Il logo nella navbar deve essere sostituito con la nuova versione fornita dal team marketing.',
     status: 'open',
@@ -53,6 +57,7 @@ export const mockTickets: Ticket[] = [
   {
     id: 'KFT-004',
     requestType: 'Sposta Data',
+    customerName: 'Delta Commerce S.r.l.',
     title: 'Lentezza nel caricamento della dashboard',
     description: 'La dashboard impiega oltre 8 secondi a caricarsi. Necessaria ottimizzazione query o caching.',
     status: 'in_progress',
@@ -65,6 +70,7 @@ export const mockTickets: Ticket[] = [
   {
     id: 'KFT-005',
     requestType: 'Sollecito',
+    customerName: 'Epsilon Trading S.p.A.',
     title: 'Errore invio email di notifica',
     description: 'Le email di notifica per i nuovi ticket non vengono inviate agli assegnatari.',
     status: 'resolved',
@@ -77,6 +83,7 @@ export const mockTickets: Ticket[] = [
   {
     id: 'KFT-006',
     requestType: 'Giacenza Articolo',
+    customerName: 'Zeta Solutions S.r.l.',
     title: 'Richiesta nuova funzione: filtro per data',
     description: 'Gli utenti richiedono la possibilità di filtrare i ticket per intervallo di date nella vista lista.',
     status: 'closed',

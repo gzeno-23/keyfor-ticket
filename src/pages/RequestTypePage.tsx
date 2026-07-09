@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight, Ticket, Bell, LogOut } from 'lucide-react'
 import { BackButton } from '@/components/ui/back-button'
+import { RequestTypeLabel } from '@/components/ui/request-type-label'
 
 const requestTypes = [
   {
@@ -63,14 +64,18 @@ export function RequestTypePage() {
       </header>
 
       {/* Content */}
-      <div className="flex-1 flex flex-col px-6 py-6">
-        <div className="mb-6">
-          <BackButton to="/hub" className="-mt-4 h-8 w-8 [&>svg]:h-3 [&>svg]:w-3" />
-          <h1 className="mt-3 text-3xl font-light text-[#323130]">Nuova richiesta</h1>
-          <p className="mt-2 text-sm text-[#605E5C]">Scegli richiesta</p>
+      <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 py-6 sm:px-6">
+        <div className="pb-4">
+          <div className="flex items-center gap-3">
+            <BackButton to="/hub" className="mt-0 h-8 w-8 [&>svg]:h-3 [&>svg]:w-3" />
+            <div>
+              <h1 className="text-3xl font-light text-[#323130]">Nuova richiesta</h1>
+              <p className="mt-2 text-sm text-[#605E5C]">Seleziona una tipologia di richiesta</p>
+            </div>
+          </div>
         </div>
 
-        <div className="space-y-3 max-w-2xl">
+        <div className="space-y-3">
           {requestTypes.map(({ id, label, color, to }) => (
             <button
               key={id}
@@ -80,7 +85,12 @@ export function RequestTypePage() {
             >
               <div className="h-1.5 w-full" style={{ backgroundColor: color }} />
               <div className="flex items-center justify-between p-4">
-                <p className="text-base font-medium text-[#323130] text-left">{label}</p>
+                <RequestTypeLabel
+                  label={label}
+                  color={color}
+                  textClassName="text-base font-medium text-[#323130] text-left"
+                  lineClassName="h-0.5"
+                />
                 <div
                   className="flex items-center gap-2 text-sm font-medium flex-shrink-0"
                   style={{ color }}

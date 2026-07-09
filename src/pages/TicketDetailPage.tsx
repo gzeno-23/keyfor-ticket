@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { Calendar, CheckCircle2, Edit, Tag, User, UserCheck, XCircle } from 'lucide-react'
 import { mockTickets, type Status } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
+import { RequestTypeLabel } from '@/components/ui/request-type-label'
 
 interface Comment {
   text: string
@@ -122,9 +123,15 @@ export function TicketDetailPage() {
           <BackButton to="/tickets" />
           <div>
             <p className="text-xs uppercase tracking-[0.18em] text-[#605E5C]">Ticket Card</p>
-            <h1 className="mt-1 text-2xl font-light text-[#323130] md:text-[30px]">
-              {ticket.requestType ?? ticket.title}
-            </h1>
+            {ticket.requestType ? (
+              <RequestTypeLabel
+                label={ticket.requestType}
+                className="mt-1"
+                textClassName="text-2xl font-light text-[#323130] leading-tight md:text-[30px]"
+              />
+            ) : (
+              <h1 className="mt-1 text-2xl font-light text-[#323130] md:text-[30px]">{ticket.title}</h1>
+            )}
             <p className="mt-1 text-xs text-[#605E5C]">{ticket.id}</p>
           </div>
         </div>

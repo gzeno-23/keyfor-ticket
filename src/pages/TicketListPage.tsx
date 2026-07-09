@@ -4,6 +4,7 @@ import { ChevronRight, Plus, Search } from 'lucide-react'
 import { StatusBadge } from '@/components/ui/badges'
 import { mockTickets, type Status, type Ticket } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
+import { RequestTypeLabel } from '@/components/ui/request-type-label'
 
 const statusLabel: Record<Status, string> = {
   open: 'Aperto',
@@ -37,6 +38,7 @@ export function TicketListPage() {
       search === '' ||
       ticket.title.toLowerCase().includes(search.toLowerCase()) ||
       ticket.id.toLowerCase().includes(search.toLowerCase()) ||
+      ticket.customerName.toLowerCase().includes(search.toLowerCase()) ||
       (ticket.requestType ?? '').toLowerCase().includes(search.toLowerCase())
     const matchStatus = statusFilter === 'all' || ticket.status === statusFilter
     return matchSearch && matchStatus
@@ -99,7 +101,13 @@ export function TicketListPage() {
                 className="flex cursor-pointer items-center gap-3 px-4 py-3 hover:bg-[#F3F2F1]"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-[#323130]">{ticket.requestType ?? 'Richiesta'}</p>
+                  <RequestTypeLabel
+                    label={ticket.requestType ?? 'Richiesta'}
+                    className="max-w-full"
+                    textClassName="text-sm font-medium text-[#323130]"
+                    lineClassName="h-0.5"
+                  />
+                  <p className="mt-1 truncate text-xs text-[#605E5C]">{ticket.customerName}</p>
                   <p className="mt-0.5 text-xs text-[#A19F9D]">{new Date(ticket.createdAt).toLocaleDateString('it-IT')}</p>
                 </div>
                 <StatusBadge status={ticket.status} />
@@ -115,6 +123,7 @@ export function TicketListPage() {
             <thead>
               <tr className="bg-[#FAF9F8]">
                 <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Tipo richiesta</th>
+                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Cliente</th>
                 <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Data</th>
                 <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Stato</th>
               </tr>
@@ -122,7 +131,7 @@ export function TicketListPage() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="px-6 py-16 text-center text-sm text-[#605E5C]">
+                  <td colSpan={4} className="px-6 py-16 text-center text-sm text-[#605E5C]">
                     Nessun ticket trovato con i filtri selezionati.
                   </td>
                 </tr>
@@ -143,10 +152,15 @@ function TicketListRow({ ticket, index }: { ticket: Ticket; index: number }) {
   return (
     <tr className={index % 2 === 0 ? 'bg-white' : 'bg-[#FCFBFA]'}>
       <td className="px-6 py-3 align-top">
-        <Link to={`/tickets/${ticket.id}`} className="font-medium text-[#323130] hover:text-[#009B9B]">
-          {ticket.requestType ?? 'Richiesta'}
+        <Link to={`/tickets/${ticket.id}`} className="inline-block hover:opacity-80">
+          <RequestTypeLabel
+            label={ticket.requestType ?? 'Richiesta'}
+            textClassName="text-sm font-medium text-[#323130]"
+            lineClassName="h-0.5"
+          />
         </Link>
       </td>
+      <td className="px-6 py-3 align-top text-[#323130]">{ticket.customerName}</td>
       <td className="px-6 py-3 align-top text-[#605E5C]">
         {new Date(ticket.createdAt).toLocaleDateString('it-IT')}
       </td>

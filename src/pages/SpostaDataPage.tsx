@@ -2,6 +2,8 @@ import { useState, type ChangeEvent, type FormEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Search, X } from 'lucide-react'
 import { BackButton } from '@/components/ui/back-button'
+import { RequestTypeLabel } from '@/components/ui/request-type-label'
+import { getRequestTypeColor } from '@/lib/request-type'
 
 // ── Mock BC data ──────────────────────────────────────────────────────────────
 const BC_CLIENTI = [
@@ -289,25 +291,27 @@ export function SpostaDataPage() {
 
   const requestKey = pathname.split('/').pop() ?? 'sposta-data'
   const currentRequest = requestConfig[requestKey] ?? requestConfig['sposta-data']
+  const currentRequestColor = getRequestTypeColor(currentRequest.label)
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
       <div className="flex items-center gap-3 pb-4">
         <BackButton to="/request-type" className="mt-0 h-8 w-8 [&>svg]:h-3 [&>svg]:w-3" />
         <div>
-          <h1 className="text-3xl font-light text-[#323130]">Nuova richiesta</h1>
-          <div className="mt-2 flex items-center gap-2">
-            <p className="text-sm text-[#605E5C]">{currentRequest.label}</p>
-            <button
-              type="button"
-              onClick={() => setIsInfoOpen(true)}
-              className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full border border-[#009B9B] text-[8px] font-semibold leading-none text-[#009B9B] align-middle hover:bg-[#E6F5F5]"
-              aria-label="Informazioni su Sposta Data"
-            >
-              i
-            </button>
-          </div>
+        <h1 className="text-3xl font-light text-[#323130]">Nuova richiesta</h1>
+        <div className="mt-2 flex items-start gap-2">
+          <RequestTypeLabel label={currentRequest.label} />
+          <button
+            type="button"
+            onClick={() => setIsInfoOpen(true)}
+            className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full border text-[8px] font-semibold leading-none align-middle"
+            style={{ borderColor: currentRequestColor, color: currentRequestColor }}
+            aria-label="Informazioni su Sposta Data"
+          >
+            i
+          </button>
         </div>
+      </div>
       </div>
 
       <div className="mt-4 flex items-center gap-6 border-b border-[#EDEBE9] text-sm">
