@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { AlertCircle, ArrowLeft, Save, X } from 'lucide-react'
+import { AlertCircle, MoveLeft, Save, X } from 'lucide-react'
 import { StatusBadge } from '@/components/ui/badges'
 import type { Status } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
@@ -43,13 +43,13 @@ export function TicketReviewPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-4 sm:px-6 sm:py-6">
-      <div className="flex flex-col gap-4 border-b border-[#EDEBE9] pb-4 md:flex-row md:items-start md:justify-between">
-        <div className="flex items-start gap-3 sm:gap-4">
+    <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
+      <div className="flex flex-col gap-4 border-b border-[#EDEBE9] pb-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center gap-3">
           <BackButton />
           <div>
-            <p className="text-xs uppercase tracking-[0.18em] text-[#605E5C]">Nuovo documento</p>
-            <h1 className="mt-1 text-[30px] font-light text-[#323130]">Conferma ticket</h1>
+            <h1 className="text-3xl font-light text-[#323130]">Conferma ticket</h1>
+            <p className="mt-1 text-sm text-[#605E5C]">Nuovo documento</p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -58,7 +58,7 @@ export function TicketReviewPage() {
             onClick={() => navigate(-1)}
             className="flex items-center gap-1 border border-[#EDEBE9] px-4 py-2 text-sm text-[#605E5C] hover:bg-[#F3F2F1]"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <MoveLeft className="h-4 w-4" />
             Modifica
           </button>
           <button
@@ -123,7 +123,7 @@ export function TicketReviewPage() {
 function ReviewField({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-1 border-b border-dotted border-[#EDEBE9] py-2 sm:flex-row sm:items-center">
-      <span className="w-32 shrink-0 text-sm text-[#605E5C] md:w-48">{label}</span>
+      <span className="w-32 shrink-0 text-sm font-semibold text-[#201F1E] md:w-48">{label}</span>
       <span className="text-sm text-[#323130]">{value}</span>
     </div>
   )

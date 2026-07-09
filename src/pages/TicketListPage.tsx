@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { ChevronRight, Plus, Search } from 'lucide-react'
+import { MoveRight, Plus, Search } from 'lucide-react'
 import { StatusBadge } from '@/components/ui/badges'
 import { mockTickets, type Status, type Ticket } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
-import { RequestTypeLabel } from '@/components/ui/request-type-label'
+import { getRequestTypeColor } from '@/lib/request-type'
 
 const statusLabel: Record<Status, string> = {
   open: 'Aperto',
@@ -44,17 +44,16 @@ export function TicketListPage() {
     return matchSearch && matchStatus
   })
 
-  const pageTitle = statusFilter === 'open' ? 'Richieste aperte' : 'Ticket'
+  const pageTitle = 'Richieste'
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 sm:py-6">
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
       <div className="border-b border-[#EDEBE9] pb-4">
-        <p className="text-xs uppercase tracking-[0.18em] text-[#605E5C]">Dashboard / Ticket</p>
-        <div className="mt-2 flex items-end justify-between gap-4">
-          <div className="flex items-start gap-3 sm:gap-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
             <BackButton />
             <div>
-              <h1 className="text-[28px] font-light text-[#323130]">{pageTitle}</h1>
+              <h1 className="text-3xl font-light text-[#323130]">{pageTitle}</h1>
               <p className="mt-1 text-sm text-[#605E5C]">{filtered.length} record visualizzati</p>
             </div>
           </div>
@@ -101,17 +100,18 @@ export function TicketListPage() {
                 className="flex cursor-pointer items-center gap-3 px-4 py-3 hover:bg-[#F3F2F1]"
               >
                 <div className="min-w-0 flex-1">
-                  <RequestTypeLabel
-                    label={ticket.requestType ?? 'Richiesta'}
-                    className="max-w-full"
-                    textClassName="text-sm font-medium text-[#323130]"
-                    lineClassName="h-0.5"
-                  />
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="h-2 w-2 shrink-0 rounded-[2px]"
+                      style={{ backgroundColor: getRequestTypeColor(ticket.requestType, '#A19F9D') }}
+                    />
+                    <p className="truncate text-sm font-medium text-[#323130]">{ticket.requestType ?? 'Richiesta'}</p>
+                  </div>
                   <p className="mt-1 truncate text-xs text-[#605E5C]">{ticket.customerName}</p>
                   <p className="mt-0.5 text-xs text-[#A19F9D]">{new Date(ticket.createdAt).toLocaleDateString('it-IT')}</p>
                 </div>
                 <StatusBadge status={ticket.status} />
-                <ChevronRight className="h-4 w-4 shrink-0 text-[#A19F9D]" />
+                <MoveRight className="h-4 w-4 shrink-0 text-[#A19F9D]" />
               </div>
             ))
           )}
@@ -152,12 +152,12 @@ function TicketListRow({ ticket, index }: { ticket: Ticket; index: number }) {
   return (
     <tr className={index % 2 === 0 ? 'bg-white' : 'bg-[#FCFBFA]'}>
       <td className="px-6 py-3 align-top">
-        <Link to={`/tickets/${ticket.id}`} className="inline-block hover:opacity-80">
-          <RequestTypeLabel
-            label={ticket.requestType ?? 'Richiesta'}
-            textClassName="text-sm font-medium text-[#323130]"
-            lineClassName="h-0.5"
+        <Link to={`/tickets/${ticket.id}`} className="inline-flex items-center gap-2 font-medium text-[#323130] hover:text-[#009B9B]">
+          <span
+            className="h-2 w-2 shrink-0 rounded-[2px]"
+            style={{ backgroundColor: getRequestTypeColor(ticket.requestType, '#A19F9D') }}
           />
+          <span>{ticket.requestType ?? 'Richiesta'}</span>
         </Link>
       </td>
       <td className="px-6 py-3 align-top text-[#323130]">{ticket.customerName}</td>

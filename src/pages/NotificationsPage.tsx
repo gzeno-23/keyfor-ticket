@@ -1,36 +1,52 @@
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Bell } from 'lucide-react'
 import { BackButton } from '@/components/ui/back-button'
-
-const notifications = [
-  { id: 'N-001', text: 'Nuova richiesta ricevuta: Sposta Data', time: 'Oggi, 09:15' },
-  { id: 'N-002', text: 'Richiesta KFT-002 aggiornata', time: 'Ieri, 17:42' },
-  { id: 'N-003', text: 'Richiesta KFT-005 chiusa', time: 'Ieri, 11:08' },
-]
+import { useNotifications } from '@/lib/notifications'
 
 export function NotificationsPage() {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { notifications, unreadCount } = useNotifications()
+  const fromPathFromState = (location.state as { from?: string } | undefined)?.from
+  const fromPathFromQuery = new URLSearchParams(location.search).get('from') ?? undefined
+  const fromPath = fromPathFromState ?? fromPathFromQuery ?? '/hub'
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
       <div className="border-b border-[#EDEBE9] pb-4">
-        <div className="flex items-start gap-3 sm:gap-4">
-          <BackButton />
+        <div className="flex items-center gap-3">
+          <BackButton to={fromPath} />
           <div>
-            <h1 className="text-[28px] font-light text-[#323130]">Notifiche</h1>
-            <p className="mt-1 text-sm text-[#605E5C]">{notifications.length} notifiche</p>
+            <h1 className="text-3xl font-light text-[#323130]">Notifiche</h1>
+            <p className="mt-1 text-sm text-[#605E5C]">
+              {notifications.length} notifiche · {unreadCount} non lette
+            </p>
           </div>
         </div>
       </div>
 
       <div className="mt-4 rounded-2xl border border-[#EDEBE9] bg-white">
         {notifications.map((item) => (
-          <div key={item.id} className="flex items-start gap-3 border-b border-[#EDEBE9] px-4 py-4 last:border-b-0">
-            <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#E5F4F4]">
-              <Bell className="h-4 w-4 text-[#009B9B]" />
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => navigate(`/notifications/${item.id}`, { state: { from: fromPath } })}
+            className={`w-full border-b border-[#EDEBE9] px-4 py-4 text-left last:border-b-0 hover:bg-[#FAF9F8] ${
+              item.unread ? 'bg-[#FDFDFC]' : ''
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#E5F4F4]">
+                <Bell className="h-4 w-4 text-[#009B9B]" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className={`truncate text-sm ${item.unread ? 'font-semibold text-[#201F1E]' : 'text-[#323130]'}`}>{item.title}</p>
+                <p className="mt-0.5 truncate text-xs text-[#605E5C]">{item.preview}</p>
+                <p className="mt-1 text-[11px] text-[#A19F9D]">{item.time}</p>
+              </div>
+              {item.unread && <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#D83B01]" />}
             </div>
-            <div className="min-w-0">
-              <p className="text-sm text-[#323130]">{item.text}</p>
-              <p className="mt-1 text-xs text-[#605E5C]">{item.time}</p>
-            </div>
-          </div>
+          </button>
         ))}
       </div>
     </div>

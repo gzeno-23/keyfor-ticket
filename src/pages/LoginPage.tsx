@@ -1,8 +1,13 @@
 import { useNavigate } from 'react-router-dom'
-import { ArrowRight } from 'lucide-react'
+import { MoveRight } from 'lucide-react'
+import { resetNotificationsForDemo } from '@/lib/notifications'
 
 export function LoginPage() {
   const navigate = useNavigate()
+  const handleSignIn = () => {
+    resetNotificationsForDemo()
+    navigate('/hub', { replace: true })
+  }
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] flex flex-col items-center justify-center px-4">
@@ -19,11 +24,11 @@ export function LoginPage() {
 
         {/* Sign In button */}
         <button
-          onClick={() => navigate('/hub', { replace: true })}
+          onClick={handleSignIn}
           className="mt-4 flex items-center gap-3 bg-[#009B9B] hover:bg-[#007575] transition-colors text-white px-10 py-3 text-sm font-medium tracking-wide shadow"
         >
           Sign In
-          <ArrowRight className="w-4 h-4" />
+          <MoveRight className="w-4 h-4" />
         </button>
       </div>
     </div>

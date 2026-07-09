@@ -10,6 +10,7 @@ import { EditTicketPage } from '@/pages/EditTicketPage'
 import { NewTicketPage } from '@/pages/NewTicketPage'
 import { TicketReviewPage } from '@/pages/TicketReviewPage'
 import { NotificationsPage } from '@/pages/NotificationsPage'
+import { NotificationDetailPage } from '@/pages/NotificationDetailPage'
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
           <Route path="/tickets/:id" element={<TicketDetailPage />} />
           <Route path="/tickets/:id/edit" element={<EditTicketPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/notifications/:id" element={<NotificationDetailPage />} />
           <Route path="/settings" element={<div className="p-8 text-[#605E5C]">Impostazioni (coming soon)</div>} />
         </Route>
 

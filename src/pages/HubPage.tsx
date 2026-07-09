@@ -1,5 +1,7 @@
-import { useNavigate } from 'react-router-dom'
-import { Ticket, Bell, LogOut } from 'lucide-react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { Bell } from 'lucide-react'
+import { UserProfileMenu } from '@/components/layout/UserProfileMenu'
+import { resetNotificationsForDemo, useNotifications } from '@/lib/notifications'
 
 const choices = [
   {
@@ -26,35 +28,43 @@ const choices = [
 ]
 
 export function HubPage() {
+  const location = useLocation()
   const navigate = useNavigate()
+  const { unreadCount } = useNotifications()
+  const currentPath = `${location.pathname}${location.search}`
+  const handleLogout = () => {
+    resetNotificationsForDemo()
+    navigate('/login')
+  }
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] flex flex-col">
       {/* Top bar — BC dark style */}
-      <header className="bg-[#1F1F1F] px-6 py-0 h-12 flex items-center gap-3">
-        <div className="w-7 h-7 rounded-sm bg-[#00828E] flex items-center justify-center">
-          <Ticket className="w-4 h-4 text-white" />
+      <header className="bg-[#1F1F1F] pl-3 pr-6 py-0 h-14 flex items-center gap-1">
+        <div className="w-14 h-14 flex items-center justify-center shrink-0">
+          <img
+            src={`${import.meta.env.BASE_URL}login-symbol.png`}
+            alt=""
+            className="h-12 w-12 object-contain brightness-0 invert"
+          />
         </div>
-        <span className="font-semibold text-white text-sm tracking-wide">Key Ticket</span>
-        <div className="ml-auto flex items-center gap-0.5">
+        <button
+          type="button"
+          onClick={() => navigate('/hub')}
+          className="font-semibold text-white text-sm tracking-wide hover:text-white/90 transition-colors"
+        >
+          Key Ticket
+        </button>
+        <div className="ml-auto flex items-center gap-0">
           <button
             type="button"
-            onClick={() => navigate('/notifications')}
-            className="flex h-8 w-8 items-center justify-center rounded-md text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+            onClick={() => navigate('/notifications', { state: { from: currentPath } })}
+            className="relative flex h-8 w-8 items-center justify-center rounded-md text-white/80 hover:bg-white/10 hover:text-white transition-colors"
           >
             <Bell className="h-4 w-4" />
+            {unreadCount > 0 && <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[#D83B01]" />}
           </button>
-          <button
-            type="button"
-            onClick={() => navigate('/login')}
-            title="Log Out"
-            className="flex h-8 w-8 items-center justify-center rounded-md text-white/80 hover:bg-white/10 hover:text-white transition-colors"
-          >
-            <LogOut className="h-3.5 w-3.5" />
-          </button>
-          <div className="w-8 h-8 rounded-full bg-[#00828E] flex items-center justify-center text-xs font-bold text-white select-none">
-            MR
-          </div>
+          <UserProfileMenu accentColor="#00828E" onLogout={handleLogout} />
         </div>
       </header>
 
@@ -80,3 +90,5 @@ export function HubPage() {
     </div>
   )
 }
+
+

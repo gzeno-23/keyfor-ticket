@@ -5,8 +5,8 @@ import {
   PlusCircle,
   Users,
   Settings,
-  ChevronLeft,
-  ChevronRight,
+  MoveLeft,
+  MoveRight,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -52,7 +52,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           )}
           title={collapsed ? 'Espandi menu' : 'Chiudi menu'}
         >
-          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          {collapsed ? <MoveRight className="w-4 h-4" /> : <MoveLeft className="w-4 h-4" />}
         </button>
       </div>
 

@@ -29,16 +29,16 @@ export function EditTicketPage() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
       <div className="flex items-center gap-3 border-b border-[#EDEBE9] pb-4">
-        <BackButton to={`/tickets/${ticket.id}`} className="mt-0" />
+        <BackButton to={`/tickets/${ticket.id}`} />
         <div>
-          <h1 className="text-2xl font-light text-[#323130]">Modifica Ticket</h1>
+          <h1 className="text-3xl font-light text-[#323130]">Modifica Ticket</h1>
           <p className="mt-0.5 text-xs text-[#605E5C]">{ticket.id}</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
-          <label className="block text-sm font-medium text-[#323130] mb-2">Titolo</label>
+          <label className="block text-sm font-semibold text-[#201F1E] mb-2">Titolo</label>
           <input
             type="text"
             value={form.title}
@@ -48,7 +48,7 @@ export function EditTicketPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-[#323130] mb-2">Descrizione</label>
+          <label className="block text-sm font-semibold text-[#201F1E] mb-2">Descrizione</label>
           <textarea
             value={form.description}
             onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}

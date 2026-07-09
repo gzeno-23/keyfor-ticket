@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { Calendar, CheckCircle2, Edit, Tag, User, UserCheck, XCircle } from 'lucide-react'
 import { mockTickets, type Status } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
-import { RequestTypeLabel } from '@/components/ui/request-type-label'
 
 interface Comment {
   text: string
@@ -117,22 +116,12 @@ export function TicketDetailPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 sm:py-6">
-      <div className="flex flex-col gap-4 border-b border-[#EDEBE9] pb-4 md:flex-row md:items-start md:justify-between">
-        <div className="flex items-start gap-3 sm:gap-4">
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+      <div className="flex flex-col gap-4 border-b border-[#EDEBE9] pb-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center gap-3">
           <BackButton to="/tickets" />
           <div>
-            <p className="text-xs uppercase tracking-[0.18em] text-[#605E5C]">Ticket Card</p>
-            {ticket.requestType ? (
-              <RequestTypeLabel
-                label={ticket.requestType}
-                className="mt-1"
-                textClassName="text-2xl font-light text-[#323130] leading-tight md:text-[30px]"
-              />
-            ) : (
-              <h1 className="mt-1 text-2xl font-light text-[#323130] md:text-[30px]">{ticket.title}</h1>
-            )}
-            <p className="mt-1 text-xs text-[#605E5C]">{ticket.id}</p>
+            <h1 className="text-3xl font-light text-[#323130]">{ticket.requestType ?? ticket.title}</h1>
           </div>
         </div>
       </div>
@@ -140,11 +129,11 @@ export function TicketDetailPage() {
       <div className="mt-4 rounded-2xl border border-[#EDEBE9] bg-white px-4 py-3 text-sm">
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <p className="text-xs text-[#605E5C]">Segnalato da</p>
+            <p className="text-xs font-semibold text-[#201F1E]">Segnalato da</p>
             <p className="mt-0.5 text-[#323130]">{ticket.reporter}</p>
           </div>
           <div>
-            <p className="text-xs text-[#605E5C]">Data richiesta</p>
+            <p className="text-xs font-semibold text-[#201F1E]">Data richiesta</p>
             <p className="mt-0.5 text-[#323130]">{new Date(ticket.createdAt).toLocaleDateString('it-IT')}</p>
           </div>
         </div>
@@ -223,7 +212,7 @@ export function TicketDetailPage() {
               )}
 
               <div className="mt-6">
-                <label className="mb-2 block text-sm text-[#605E5C]">Nuovo commento</label>
+                <label className="mb-2 block text-sm font-semibold text-[#201F1E]">Nuovo commento</label>
                 <textarea
                   placeholder="Scrivi un commento"
                   rows={4}
@@ -390,7 +379,7 @@ export function TicketDetailPage() {
 function FieldRow({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="flex flex-col gap-1 border-b border-dotted border-[#EDEBE9] py-2 sm:flex-row sm:items-center">
-      <span className="w-32 shrink-0 text-sm text-[#605E5C] md:w-48">{label}</span>
+      <span className="w-32 shrink-0 text-sm font-semibold text-[#201F1E] md:w-48">{label}</span>
       <span className="min-w-0 text-sm text-[#323130]">{value}</span>
     </div>
   )

@@ -1,4 +1,4 @@
-import { ArrowLeft } from 'lucide-react'
+import { MoveLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 
@@ -23,11 +23,11 @@ export function BackButton({ to = -1, className }: BackButtonProps) {
       type="button"
       onClick={handleBack}
       className={cn(
-        'mt-1 flex h-10 w-10 items-center justify-center rounded-full border border-[#EDEBE9] bg-white text-[#323130] hover:bg-[#F3F2F1]',
+        'flex h-10 w-10 items-center justify-center rounded-full bg-[#DDF1F4] text-[#201F1E] hover:bg-[#CFE8EC]',
         className
       )}
     >
-      <ArrowLeft className="h-4 w-4" />
+      <MoveLeft className="h-3 w-3" />
     </button>
   )
 }

@@ -18,13 +18,13 @@ export function NewTicketPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-4 sm:px-6 sm:py-6">
-      <div className="flex flex-col gap-4 border-b border-[#EDEBE9] pb-4 md:flex-row md:items-start md:justify-between">
-        <div className="flex items-start gap-3 sm:gap-4">
+    <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
+      <div className="flex flex-col gap-4 border-b border-[#EDEBE9] pb-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center gap-3">
           <BackButton to="/tickets" />
           <div>
-            <p className="text-xs uppercase tracking-[0.18em] text-[#605E5C]">Nuovo documento</p>
-            <h1 className="mt-1 text-[30px] font-light text-[#323130]">Nuovo Ticket</h1>
+            <h1 className="text-3xl font-light text-[#323130]">Nuovo Ticket</h1>
+            <p className="mt-1 text-sm text-[#605E5C]">Nuovo documento</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -126,7 +126,7 @@ function EditField({
 }) {
   return (
     <div className="flex flex-col gap-1 border-b border-dotted border-[#EDEBE9] py-2 sm:flex-row sm:items-center">
-      <span className="w-32 shrink-0 text-sm text-[#605E5C] md:w-48">
+      <span className="w-32 shrink-0 text-sm font-semibold text-[#201F1E] md:w-48">
         {label}
         {required ? ' *' : ''}
       </span>

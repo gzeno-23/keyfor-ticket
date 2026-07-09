@@ -2,7 +2,6 @@ import { useState, type ChangeEvent, type FormEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Search, X } from 'lucide-react'
 import { BackButton } from '@/components/ui/back-button'
-import { RequestTypeLabel } from '@/components/ui/request-type-label'
 import { getRequestTypeColor } from '@/lib/request-type'
 
 // ── Mock BC data ──────────────────────────────────────────────────────────────
@@ -149,7 +148,7 @@ function LookupField({
 }) {
   return (
     <div className="flex flex-col gap-1 py-2 sm:flex-row sm:items-center">
-      <span className="w-40 shrink-0 text-sm text-[#605E5C]">{label}</span>
+      <span className="w-40 shrink-0 text-sm font-semibold text-[#201F1E]">{label}</span>
       <div className="flex min-w-0 flex-1 items-center gap-2">
         <button type="button" onClick={onOpen} className="flex-1 text-left text-sm">
           {value
@@ -175,7 +174,7 @@ function LookupField({
 function DateField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
     <div className="flex flex-col gap-1 py-2 sm:flex-row sm:items-center">
-      <span className="w-40 shrink-0 text-sm text-[#605E5C]">{label}</span>
+      <span className="w-40 shrink-0 text-sm font-semibold text-[#201F1E]">{label}</span>
       <input
         type="date"
         value={value}
@@ -296,23 +295,23 @@ export function SpostaDataPage() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
       <div className="flex items-center gap-3 pb-4">
-        <BackButton to="/request-type" className="mt-0 h-8 w-8 [&>svg]:h-3 [&>svg]:w-3" />
-        <div>
-        <h1 className="text-3xl font-light text-[#323130]">Nuova richiesta</h1>
-        <div className="mt-2 flex items-start gap-2">
-          <RequestTypeLabel label={currentRequest.label} />
-          <button
-            type="button"
-            onClick={() => setIsInfoOpen(true)}
-            className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full border text-[8px] font-semibold leading-none align-middle"
-            style={{ borderColor: currentRequestColor, color: currentRequestColor }}
-            aria-label="Informazioni su Sposta Data"
-          >
-            i
-          </button>
+        <BackButton to="/request-type" />
+          <div>
+            <h1 className="text-3xl font-light text-[#323130]">Nuova richiesta</h1>
+            <div className="mt-2 flex items-center gap-1">
+              <span className="h-2 w-2 shrink-0 rounded-[2px]" style={{ backgroundColor: currentRequestColor }} />
+              <p className="text-sm text-[#605E5C]">{currentRequest.label}</p>
+              <button
+                type="button"
+                onClick={() => setIsInfoOpen(true)}
+                className="inline-flex h-3 w-3 items-center justify-center self-center rounded-full border border-[#323130] text-[7px] font-semibold leading-none text-[#323130] translate-y-[1px]"
+                aria-label="Informazioni su Sposta Data"
+              >
+                i
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-      </div>
 
       <div className="mt-4 flex items-center gap-6 border-b border-[#EDEBE9] text-sm">
         <button
