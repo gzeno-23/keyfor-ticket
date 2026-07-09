@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, X, Check } from 'lucide-react'
+import { Search, X } from 'lucide-react'
 import { BackButton } from '@/components/ui/back-button'
 
 // ── Mock BC data ──────────────────────────────────────────────────────────────
@@ -42,14 +42,13 @@ function LookupDialog({
   onClose: () => void
 }) {
   const [query, setQuery] = useState('')
-  const [manualMode, setManualMode] = useState(false)
-  const [manualValue, setManualValue] = useState('')
+  const normalizedQuery = query.trim()
 
-  const filtered = query.trim()
+  const filtered = normalizedQuery
     ? items.filter(
         (i) =>
-          i.label.toLowerCase().includes(query.toLowerCase()) ||
-          i.codice.toLowerCase().includes(query.toLowerCase())
+          i.label.toLowerCase().includes(normalizedQuery.toLowerCase()) ||
+          i.codice.toLowerCase().includes(normalizedQuery.toLowerCase())
       )
     : items
 
@@ -64,88 +63,52 @@ function LookupDialog({
           </button>
         </div>
 
-        {!manualMode ? (
-          <>
-            {/* Search */}
-            <div className="flex items-center gap-2 border-b border-[#EDEBE9] px-4 py-2.5">
-              <Search className="h-4 w-4 shrink-0 text-[#A19F9D]" />
-              <input
-                autoFocus
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Cerca per nome o codice..."
-                className="flex-1 bg-transparent text-sm text-[#323130] outline-none placeholder:text-[#A19F9D]"
-              />
-              {query && (
-                <button type="button" onClick={() => setQuery('')}>
-                  <X className="h-3.5 w-3.5 text-[#A19F9D]" />
+        {/* Search */}
+        <div className="flex items-center gap-2 border-b border-[#EDEBE9] px-4 py-2.5">
+          <Search className="h-4 w-4 shrink-0 text-[#A19F9D]" />
+          <input
+            autoFocus
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Cerca per nome..."
+            className="flex-1 bg-transparent text-sm text-[#323130] outline-none placeholder:text-[#A19F9D]"
+          />
+          {query && (
+            <button type="button" onClick={() => setQuery('')}>
+              <X className="h-3.5 w-3.5 text-[#A19F9D]" />
+            </button>
+          )}
+        </div>
+
+        {/* List */}
+        <div className="flex-1 overflow-y-auto">
+          {filtered.length === 0 ? (
+            <div className="px-4 py-6">
+              <p className="text-center text-sm text-[#A19F9D]">Nessun risultato trovato</p>
+              {normalizedQuery && (
+                <button
+                  type="button"
+                  onClick={() => onSelect({ codice: '', label: normalizedQuery })}
+                  className="mt-3 w-full border border-[#EDEBE9] px-3 py-2 text-left text-sm text-[#009B9B] hover:bg-[#F3F2F1]"
+                >
+                  Inserisci "{normalizedQuery}"
                 </button>
               )}
             </div>
-
-            {/* Column headers */}
-            <div className="grid grid-cols-[120px_1fr] gap-3 border-b border-[#EDEBE9] bg-[#FAF9F8] px-4 py-2 text-xs font-semibold uppercase tracking-wide text-[#605E5C]">
-              <span>Codice</span>
-              <span>Descrizione</span>
-            </div>
-
-            {/* List */}
-            <div className="flex-1 overflow-y-auto">
-              {filtered.length === 0 ? (
-                <p className="px-4 py-6 text-center text-sm text-[#A19F9D]">Nessun risultato trovato</p>
-              ) : (
-                filtered.map((item) => (
-                  <button
-                    key={item.codice}
-                    type="button"
-                    onClick={() => onSelect(item)}
-                    className="grid w-full grid-cols-[120px_1fr] gap-3 border-b border-[#EDEBE9]/50 px-4 py-2.5 text-left text-sm hover:bg-[#F3F2F1]"
-                  >
-                    <span className="font-mono text-xs text-[#009B9B]">{item.codice}</span>
-                    <span className="text-[#323130]">{item.label}</span>
-                  </button>
-                ))
-              )}
+          ) : (
+            filtered.map((item) => (
               <button
+                key={item.codice}
                 type="button"
-                onClick={() => setManualMode(true)}
-                className="flex w-full items-center gap-2 border-t border-[#EDEBE9] px-4 py-3 text-left text-sm font-medium text-[#009B9B] hover:bg-[#F3F2F1]"
+                onClick={() => onSelect(item)}
+                className="w-full border-b border-[#EDEBE9]/50 px-4 py-2.5 text-left text-sm text-[#323130] hover:bg-[#F3F2F1]"
               >
-                + Altro (inserimento manuale)
+                {item.label}
               </button>
-            </div>
-          </>
-        ) : (
-          <div className="flex flex-col gap-4 p-5">
-            <p className="text-sm text-[#605E5C]">Inserisci il valore manualmente:</p>
-            <input
-              autoFocus
-              type="text"
-              value={manualValue}
-              onChange={(e) => setManualValue(e.target.value)}
-              placeholder="Inserisci qui..."
-              className="border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] outline-none focus:border-[#009B9B]"
-            />
-            <div className="flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setManualMode(false)}
-                className="border border-[#EDEBE9] px-4 py-2 text-sm text-[#605E5C] hover:bg-[#F3F2F1]"
-              >
-                Indietro
-              </button>
-              <button
-                type="button"
-                disabled={!manualValue.trim()}
-                onClick={() => onSelect({ codice: '', label: manualValue.trim() })}
-                className="flex items-center gap-2 bg-[#009B9B] px-4 py-2 text-sm font-medium text-white hover:bg-[#007575] disabled:opacity-40"
-              >
-                <Check className="h-4 w-4" /> Conferma
-              </button>
-            </div>
-          </div>
-        )}
+            ))
+          )}
+        </div>
       </div>
     </div>
   )

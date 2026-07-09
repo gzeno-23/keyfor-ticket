@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, Ticket } from 'lucide-react'
+import { ChevronRight, Ticket, Bell, LogOut } from 'lucide-react'
 import { BackButton } from '@/components/ui/back-button'
 
 const requestTypes = [
@@ -40,7 +40,22 @@ export function RequestTypePage() {
           <Ticket className="w-4 h-4 text-white" />
         </div>
         <span className="font-semibold text-white text-sm tracking-wide">Key Ticket</span>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => navigate('/notifications')}
+            className="flex h-8 w-8 items-center justify-center rounded-md text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+          >
+            <Bell className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/login')}
+            className="flex items-center gap-1 px-1.5 py-1 text-xs font-medium text-white/85 hover:text-white"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            Log Out
+          </button>
           <div className="w-8 h-8 rounded-full bg-[#009B9B] flex items-center justify-center text-xs font-bold text-white select-none">
             MR
           </div>

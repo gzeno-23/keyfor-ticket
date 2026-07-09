@@ -1,4 +1,4 @@
-import { Bell, HelpCircle, Search, Settings, Ticket, LayoutDashboard, List, PlusCircle } from 'lucide-react'
+import { Bell, Ticket, LayoutDashboard, List, PlusCircle, LogOut } from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 
@@ -46,32 +46,29 @@ export function TopNav() {
 
         <div className="flex-1" />
 
-        <div className="hidden items-center gap-0.5 md:flex">
-          {[
-            { label: 'Cerca', icon: Search, onClick: () => {} },
-            { label: 'Notifiche', icon: Bell, onClick: () => navigate('/notifications') },
-            { label: 'Impostazioni', icon: Settings, onClick: () => navigate('/settings') },
-            { label: 'Guida', icon: HelpCircle, onClick: () => {} },
-          ].map(({ label, icon: Icon, onClick }) => (
-            <button
-              key={label}
-              type="button"
-              title={label}
-              onClick={onClick}
-              className="flex h-8 w-8 items-center justify-center rounded-md text-white/60 hover:bg-white/10 hover:text-white transition-colors"
-            >
-              <Icon className="h-4 w-4" />
-            </button>
-          ))}
-
-          <div className="ml-2 w-px h-5 bg-white/20" />
-
-          <div className="ml-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#009B9B] text-xs font-semibold text-white cursor-pointer hover:bg-[#007575] transition-colors" title="Marco Rossi">
+        <div className="hidden items-center gap-1 md:flex">
+          <button
+            type="button"
+            title="Notifiche"
+            onClick={() => navigate('/notifications')}
+            className="flex h-8 w-8 items-center justify-center rounded-md text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+          >
+            <Bell className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/login')}
+            className="flex items-center gap-1 px-1.5 py-1 text-xs font-medium text-white/85 hover:text-white"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            Log Out
+          </button>
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#009B9B] text-xs font-semibold text-white cursor-pointer hover:bg-[#007575] transition-colors" title="Marco Rossi">
             MR
           </div>
         </div>
 
-        <div className="flex flex-1 items-center justify-end gap-2 md:hidden">
+        <div className="flex flex-1 items-center justify-end gap-1 md:hidden">
           <button
             type="button"
             title="Notifiche"
@@ -79,6 +76,14 @@ export function TopNav() {
             className="flex h-9 w-9 items-center justify-center rounded-md text-white/80 hover:bg-white/10 hover:text-white transition-colors"
           >
             <Bell className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/login')}
+            className="flex items-center gap-1 px-1 text-xs font-medium text-white/85"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            Log Out
           </button>
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#009B9B] text-xs font-semibold text-white shadow-sm">
             MR
