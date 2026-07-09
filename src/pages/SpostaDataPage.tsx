@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, type ChangeEvent, type FormEvent } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Search, X } from 'lucide-react'
 import { BackButton } from '@/components/ui/back-button'
 
@@ -28,6 +28,25 @@ const BC_ARTICOLI = [
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface LookupItem { codice: string; label: string }
 type DialogType = 'cliente' | 'articolo' | null
+type SpostaDataTab = 'details' | 'comments' | 'attachments'
+
+interface FileAttachment {
+  id: string
+  file: File
+  fileUrl: string
+}
+
+interface ImageAttachment {
+  id: string
+  file: File
+  previewUrl: string
+}
+
+interface NoteItem {
+  id: string
+  text: string
+  createdAt: string
+}
 
 // ── Page Dialog ───────────────────────────────────────────────────────────────
 function LookupDialog({
@@ -127,7 +146,7 @@ function LookupField({
   onClear: () => void
 }) {
   return (
-    <div className="flex flex-col gap-1 border-b border-dotted border-[#EDEBE9] py-2 sm:flex-row sm:items-center">
+    <div className="flex flex-col gap-1 py-2 sm:flex-row sm:items-center">
       <span className="w-40 shrink-0 text-sm text-[#605E5C]">{label}</span>
       <div className="flex min-w-0 flex-1 items-center gap-2">
         <button type="button" onClick={onOpen} className="flex-1 text-left text-sm">
@@ -153,7 +172,7 @@ function LookupField({
 // ── Date field ────────────────────────────────────────────────────────────────
 function DateField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
-    <div className="flex flex-col gap-1 border-b border-dotted border-[#EDEBE9] py-2 sm:flex-row sm:items-center">
+    <div className="flex flex-col gap-1 py-2 sm:flex-row sm:items-center">
       <span className="w-40 shrink-0 text-sm text-[#605E5C]">{label}</span>
       <input
         type="date"
@@ -168,9 +187,15 @@ function DateField({ label, value, onChange }: { label: string; value: string; o
 // ── Main page ─────────────────────────────────────────────────────────────────
 export function SpostaDataPage() {
   const navigate = useNavigate()
+  const { pathname } = useLocation()
   const [form, setForm] = useState({ cliente: '', articolo: '', vecchiaData: '', nuovaData: '' })
   const [openDialog, setOpenDialog] = useState<DialogType>(null)
   const [isInfoOpen, setIsInfoOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState<SpostaDataTab>('details')
+  const [attachedFiles, setAttachedFiles] = useState<FileAttachment[]>([])
+  const [attachedImages, setAttachedImages] = useState<ImageAttachment[]>([])
+  const [comments, setComments] = useState<NoteItem[]>([])
+  const [commentText, setCommentText] = useState('')
 
   const clientiItems: LookupItem[] = BC_CLIENTI.map((c) => ({ codice: c.codice, label: c.nome }))
   const articoliItems: LookupItem[] = BC_ARTICOLI.map((a) => ({ codice: a.codice, label: `${a.codice} — ${a.descrizione}` }))
@@ -185,14 +210,94 @@ export function SpostaDataPage() {
     navigate('/dashboard')
   }
 
+  const handleFileAttach = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? [])
+    if (files.length === 0) return
+    const nextFiles = files.map((file) => ({
+      id: `${file.name}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      file,
+      fileUrl: URL.createObjectURL(file),
+    }))
+    setAttachedFiles((current) => [...current, ...nextFiles])
+    event.target.value = ''
+  }
+
+  const handleImageAttach = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? [])
+    if (files.length === 0) return
+    const nextImages = files.map((file) => ({
+      id: `${file.name}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      file,
+      previewUrl: URL.createObjectURL(file),
+    }))
+    setAttachedImages((current) => [...current, ...nextImages])
+    event.target.value = ''
+  }
+
+  const handleRemoveFile = (id: string) => {
+    setAttachedFiles((current) => {
+      const fileToRemove = current.find((item) => item.id === id)
+      if (fileToRemove) URL.revokeObjectURL(fileToRemove.fileUrl)
+      return current.filter((item) => item.id !== id)
+    })
+  }
+
+  const handleRemoveImage = (id: string) => {
+    setAttachedImages((current) => {
+      const imageToRemove = current.find((item) => item.id === id)
+      if (imageToRemove) URL.revokeObjectURL(imageToRemove.previewUrl)
+      return current.filter((item) => item.id !== id)
+    })
+  }
+
+  const handleAddComment = () => {
+    const text = commentText.trim()
+    if (!text) return
+    setComments((current) => [
+      ...current,
+      {
+        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        text,
+        createdAt: new Date().toLocaleString('it-IT'),
+      },
+    ])
+    setCommentText('')
+  }
+
+  const handleDeleteComment = (id: string) => {
+    setComments((current) => current.filter((comment) => comment.id !== id))
+  }
+
+  const requestConfig: Record<string, { label: string; info: string }> = {
+    'sposta-data': {
+      label: 'Sposta Data',
+      info: 'Questa richiesta serve a modificare la data di consegna o la data di scadenza associata a cliente e articolo.',
+    },
+    'non-conformita': {
+      label: 'Non Conformità',
+      info: 'Questa richiesta serve a segnalare una non conformità relativa a prodotto, documento o consegna.',
+    },
+    sollecito: {
+      label: 'Sollecito',
+      info: 'Questa richiesta serve a inviare un sollecito per attività o documenti in attesa.',
+    },
+    'giacenza-articolo': {
+      label: 'Giacenza Articolo',
+      info: 'Questa richiesta serve a verificare disponibilità e giacenza di un articolo.',
+    },
+  }
+
+  const requestKey = pathname.split('/').pop() ?? 'sposta-data'
+  const currentRequest = requestConfig[requestKey] ?? requestConfig['sposta-data']
+
   return (
     <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
       <div className="flex items-center gap-3 pb-4">
-        <BackButton to="/request-type" className="mt-0" />
+        <BackButton to="/request-type" className="mt-0 h-8 w-8 [&>svg]:h-3 [&>svg]:w-3" />
         <div>
           <h1 className="text-3xl font-light text-[#323130]">Nuova richiesta</h1>
           <div className="mt-2 flex items-center gap-2">
-            <p className="text-sm text-[#605E5C]">Sposta Data</p>
+            <p className="text-sm text-[#605E5C]">{currentRequest.label}</p>
             <button
               type="button"
               onClick={() => setIsInfoOpen(true)}
@@ -205,34 +310,161 @@ export function SpostaDataPage() {
         </div>
       </div>
 
-      <div className="mt-4 flex items-center gap-6 text-sm">
-        <button type="button" className="px-1 py-2 text-[#009B9B]">
+      <div className="mt-4 flex items-center gap-6 border-b border-[#EDEBE9] text-sm">
+        <button
+          type="button"
+          onClick={() => setActiveTab('details')}
+          className={`border-b-2 px-1 py-3 ${
+            activeTab === 'details' ? 'border-[#009B9B] text-[#009B9B]' : 'border-transparent text-[#605E5C]'
+          }`}
+        >
           Dettagli
         </button>
-        <button type="button" className="px-1 py-2 text-[#605E5C]">
-          Allegati (0)
+        <button
+          type="button"
+          onClick={() => setActiveTab('comments')}
+          className={`border-b-2 px-1 py-3 ${
+            activeTab === 'comments' ? 'border-[#009B9B] text-[#009B9B]' : 'border-transparent text-[#605E5C]'
+          }`}
+        >
+          Commenti ({comments.length})
         </button>
-        <button type="button" className="px-1 py-2 text-[#605E5C]">
-          Note (0)
+        <button
+          type="button"
+          onClick={() => setActiveTab('attachments')}
+          className={`border-b-2 px-1 py-3 ${
+            activeTab === 'attachments' ? 'border-[#009B9B] text-[#009B9B]' : 'border-transparent text-[#605E5C]'
+          }`}
+        >
+          Allegati ({attachedFiles.length + attachedImages.length})
         </button>
       </div>
 
-      <form id="sposta-data-form" onSubmit={handleSubmit} className="mt-6 space-y-1">
-        <LookupField
-          label="Nome cliente"
-          value={form.cliente}
-          onOpen={() => setOpenDialog('cliente')}
-          onClear={() => setForm((f) => ({ ...f, cliente: '' }))}
-        />
-        <LookupField
-          label="Numero articolo"
-          value={form.articolo}
-          onOpen={() => setOpenDialog('articolo')}
-          onClear={() => setForm((f) => ({ ...f, articolo: '' }))}
-        />
-        <DateField label="Vecchia data" value={form.vecchiaData} onChange={(v) => setForm((f) => ({ ...f, vecchiaData: v }))} />
-        <DateField label="Nuova data" value={form.nuovaData} onChange={(v) => setForm((f) => ({ ...f, nuovaData: v }))} />
-      </form>
+      {activeTab === 'details' && (
+        <form id="sposta-data-form" onSubmit={handleSubmit} className="mt-6 space-y-1">
+          <LookupField
+            label="Nome cliente"
+            value={form.cliente}
+            onOpen={() => setOpenDialog('cliente')}
+            onClear={() => setForm((f) => ({ ...f, cliente: '' }))}
+          />
+          <LookupField
+            label="Numero articolo"
+            value={form.articolo}
+            onOpen={() => setOpenDialog('articolo')}
+            onClear={() => setForm((f) => ({ ...f, articolo: '' }))}
+          />
+          <DateField label="Vecchia data" value={form.vecchiaData} onChange={(v) => setForm((f) => ({ ...f, vecchiaData: v }))} />
+          <DateField label="Nuova data" value={form.nuovaData} onChange={(v) => setForm((f) => ({ ...f, nuovaData: v }))} />
+        </form>
+      )}
+
+      {activeTab === 'attachments' && (
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <div className="rounded-xl border border-[#EDEBE9] bg-white p-4">
+            <p className="text-sm font-semibold text-[#323130]">File</p>
+            <label className="mt-3 inline-flex cursor-pointer items-center rounded-md border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] hover:bg-[#F3F2F1]">
+              Inserisci file
+              <input type="file" multiple className="hidden" onChange={handleFileAttach} />
+            </label>
+            <div className="mt-3 space-y-1 text-xs text-[#605E5C]">
+              {attachedFiles.length === 0 ? (
+                <p>Nessun file allegato.</p>
+              ) : (
+                attachedFiles.map((item) => (
+                  <div key={item.id} className="flex items-center justify-between gap-3">
+                    <a
+                      href={item.fileUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="truncate text-[#323130] hover:text-[#009B9B] hover:underline"
+                    >
+                      {item.file.name}
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveFile(item.id)}
+                      className="shrink-0 text-[11px] font-medium text-[#A4262C] hover:underline"
+                    >
+                      Elimina
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-[#EDEBE9] bg-white p-4">
+            <p className="text-sm font-semibold text-[#323130]">Immagini</p>
+            <label className="mt-3 inline-flex cursor-pointer items-center rounded-md border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] hover:bg-[#F3F2F1]">
+              Inserisci immagine
+              <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageAttach} />
+            </label>
+            <div className="mt-3 space-y-1 text-xs text-[#605E5C]">
+              {attachedImages.length === 0 ? (
+                <p>Nessuna immagine allegata.</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  {attachedImages.map((image) => (
+                    <div key={image.id} className="rounded-md border border-[#EDEBE9] p-2">
+                      <img src={image.previewUrl} alt={image.file.name} className="h-20 w-full rounded object-cover" />
+                      <p className="mt-1 truncate text-[11px] text-[#323130]">{image.file.name}</p>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(image.id)}
+                        className="mt-1 text-[11px] font-medium text-[#A4262C] hover:underline"
+                      >
+                        Elimina
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'comments' && (
+        <div className="mt-6 rounded-xl border border-[#EDEBE9] bg-white p-4">
+          <p className="text-sm font-semibold text-[#323130]">Commenti</p>
+          <textarea
+            rows={4}
+            value={commentText}
+            onChange={(e) => setCommentText(e.target.value)}
+            placeholder="Scrivi un commento..."
+            className="mt-3 w-full border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] outline-none focus:border-[#009B9B]"
+          />
+          <div className="mt-3 flex justify-end">
+            <button
+              type="button"
+              onClick={handleAddComment}
+              disabled={!commentText.trim()}
+              className="bg-[#009B9B] px-4 py-2 text-sm font-medium text-white hover:bg-[#007575] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Aggiungi commento
+            </button>
+          </div>
+
+          <div className="mt-4 space-y-3">
+            {comments.length === 0 ? (
+              <p className="text-sm text-[#605E5C]">Nessun commento presente.</p>
+            ) : (
+              comments.map((comment) => (
+                <div key={comment.id} className="rounded-md border border-[#EDEBE9] px-3 py-2">
+                  <p className="text-sm text-[#323130]">{comment.text}</p>
+                  <div className="mt-1 flex items-center justify-between text-[11px] text-[#A19F9D]">
+                    <span>{comment.createdAt}</span>
+                    <button type="button" onClick={() => handleDeleteComment(comment.id)} className="text-[#A4262C] hover:underline">
+                      Elimina
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="mt-10 flex justify-end gap-3 border-t border-[#EDEBE9] pt-6">
         <button
@@ -271,9 +503,9 @@ export function SpostaDataPage() {
       {isInfoOpen && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 px-4">
           <div className="w-full max-w-md rounded-lg border border-[#EDEBE9] bg-white p-5 shadow-2xl">
-            <h3 className="text-base font-semibold text-[#323130]">Sposta Data</h3>
+            <h3 className="text-base font-semibold text-[#323130]">{currentRequest.label}</h3>
             <p className="mt-2 text-sm leading-6 text-[#605E5C]">
-              Questa richiesta serve a modificare la data di consegna o la data di scadenza associata a cliente e articolo.
+              {currentRequest.info}
             </p>
             <div className="mt-5 flex justify-end">
               <button

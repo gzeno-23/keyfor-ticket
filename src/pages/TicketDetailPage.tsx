@@ -2,7 +2,6 @@ import { useState, type ChangeEvent, type ReactNode } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Calendar, CheckCircle2, Edit, Tag, User, UserCheck, XCircle } from 'lucide-react'
 import { mockTickets, type Status } from '@/data/mock-tickets'
-import { StatusBadge } from '@/components/ui/badges'
 import { BackButton } from '@/components/ui/back-button'
 
 interface Comment {
@@ -17,6 +16,12 @@ interface ImageAttachment {
   previewUrl: string
 }
 
+interface FileAttachment {
+  id: string
+  file: File
+  fileUrl: string
+}
+
 type TicketTab = 'details' | 'comments' | 'attachments'
 
 export function TicketDetailPage() {
@@ -29,7 +34,7 @@ export function TicketDetailPage() {
   const [comments, setComments] = useState<Comment[]>([])
   const [commentText, setCommentText] = useState('')
   const [activeTab, setActiveTab] = useState<TicketTab>('details')
-  const [attachedFiles, setAttachedFiles] = useState<File[]>([])
+  const [attachedFiles, setAttachedFiles] = useState<FileAttachment[]>([])
   const [attachedImages, setAttachedImages] = useState<ImageAttachment[]>([])
 
   if (!ticket) {
@@ -73,7 +78,12 @@ export function TicketDetailPage() {
   const handleFileAttach = (event: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? [])
     if (files.length === 0) return
-    setAttachedFiles((current) => [...current, ...files])
+    const nextFiles = files.map((file) => ({
+      id: `${file.name}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      file,
+      fileUrl: URL.createObjectURL(file),
+    }))
+    setAttachedFiles((current) => [...current, ...nextFiles])
     event.target.value = ''
   }
 
@@ -89,8 +99,12 @@ export function TicketDetailPage() {
     event.target.value = ''
   }
 
-  const handleRemoveFile = (indexToRemove: number) => {
-    setAttachedFiles((current) => current.filter((_, index) => index !== indexToRemove))
+  const handleRemoveFile = (id: string) => {
+    setAttachedFiles((current) => {
+      const fileToRemove = current.find((file) => file.id === id)
+      if (fileToRemove) URL.revokeObjectURL(fileToRemove.fileUrl)
+      return current.filter((file) => file.id !== id)
+    })
   }
 
   const handleRemoveImage = (id: string) => {
@@ -155,7 +169,6 @@ export function TicketDetailPage() {
               <section>
                 <h2 className="mb-4 text-base font-semibold text-[#323130]">Generale</h2>
                 <div className="grid grid-cols-1 gap-x-8 gap-y-1 md:grid-cols-2">
-                  <FieldRow label="Stato" value={<StatusBadge status={status} />} />
                   <FieldRow label="Segnalato da" value={ticket.reporter} />
                   <FieldRow label="Data creazione" value={new Date(ticket.createdAt).toLocaleString('it-IT')} />
                   <FieldRow label="Ultimo aggiornamento" value={new Date(ticket.updatedAt).toLocaleString('it-IT')} />
@@ -240,15 +253,22 @@ export function TicketDetailPage() {
                     {attachedFiles.length === 0 ? (
                       <p>Nessun file allegato.</p>
                     ) : (
-                      attachedFiles.map((file, index) => (
-                        <div key={`${file.name}-${index}`} className="flex items-center justify-between gap-3">
+                      attachedFiles.map((file) => (
+                        <div key={file.id} className="flex items-center justify-between gap-3">
                           <div className="min-w-0">
-                            <p className="truncate text-[#323130]">{file.name}</p>
-                            <p className="text-[11px] text-[#A19F9D]">{Math.max(1, Math.round(file.size / 1024))} KB</p>
+                            <a
+                              href={file.fileUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="truncate text-[#323130] hover:text-[#009B9B] hover:underline"
+                            >
+                              {file.file.name}
+                            </a>
+                            <p className="text-[11px] text-[#A19F9D]">{Math.max(1, Math.round(file.file.size / 1024))} KB</p>
                           </div>
                           <button
                             type="button"
-                            onClick={() => handleRemoveFile(index)}
+                            onClick={() => handleRemoveFile(file.id)}
                             className="shrink-0 text-[11px] font-medium text-[#A4262C] hover:underline"
                           >
                             Elimina

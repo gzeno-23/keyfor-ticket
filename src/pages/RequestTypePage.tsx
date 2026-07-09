@@ -13,19 +13,19 @@ const requestTypes = [
     id: 'non-conformita',
     label: 'Non Conformità',
     color: '#D83B01',
-    to: '/tickets/new?type=non-conformita',
+    to: '/richieste/non-conformita',
   },
   {
     id: 'sollecito',
     label: 'Sollecito',
     color: '#FFB900',
-    to: '/tickets/new?type=sollecito',
+    to: '/richieste/sollecito',
   },
   {
     id: 'giacenza',
     label: 'Giacenza Articolo',
     color: '#0078D4',
-    to: '/tickets/new?type=giacenza',
+    to: '/richieste/giacenza-articolo',
   },
 ]
 
@@ -65,7 +65,7 @@ export function RequestTypePage() {
       {/* Content */}
       <div className="flex-1 flex flex-col px-6 py-6">
         <div className="mb-6">
-          <BackButton to="/hub" className="-mt-4 h-8 w-8" />
+          <BackButton to="/hub" className="-mt-4 h-8 w-8 [&>svg]:h-3 [&>svg]:w-3" />
           <h1 className="mt-3 text-3xl font-light text-[#323130]">Nuova richiesta</h1>
           <p className="mt-2 text-sm text-[#605E5C]">Scegli richiesta</p>
         </div>
@@ -85,7 +85,7 @@ export function RequestTypePage() {
                   className="flex items-center gap-2 text-sm font-medium flex-shrink-0"
                   style={{ color }}
                 >
-                  Seleziona <ChevronRight className="w-4 h-4" />
+                  Seleziona <ChevronRight className="w-3.5 h-3.5" />
                 </div>
               </div>
             </button>

@@ -23,6 +23,9 @@ function App() {
         {/* Pagine con TopNav */}
         <Route element={<AppLayout />}>
           <Route path="/richieste/sposta-data" element={<SpostaDataPage />} />
+          <Route path="/richieste/non-conformita" element={<SpostaDataPage />} />
+          <Route path="/richieste/sollecito" element={<SpostaDataPage />} />
+          <Route path="/richieste/giacenza-articolo" element={<SpostaDataPage />} />
           <Route path="/dashboard" element={<TicketListPage />} />
           <Route path="/tickets" element={<TicketListPage />} />
           <Route path="/tickets/new" element={<NewTicketPage />} />
