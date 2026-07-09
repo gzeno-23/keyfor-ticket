@@ -11,6 +11,12 @@ interface Comment {
   time: string
 }
 
+interface ImageAttachment {
+  id: string
+  file: File
+  previewUrl: string
+}
+
 type TicketTab = 'details' | 'comments' | 'attachments'
 
 export function TicketDetailPage() {
@@ -24,7 +30,7 @@ export function TicketDetailPage() {
   const [commentText, setCommentText] = useState('')
   const [activeTab, setActiveTab] = useState<TicketTab>('details')
   const [attachedFiles, setAttachedFiles] = useState<File[]>([])
-  const [attachedImages, setAttachedImages] = useState<File[]>([])
+  const [attachedImages, setAttachedImages] = useState<ImageAttachment[]>([])
 
   if (!ticket) {
     return (
@@ -74,8 +80,25 @@ export function TicketDetailPage() {
   const handleImageAttach = (event: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? [])
     if (files.length === 0) return
-    setAttachedImages((current) => [...current, ...files])
+    const nextImages = files.map((file) => ({
+      id: `${file.name}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      file,
+      previewUrl: URL.createObjectURL(file),
+    }))
+    setAttachedImages((current) => [...current, ...nextImages])
     event.target.value = ''
+  }
+
+  const handleRemoveFile = (indexToRemove: number) => {
+    setAttachedFiles((current) => current.filter((_, index) => index !== indexToRemove))
+  }
+
+  const handleRemoveImage = (id: string) => {
+    setAttachedImages((current) => {
+      const imageToRemove = current.find((image) => image.id === id)
+      if (imageToRemove) URL.revokeObjectURL(imageToRemove.previewUrl)
+      return current.filter((image) => image.id !== id)
+    })
   }
 
   return (
@@ -94,7 +117,7 @@ export function TicketDetailPage() {
       </div>
 
       <div className="mt-4 rounded-2xl border border-[#EDEBE9] bg-white px-4 py-3 text-sm">
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           <div>
             <p className="text-xs text-[#605E5C]">Segnalato da</p>
             <p className="mt-0.5 text-[#323130]">{ticket.reporter}</p>
@@ -102,12 +125,6 @@ export function TicketDetailPage() {
           <div>
             <p className="text-xs text-[#605E5C]">Data richiesta</p>
             <p className="mt-0.5 text-[#323130]">{new Date(ticket.createdAt).toLocaleDateString('it-IT')}</p>
-          </div>
-          <div>
-            <p className="text-xs text-[#605E5C]">Stato</p>
-            <div className="mt-1">
-              <StatusBadge status={status} />
-            </div>
           </div>
         </div>
       </div>
@@ -223,7 +240,21 @@ export function TicketDetailPage() {
                     {attachedFiles.length === 0 ? (
                       <p>Nessun file allegato.</p>
                     ) : (
-                      attachedFiles.map((file, index) => <p key={`${file.name}-${index}`}>{file.name}</p>)
+                      attachedFiles.map((file, index) => (
+                        <div key={`${file.name}-${index}`} className="flex items-center justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="truncate text-[#323130]">{file.name}</p>
+                            <p className="text-[11px] text-[#A19F9D]">{Math.max(1, Math.round(file.size / 1024))} KB</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveFile(index)}
+                            className="shrink-0 text-[11px] font-medium text-[#A4262C] hover:underline"
+                          >
+                            Elimina
+                          </button>
+                        </div>
+                      ))
                     )}
                   </div>
                 </div>
@@ -238,7 +269,25 @@ export function TicketDetailPage() {
                     {attachedImages.length === 0 ? (
                       <p>Nessuna immagine allegata.</p>
                     ) : (
-                      attachedImages.map((file, index) => <p key={`${file.name}-${index}`}>{file.name}</p>)
+                      <div className="grid grid-cols-2 gap-3">
+                        {attachedImages.map((image) => (
+                          <div key={image.id} className="rounded-md border border-[#EDEBE9] p-2">
+                            <img
+                              src={image.previewUrl}
+                              alt={image.file.name}
+                              className="h-20 w-full rounded object-cover"
+                            />
+                            <p className="mt-1 truncate text-[11px] text-[#323130]">{image.file.name}</p>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveImage(image.id)}
+                              className="mt-1 text-[11px] font-medium text-[#A4262C] hover:underline"
+                            >
+                              Elimina
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
                 </div>

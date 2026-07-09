@@ -1,24 +1,24 @@
 import { useNavigate } from 'react-router-dom'
-import { PlusCircle, Clock, Ticket, Eye, Bell, LogOut } from 'lucide-react'
+import { Ticket, Bell, LogOut } from 'lucide-react'
 
 const choices = [
   {
     id: 'new',
-    icon: PlusCircle,
+    iconSrc: `${import.meta.env.BASE_URL}hub-create.svg`,
     label: 'Crea nuova richiesta',
     color: '#009B9B',
     to: '/request-type',
   },
   {
     id: 'manage',
-    icon: Eye,
+    iconSrc: `${import.meta.env.BASE_URL}hub-view.svg`,
     label: 'Visualizza richieste aperte',
     color: '#D83B01',
     to: '/dashboard?status=open',
   },
   {
     id: 'history',
-    icon: Clock,
+    iconSrc: `${import.meta.env.BASE_URL}hub-archive.svg`,
     label: 'Storico richieste',
     color: '#FFB900',
     to: '/tickets?status=resolved',
@@ -60,19 +60,19 @@ export function HubPage() {
 
       {/* Content */}
       <div className="flex-1 flex flex-col w-full">
-        {choices.map(({ id, icon: Icon, label, color, to }) => (
+        {choices.map(({ id, iconSrc, label, color, to }) => (
           <button
             key={id}
             type="button"
             onClick={() => navigate(to)}
-            className="flex-1 w-full border-b border-white/50 transition-all duration-200 hover:brightness-95"
-            style={{ backgroundColor: `${color}1F` }}
+            className="flex-1 w-full transition-all duration-200 hover:brightness-95"
+            style={{ backgroundColor: color }}
           >
             <div className="h-full w-full flex flex-col items-center justify-center gap-4 py-6">
               <div className="w-20 h-20 rounded-full bg-white/90 flex items-center justify-center">
-                <Icon className="w-10 h-10" style={{ color }} />
+                <img src={iconSrc} alt="" className="h-10 w-10" />
               </div>
-              <p className="text-base sm:text-lg font-semibold text-[#323130]">{label}</p>
+              <p className="text-base sm:text-lg font-semibold text-white">{label}</p>
             </div>
           </button>
         ))}
