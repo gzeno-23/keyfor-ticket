@@ -48,9 +48,9 @@ export function RequestTypePage() {
       </header>
 
       {/* Content */}
-      <div className="flex-1 flex flex-col px-6 py-12">
-        <div className="mb-8">
-          <BackButton to="/hub" className="mt-0" />
+      <div className="flex-1 flex flex-col px-6 py-6">
+        <div className="mb-6">
+          <BackButton to="/hub" className="-mt-4 h-8 w-8" />
           <h1 className="mt-3 text-3xl font-light text-[#323130]">Nuova richiesta</h1>
           <p className="mt-2 text-sm text-[#605E5C]">Scegli richiesta</p>
         </div>

@@ -36,7 +36,8 @@ export function TicketListPage() {
     const matchSearch =
       search === '' ||
       ticket.title.toLowerCase().includes(search.toLowerCase()) ||
-      ticket.id.toLowerCase().includes(search.toLowerCase())
+      ticket.id.toLowerCase().includes(search.toLowerCase()) ||
+      (ticket.requestType ?? '').toLowerCase().includes(search.toLowerCase())
     const matchStatus = statusFilter === 'all' || ticket.status === statusFilter
     return matchSearch && matchStatus
   })
@@ -98,8 +99,8 @@ export function TicketListPage() {
                 className="flex cursor-pointer items-center gap-3 px-4 py-3 hover:bg-[#F3F2F1]"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-[#323130]">{ticket.title}</p>
-                  <p className="mt-0.5 text-xs text-[#A19F9D]">{ticket.id}</p>
+                  <p className="truncate text-sm font-medium text-[#323130]">{ticket.requestType ?? 'Richiesta'}</p>
+                  <p className="mt-0.5 text-xs text-[#A19F9D]">{new Date(ticket.createdAt).toLocaleDateString('it-IT')}</p>
                 </div>
                 <StatusBadge status={ticket.status} />
                 <ChevronRight className="h-4 w-4 shrink-0 text-[#A19F9D]" />
@@ -113,17 +114,15 @@ export function TicketListPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-[#FAF9F8]">
-                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">ID</th>
-                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Titolo</th>
-                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Segnalato da</th>
-                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Stato</th>
+                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Tipo richiesta</th>
                 <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Data</th>
+                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Stato</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-16 text-center text-sm text-[#605E5C]">
+                  <td colSpan={3} className="px-6 py-16 text-center text-sm text-[#605E5C]">
                     Nessun ticket trovato con i filtri selezionati.
                   </td>
                 </tr>
@@ -144,19 +143,14 @@ function TicketListRow({ ticket, index }: { ticket: Ticket; index: number }) {
   return (
     <tr className={index % 2 === 0 ? 'bg-white' : 'bg-[#FCFBFA]'}>
       <td className="px-6 py-3 align-top">
-        <Link to={`/tickets/${ticket.id}`} className="font-medium text-[#009B9B] hover:text-[#007575]">
-          {ticket.id}
+        <Link to={`/tickets/${ticket.id}`} className="font-medium text-[#323130] hover:text-[#009B9B]">
+          {ticket.requestType ?? 'Richiesta'}
         </Link>
       </td>
-      <td className="px-6 py-3 align-top text-[#323130]">
-        <div className="font-medium">{ticket.title}</div>
-        <div className="mt-1 text-xs text-[#605E5C]">{ticket.tags.join(' · ')}</div>
-      </td>
-      <td className="px-6 py-3 align-top text-[#605E5C]">{ticket.reporter}</td>
-      <td className={`px-6 py-3 align-top ${statusColor[ticket.status]}`}>{statusLabel[ticket.status]}</td>
       <td className="px-6 py-3 align-top text-[#605E5C]">
         {new Date(ticket.createdAt).toLocaleDateString('it-IT')}
       </td>
+      <td className={`px-6 py-3 align-top ${statusColor[ticket.status]}`}>{statusLabel[ticket.status]}</td>
     </tr>
   )
 }

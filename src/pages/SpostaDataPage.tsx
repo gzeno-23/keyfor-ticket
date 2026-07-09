@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, X, Check, Info } from 'lucide-react'
+import { Search, X, Check } from 'lucide-react'
 import { BackButton } from '@/components/ui/back-button'
 
 // ── Mock BC data ──────────────────────────────────────────────────────────────
@@ -207,6 +207,7 @@ export function SpostaDataPage() {
   const navigate = useNavigate()
   const [form, setForm] = useState({ cliente: '', articolo: '', vecchiaData: '', nuovaData: '' })
   const [openDialog, setOpenDialog] = useState<DialogType>(null)
+  const [isInfoOpen, setIsInfoOpen] = useState(false)
 
   const clientiItems: LookupItem[] = BC_CLIENTI.map((c) => ({ codice: c.codice, label: c.nome }))
   const articoliItems: LookupItem[] = BC_ARTICOLI.map((a) => ({ codice: a.codice, label: `${a.codice} — ${a.descrizione}` }))
@@ -223,25 +224,33 @@ export function SpostaDataPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
-      <div className="flex items-center gap-3 border-b border-[#EDEBE9] pb-4">
+      <div className="flex items-center gap-3 pb-4">
         <BackButton to="/request-type" className="mt-0" />
         <div>
-          <h1 className="text-2xl font-light text-[#323130]">Nuova richiesta</h1>
-          <div className="mt-0.5 flex items-center gap-2">
-            <p className="text-xs text-[#605E5C]">Sposta Data</p>
-            <div className="group relative">
-              <Info className="h-4 w-4 text-[#009B9B] cursor-help" />
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-[#323130] text-white text-xs px-3 py-2 rounded whitespace-nowrap z-10">
-                Sposta Data: modifica la data di consegna o scadenza di una richiesta
-              </div>
-            </div>
+          <h1 className="text-3xl font-light text-[#323130]">Nuova richiesta</h1>
+          <div className="mt-2 flex items-center gap-2">
+            <p className="text-sm text-[#605E5C]">Sposta Data</p>
+            <button
+              type="button"
+              onClick={() => setIsInfoOpen(true)}
+              className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full border border-[#009B9B] text-[8px] font-semibold leading-none text-[#009B9B] align-middle hover:bg-[#E6F5F5]"
+              aria-label="Informazioni su Sposta Data"
+            >
+              i
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="mt-4 border-b border-[#EDEBE9] text-sm">
-        <button type="button" className="border-b-2 border-[#009B9B] px-1 py-3 text-[#009B9B]">
-          Generale
+      <div className="mt-4 flex items-center gap-6 text-sm">
+        <button type="button" className="px-1 py-2 text-[#009B9B]">
+          Dettagli
+        </button>
+        <button type="button" className="px-1 py-2 text-[#605E5C]">
+          Allegati (0)
+        </button>
+        <button type="button" className="px-1 py-2 text-[#605E5C]">
+          Note (0)
         </button>
       </div>
 
@@ -294,6 +303,26 @@ export function SpostaDataPage() {
           onSelect={handleSelect('articolo')}
           onClose={() => setOpenDialog(null)}
         />
+      )}
+
+      {isInfoOpen && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 px-4">
+          <div className="w-full max-w-md rounded-lg border border-[#EDEBE9] bg-white p-5 shadow-2xl">
+            <h3 className="text-base font-semibold text-[#323130]">Sposta Data</h3>
+            <p className="mt-2 text-sm leading-6 text-[#605E5C]">
+              Questa richiesta serve a modificare la data di consegna o la data di scadenza associata a cliente e articolo.
+            </p>
+            <div className="mt-5 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setIsInfoOpen(false)}
+                className="bg-[#009B9B] px-4 py-2 text-sm font-medium text-white hover:bg-[#007575]"
+              >
+                Chiudi
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
