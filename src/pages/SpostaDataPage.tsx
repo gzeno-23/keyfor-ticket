@@ -391,7 +391,7 @@ export function SpostaDataPage() {
             </div>
           </div>
 
-        <div className="mt-4 flex items-center gap-6 border-b border-[#EDEBE9] text-sm">
+        <div className="mt-4 flex items-center gap-6 text-sm">
           <button
             type="button"
             onClick={() => setActiveTab('details')}
@@ -420,6 +420,7 @@ export function SpostaDataPage() {
             Allegati ({attachedFiles.length + attachedImages.length})
           </button>
         </div>
+        <div className="h-1 w-full bg-[#C8C6C4]" />
       </div>
 
       {activeTab === 'details' && (

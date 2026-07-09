@@ -225,7 +225,7 @@ export function RequestTypePage() {
               </div>
             </div>
 
-            <div className="mt-4 flex items-center gap-6 overflow-x-auto border-b border-[#EDEBE9] text-sm">
+            <div className="mt-4 flex items-center gap-6 overflow-x-auto text-sm">
               {requestAreaTabs.map((tab) => (
                 <button
                   key={tab.id}
@@ -239,6 +239,7 @@ export function RequestTypePage() {
                 </button>
               ))}
             </div>
+            <div className="h-1 w-full bg-[#C8C6C4]" />
           </div>
 
           <div className="mt-5 space-y-5">

@@ -144,6 +144,7 @@ export function TicketListPage() {
                   </button>
                 ))}
               </div>
+              <div className="h-1 w-full bg-[#C8C6C4]" />
             </div>
           </div>
         ) : (

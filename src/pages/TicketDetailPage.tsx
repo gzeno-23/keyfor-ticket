@@ -153,7 +153,7 @@ export function TicketDetailPage() {
           </div>
         </div>
 
-        <div className="mt-4 flex gap-4 overflow-x-auto border-b border-[#EDEBE9] text-sm">
+        <div className="mt-4 flex gap-4 overflow-x-auto text-sm">
           {[
             { id: 'details' as TicketTab, label: 'Dettagli' },
             { id: 'comments' as TicketTab, label: `Note (${comments.length})` },
@@ -172,6 +172,7 @@ export function TicketDetailPage() {
             </button>
           ))}
         </div>
+        <div className="h-1 w-full bg-[#C8C6C4]" />
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-6">
