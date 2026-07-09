@@ -6,6 +6,22 @@ import { UserProfileMenu } from '@/components/layout/UserProfileMenu'
 import { resetNotificationsForDemo, useNotifications } from '@/lib/notifications'
 
 type RequestArea = 'ordini' | 'magazzino' | 'logistica' | 'amministrazione'
+type RequestTypeId =
+  | 'sposta-data'
+  | 'non-conformita'
+  | 'sollecito'
+  | 'giacenza-articolo'
+  | 'reso-merce'
+  | 'variazione-prezzo'
+  | 'blocco-ordine'
+  | 'sblocco-ordine'
+  | 'verifica-pagamento'
+  | 'aggiornamento-anagrafica'
+  | 'richiesta-fattura'
+  | 'reclamo-trasporto'
+  | 'priorita-consegna'
+  | 'richiesta-documenti'
+  | 'cambio-vettore'
 
 const requestAreaTabs: { id: RequestArea; label: string }[] = [
   { id: 'ordini', label: 'Ordini' },
@@ -14,7 +30,7 @@ const requestAreaTabs: { id: RequestArea; label: string }[] = [
   { id: 'amministrazione', label: 'Amministrazione' },
 ]
 
-const requestTypes = [
+const requestTypes: { id: RequestTypeId; label: string; color: string; to: string }[] = [
   {
     id: 'sposta-data',
     label: 'Sposta Data',
@@ -34,18 +50,121 @@ const requestTypes = [
     to: '/richieste/sollecito',
   },
   {
-    id: 'giacenza',
+    id: 'giacenza-articolo',
     label: 'Giacenza Articolo',
     color: '#0078D4',
     to: '/richieste/giacenza-articolo',
   },
+  {
+    id: 'reso-merce',
+    label: 'Reso Merce',
+    color: '#5C2D91',
+    to: '/richieste/reso-merce',
+  },
+  {
+    id: 'variazione-prezzo',
+    label: 'Variazione Prezzo',
+    color: '#8764B8',
+    to: '/richieste/variazione-prezzo',
+  },
+  {
+    id: 'blocco-ordine',
+    label: 'Blocco Ordine',
+    color: '#D83B01',
+    to: '/richieste/blocco-ordine',
+  },
+  {
+    id: 'sblocco-ordine',
+    label: 'Sblocco Ordine',
+    color: '#498205',
+    to: '/richieste/sblocco-ordine',
+  },
+  {
+    id: 'verifica-pagamento',
+    label: 'Verifica Pagamento',
+    color: '#0078D4',
+    to: '/richieste/verifica-pagamento',
+  },
+  {
+    id: 'aggiornamento-anagrafica',
+    label: 'Aggiornamento Anagrafica',
+    color: '#00B7C3',
+    to: '/richieste/aggiornamento-anagrafica',
+  },
+  {
+    id: 'richiesta-fattura',
+    label: 'Richiesta Fattura',
+    color: '#986F0B',
+    to: '/richieste/richiesta-fattura',
+  },
+  {
+    id: 'reclamo-trasporto',
+    label: 'Reclamo Trasporto',
+    color: '#A4262C',
+    to: '/richieste/reclamo-trasporto',
+  },
+  {
+    id: 'priorita-consegna',
+    label: 'Priorità Consegna',
+    color: '#038387',
+    to: '/richieste/priorita-consegna',
+  },
+  {
+    id: 'richiesta-documenti',
+    label: 'Richiesta Documenti',
+    color: '#8764B8',
+    to: '/richieste/richiesta-documenti',
+  },
+  {
+    id: 'cambio-vettore',
+    label: 'Cambio Vettore',
+    color: '#107C10',
+    to: '/richieste/cambio-vettore',
+  },
 ]
 
-const requestTypeByArea: Record<RequestArea, string[]> = {
-  ordini: ['sposta-data', 'non-conformita', 'sollecito', 'giacenza'],
-  magazzino: ['non-conformita', 'giacenza', 'sollecito'],
-  logistica: ['sposta-data', 'sollecito', 'giacenza'],
-  amministrazione: ['non-conformita', 'sollecito'],
+const requestTypeByArea: Record<RequestArea, RequestTypeId[]> = {
+  ordini: [
+    'sposta-data',
+    'non-conformita',
+    'sollecito',
+    'giacenza-articolo',
+    'reso-merce',
+    'variazione-prezzo',
+    'blocco-ordine',
+    'sblocco-ordine',
+    'verifica-pagamento',
+    'aggiornamento-anagrafica',
+    'richiesta-fattura',
+    'reclamo-trasporto',
+    'priorita-consegna',
+    'richiesta-documenti',
+    'cambio-vettore',
+  ],
+  magazzino: [
+    'non-conformita',
+    'giacenza-articolo',
+    'sblocco-ordine',
+    'verifica-pagamento',
+    'richiesta-documenti',
+    'reso-merce',
+  ],
+  logistica: [
+    'sposta-data',
+    'sollecito',
+    'reclamo-trasporto',
+    'priorita-consegna',
+    'cambio-vettore',
+    'richiesta-documenti',
+  ],
+  amministrazione: [
+    'verifica-pagamento',
+    'aggiornamento-anagrafica',
+    'richiesta-fattura',
+    'variazione-prezzo',
+    'blocco-ordine',
+    'sblocco-ordine',
+  ],
 }
 
 export function RequestTypePage() {
@@ -62,9 +181,9 @@ export function RequestTypePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] flex flex-col">
+    <div className="h-screen overflow-hidden bg-[#F8F9FA] flex flex-col">
       {/* Top bar BC dark */}
-      <header className="bg-[#1F1F1F] pl-3 pr-6 h-14 flex items-center gap-1">
+      <header className="shrink-0 bg-[#1F1F1F] pl-3 pr-6 h-14 flex items-center gap-1">
         <div className="w-14 h-14 flex items-center justify-center shrink-0">
           <img
             src={`${import.meta.env.BASE_URL}login-symbol.png`}
@@ -93,57 +212,61 @@ export function RequestTypePage() {
       </header>
 
       {/* Content */}
-      <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 py-6 sm:px-6">
-        <div className="pb-4">
-          <div className="flex items-center gap-3">
-            <BackButton to="/hub" />
-            <div>
-              <h1 className="text-3xl font-light text-[#323130]">Nuova richiesta</h1>
-              <p className="mt-2 text-sm text-[#605E5C]">Seleziona una tipologia di richiesta</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-4 flex items-center gap-6 overflow-x-auto border-b border-[#EDEBE9] text-sm">
-          {requestAreaTabs.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveArea(tab.id)}
-              className={`shrink-0 border-b-2 px-1 py-3 ${
-                activeArea === tab.id ? 'border-[#009B9B] text-[#009B9B]' : 'border-transparent text-[#605E5C]'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="mt-5 space-y-5">
-          {filteredRequestTypes.map(({ id, label, color, to }) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => navigate(to)}
-              className="w-full bg-white border border-[#EDEBE9] hover:border-[#009B9B] hover:shadow-md transition-all duration-200"
-            >
-              <div className="h-1.5 w-full" style={{ backgroundColor: color }} />
-              <div className="flex items-center justify-between p-4">
-                <p className="text-base font-medium text-[#323130] text-left">{label}</p>
-                <div
-                  className="flex items-center gap-2 text-sm font-medium flex-shrink-0"
-                  style={{ color }}
-                >
-                  Seleziona <MoveRight className="w-3.5 h-3.5" />
+      <div className="flex-1 overflow-y-auto">
+        <div className="mx-auto flex w-full max-w-2xl flex-col px-4 pb-6 sm:px-6">
+          <div className="sticky top-0 z-20 bg-[#F8F9FA] pt-6">
+            <div className="pb-4">
+              <div className="flex items-center gap-3">
+                <BackButton to="/hub" />
+                <div>
+                  <h1 className="text-3xl font-light text-[#323130]">Nuova richiesta</h1>
+                  <p className="mt-2 text-sm text-[#605E5C]">Seleziona una tipologia di richiesta</p>
                 </div>
               </div>
-            </button>
-          ))}
-          {filteredRequestTypes.length === 0 && (
-            <div className="rounded-xl border border-[#EDEBE9] bg-white p-4 text-sm text-[#605E5C]">
-              Nessuna tipologia disponibile in questa area.
             </div>
-          )}
+
+            <div className="mt-4 flex items-center gap-6 overflow-x-auto border-b border-[#EDEBE9] text-sm">
+              {requestAreaTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveArea(tab.id)}
+                  className={`shrink-0 border-b-2 px-1 py-3 ${
+                    activeArea === tab.id ? 'border-[#009B9B] text-[#009B9B]' : 'border-transparent text-[#605E5C]'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-5 space-y-5">
+            {filteredRequestTypes.map(({ id, label, color, to }) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => navigate(to)}
+                className="w-full bg-white border border-[#EDEBE9] hover:border-[#009B9B] hover:shadow-md transition-all duration-200"
+              >
+                <div className="h-1.5 w-full" style={{ backgroundColor: color }} />
+                <div className="flex items-center justify-between p-4">
+                  <p className="text-base font-medium text-[#323130] text-left">{label}</p>
+                  <div
+                    className="flex items-center gap-2 text-sm font-medium flex-shrink-0"
+                    style={{ color }}
+                  >
+                    Seleziona <MoveRight className="w-3.5 h-3.5" />
+                  </div>
+                </div>
+              </button>
+            ))}
+            {filteredRequestTypes.length === 0 && (
+              <div className="rounded-xl border border-[#EDEBE9] bg-white p-4 text-sm text-[#605E5C]">
+                Nessuna tipologia disponibile in questa area.
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -14,7 +14,7 @@ export function TopNav() {
   }
 
   return (
-    <header className="bg-[#1F1F1F] pl-3 pr-6 h-14 flex items-center gap-1">
+    <header className="sticky top-0 z-40 bg-[#1F1F1F] pl-3 pr-6 h-14 flex items-center gap-1">
       <div className="w-14 h-14 flex items-center justify-center shrink-0">
         <img
           src={`${import.meta.env.BASE_URL}login-symbol.png`}
@@ -44,4 +44,3 @@ export function TopNav() {
     </header>
   )
 }
-

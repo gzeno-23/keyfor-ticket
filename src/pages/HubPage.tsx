@@ -16,14 +16,14 @@ const choices = [
     iconSrc: `${import.meta.env.BASE_URL}hub-view.svg`,
     label: 'Visualizza richieste aperte',
     color: '#FFB900',
-    to: '/dashboard?status=open',
+    to: '/tickets?status=open',
   },
   {
     id: 'history',
     iconSrc: `${import.meta.env.BASE_URL}hub-archive.svg`,
     label: 'Storico richieste',
     color: '#D8453C',
-    to: '/tickets?status=resolved',
+    to: '/tickets?status=closed',
   },
 ]
 

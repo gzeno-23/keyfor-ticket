@@ -117,59 +117,61 @@ export function TicketDetailPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
-      <div className="flex flex-col gap-4 border-b border-[#EDEBE9] pb-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-3">
-          <BackButton to="/tickets" />
-          <div>
-            <h1 className="text-3xl font-light text-[#323130]">{ticket.requestType ?? ticket.title}</h1>
+    <div className="mx-auto max-w-6xl px-4 pb-6 sm:px-6">
+      <div className="sticky top-14 z-20 bg-[#F8F9FA] pt-6">
+        <div className="flex flex-col gap-4 border-b border-[#EDEBE9] pb-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-3">
+            <BackButton to="/tickets" />
+            <div>
+              <h1 className="text-3xl font-light text-[#323130]">{ticket.requestType ?? ticket.title}</h1>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="mt-4 rounded-2xl border border-[#EDEBE9] bg-white px-4 py-3 text-sm">
-        <div className="grid gap-x-8 gap-y-2 sm:grid-cols-2">
-          <div className="flex items-center gap-2">
-            <p className="text-xs font-semibold text-[#201F1E]">Numero richiesta</p>
-            <p className="text-[#323130]">{ticket.id}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <p className="text-xs font-semibold text-[#201F1E]">Segnalato da</p>
-            <p className="text-[#323130]">{ticket.reporter}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <p className="text-xs font-semibold text-[#201F1E]">Presa in carico da</p>
-            <p className="text-[#323130]">{assignee || 'In attesa di assegnazione'}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <p className="text-xs font-semibold text-[#201F1E]">Data richiesta</p>
-            <p className="text-[#323130]">{new Date(ticket.createdAt).toLocaleDateString('it-IT')}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <p className="text-xs font-semibold text-[#201F1E]">Stato</p>
-            <StatusBadge status={status} />
+        <div className="mt-4 rounded-2xl border border-[#EDEBE9] bg-white px-4 py-3 text-sm">
+          <div className="grid gap-x-8 gap-y-2 sm:grid-cols-2">
+            <div className="flex items-center gap-2">
+              <p className="text-xs font-semibold text-[#201F1E]">Numero richiesta</p>
+              <p className="text-[#323130]">{ticket.id}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <p className="text-xs font-semibold text-[#201F1E]">Segnalato da</p>
+              <p className="text-[#323130]">{ticket.reporter}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <p className="text-xs font-semibold text-[#201F1E]">Presa in carico da</p>
+              <p className="text-[#323130]">{assignee || 'In attesa di assegnazione'}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <p className="text-xs font-semibold text-[#201F1E]">Data richiesta</p>
+              <p className="text-[#323130]">{new Date(ticket.createdAt).toLocaleDateString('it-IT')}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <p className="text-xs font-semibold text-[#201F1E]">Stato</p>
+              <StatusBadge status={status} />
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="mt-4 flex gap-4 overflow-x-auto border-b border-[#EDEBE9] text-sm">
-        {[
-          { id: 'details' as TicketTab, label: 'Dettagli' },
-          { id: 'comments' as TicketTab, label: `Commenti (${comments.length})` },
-          { id: 'attachments' as TicketTab, label: `Allegati (${attachedFiles.length + attachedImages.length})` },
-          { id: 'actions' as TicketTab, label: 'Azioni' },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => setActiveTab(tab.id)}
-            className={`border-b-2 px-1 py-3 ${
-              activeTab === tab.id ? 'border-[#009B9B] text-[#009B9B]' : 'border-transparent text-[#605E5C]'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+        <div className="mt-4 flex gap-4 overflow-x-auto border-b border-[#EDEBE9] text-sm">
+          {[
+            { id: 'details' as TicketTab, label: 'Dettagli' },
+            { id: 'comments' as TicketTab, label: `Note (${comments.length})` },
+            { id: 'attachments' as TicketTab, label: `Allegati (${attachedFiles.length + attachedImages.length})` },
+            { id: 'actions' as TicketTab, label: 'Azioni' },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`border-b-2 px-1 py-3 ${
+                activeTab === tab.id ? 'border-[#009B9B] text-[#009B9B]' : 'border-transparent text-[#605E5C]'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-6">
@@ -188,13 +190,7 @@ export function TicketDetailPage() {
 
           {activeTab === 'comments' && (
             <section>
-              <h2 className="mb-4 text-base font-semibold text-[#323130]">Commenti</h2>
-
-              {comments.length === 0 ? (
-                <div className="border-b border-dotted border-[#EDEBE9] py-6 text-sm text-[#605E5C]">
-                  Nessun commento presente.
-                </div>
-              ) : (
+              {comments.length > 0 && (
                 <div className="space-y-4">
                   {comments.map((comment, index) => (
                     <div key={`${comment.time}-${index}`} className="border-b border-dotted border-[#EDEBE9] pb-4">
@@ -208,9 +204,9 @@ export function TicketDetailPage() {
               )}
 
               <div className="mt-6">
-                <label className="mb-2 block text-sm font-semibold text-[#201F1E]">Nuovo commento</label>
+                <label className="mb-2 block text-sm font-semibold text-[#201F1E]">Nuova nota</label>
                 <textarea
-                  placeholder="Scrivi un commento"
+                  placeholder="Scrivi una nota"
                   rows={4}
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
@@ -223,7 +219,7 @@ export function TicketDetailPage() {
                     disabled={!commentText.trim()}
                     className="bg-[#009B9B] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#007575] disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    Commenta
+                    Aggiungi nota
                   </button>
                 </div>
               </div>

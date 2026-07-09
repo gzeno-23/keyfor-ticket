@@ -231,7 +231,7 @@ export function SpostaDataPage() {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
-    navigate('/dashboard')
+    navigate('/tickets?status=open')
   }
 
   const handleCancel = () => {
@@ -318,6 +318,50 @@ export function SpostaDataPage() {
       label: 'Giacenza Articolo',
       info: 'Questa richiesta serve a verificare disponibilità e giacenza di un articolo.',
     },
+    'reso-merce': {
+      label: 'Reso Merce',
+      info: 'Questa richiesta serve a gestire un reso merce con motivazione e dati logistici.',
+    },
+    'variazione-prezzo': {
+      label: 'Variazione Prezzo',
+      info: 'Questa richiesta serve a proporre o confermare una variazione prezzo su cliente o articolo.',
+    },
+    'blocco-ordine': {
+      label: 'Blocco Ordine',
+      info: 'Questa richiesta serve a bloccare un ordine in corso per verifiche amministrative o operative.',
+    },
+    'sblocco-ordine': {
+      label: 'Sblocco Ordine',
+      info: 'Questa richiesta serve a sbloccare un ordine precedentemente fermato.',
+    },
+    'verifica-pagamento': {
+      label: 'Verifica Pagamento',
+      info: 'Questa richiesta serve a verificare stato pagamento e riconciliazione contabile.',
+    },
+    'aggiornamento-anagrafica': {
+      label: 'Aggiornamento Anagrafica',
+      info: 'Questa richiesta serve ad aggiornare i dati anagrafici di cliente o contatto.',
+    },
+    'richiesta-fattura': {
+      label: 'Richiesta Fattura',
+      info: 'Questa richiesta serve a richiedere emissione, reinvio o rettifica di fattura.',
+    },
+    'reclamo-trasporto': {
+      label: 'Reclamo Trasporto',
+      info: 'Questa richiesta serve a segnalare anomalie di trasporto o consegna.',
+    },
+    'priorita-consegna': {
+      label: 'Priorità Consegna',
+      info: 'Questa richiesta serve a impostare una priorità di consegna su ordine o spedizione.',
+    },
+    'richiesta-documenti': {
+      label: 'Richiesta Documenti',
+      info: 'Questa richiesta serve a ottenere documentazione commerciale o logistica.',
+    },
+    'cambio-vettore': {
+      label: 'Cambio Vettore',
+      info: 'Questa richiesta serve a modificare il vettore assegnato alla spedizione.',
+    },
   }
 
   const requestKey = pathname.split('/').pop() ?? 'sposta-data'
@@ -326,54 +370,56 @@ export function SpostaDataPage() {
   const isDetailsComplete = Boolean(form.cliente && form.articolo && form.vecchiaData && form.nuovaData)
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
-      <div className="flex items-center gap-3 pb-4">
-        <BackButton to="/request-type" />
-          <div>
-            <h1 className="text-3xl font-light text-[#323130]">Nuova richiesta</h1>
-            <div className="mt-2 flex items-center gap-1">
-              <span className="h-2 w-2 shrink-0 rounded-[2px]" style={{ backgroundColor: currentRequestColor }} />
-              <p className="text-sm text-[#605E5C]">{currentRequest.label}</p>
-              <button
-                type="button"
-                onClick={() => setIsInfoOpen(true)}
-                className="inline-flex h-3 w-3 items-center justify-center self-center rounded-full border border-[#323130] text-[7px] font-semibold leading-none text-[#323130] translate-y-[1px]"
-                aria-label="Informazioni su Sposta Data"
-              >
-                i
-              </button>
+    <div className="mx-auto max-w-2xl px-4 pb-6 sm:px-6">
+      <div className="sticky top-14 z-20 bg-[#F8F9FA] pt-6">
+        <div className="flex items-center gap-3 pb-4">
+          <BackButton to="/request-type" />
+            <div>
+              <h1 className="text-3xl font-light text-[#323130]">Nuova richiesta</h1>
+              <div className="mt-2 flex items-center gap-1">
+                <span className="h-2 w-2 shrink-0 rounded-[2px]" style={{ backgroundColor: currentRequestColor }} />
+                <p className="text-sm text-[#605E5C]">{currentRequest.label}</p>
+                <button
+                  type="button"
+                  onClick={() => setIsInfoOpen(true)}
+                  className="inline-flex h-3 w-3 items-center justify-center self-center rounded-full border border-[#323130] text-[7px] font-semibold leading-none text-[#323130] translate-y-[1px]"
+                  aria-label="Informazioni su Sposta Data"
+                >
+                  i
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-      <div className="mt-4 flex items-center gap-6 border-b border-[#EDEBE9] text-sm">
-        <button
-          type="button"
-          onClick={() => setActiveTab('details')}
-          className={`border-b-2 px-1 py-3 ${
-            activeTab === 'details' ? 'border-[#009B9B] text-[#009B9B]' : 'border-transparent text-[#605E5C]'
-          }`}
-        >
-          Dettagli
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('comments')}
-          className={`border-b-2 px-1 py-3 ${
-            activeTab === 'comments' ? 'border-[#009B9B] text-[#009B9B]' : 'border-transparent text-[#605E5C]'
-          }`}
-        >
-          Note ({comments.length})
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('attachments')}
-          className={`border-b-2 px-1 py-3 ${
-            activeTab === 'attachments' ? 'border-[#009B9B] text-[#009B9B]' : 'border-transparent text-[#605E5C]'
-          }`}
-        >
-          Allegati ({attachedFiles.length + attachedImages.length})
-        </button>
+        <div className="mt-4 flex items-center gap-6 border-b border-[#EDEBE9] text-sm">
+          <button
+            type="button"
+            onClick={() => setActiveTab('details')}
+            className={`border-b-2 px-1 py-3 ${
+              activeTab === 'details' ? 'border-[#009B9B] text-[#009B9B]' : 'border-transparent text-[#605E5C]'
+            }`}
+          >
+            Dettagli
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('comments')}
+            className={`border-b-2 px-1 py-3 ${
+              activeTab === 'comments' ? 'border-[#009B9B] text-[#009B9B]' : 'border-transparent text-[#605E5C]'
+            }`}
+          >
+            Note ({comments.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('attachments')}
+            className={`border-b-2 px-1 py-3 ${
+              activeTab === 'attachments' ? 'border-[#009B9B] text-[#009B9B]' : 'border-transparent text-[#605E5C]'
+            }`}
+          >
+            Allegati ({attachedFiles.length + attachedImages.length})
+          </button>
+        </div>
       </div>
 
       {activeTab === 'details' && (

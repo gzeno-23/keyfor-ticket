@@ -1,8 +1,28 @@
 export type Status = 'open' | 'in_progress' | 'resolved' | 'closed'
 
+export const REQUEST_TYPES = [
+  'Sollecito',
+  'Sposta Data',
+  'Non Conformità',
+  'Giacenza Articolo',
+  'Reso Merce',
+  'Variazione Prezzo',
+  'Blocco Ordine',
+  'Sblocco Ordine',
+  'Verifica Pagamento',
+  'Aggiornamento Anagrafica',
+  'Richiesta Fattura',
+  'Reclamo Trasporto',
+  'Priorità Consegna',
+  'Richiesta Documenti',
+  'Cambio Vettore',
+] as const
+
+export type RequestType = (typeof REQUEST_TYPES)[number]
+
 export interface Ticket {
   id: string
-  requestType?: 'Sposta Data' | 'Non Conformità' | 'Sollecito' | 'Giacenza Articolo'
+  requestType?: RequestType
   customerName: string
   title: string
   description: string
@@ -14,83 +34,69 @@ export interface Ticket {
   tags: string[]
 }
 
-export const mockTickets: Ticket[] = [
-  {
-    id: 'KFT-001',
-    requestType: 'Sollecito',
-    customerName: 'Alfa Distribuzione S.r.l.',
-    title: 'Impossibile accedere al portale clienti',
-    description: 'Gli utenti riportano un errore 403 quando tentano di accedere al portale clienti dopo il recente aggiornamento.',
-    status: 'open',
-    assignee: 'Marco Rossi',
-    reporter: 'Giulia Bianchi',
-    createdAt: '2026-07-07T09:30:00Z',
-    updatedAt: '2026-07-07T11:00:00Z',
-    tags: ['accesso', 'portale', 'urgente'],
-  },
-  {
-    id: 'KFT-002',
-    requestType: 'Non Conformità',
-    customerName: 'Beta Forniture S.p.A.',
-    title: 'Esportazione report PDF non funziona',
-    description: 'Il pulsante "Esporta PDF" nella sezione report non genera il file correttamente, mostra una pagina vuota.',
-    status: 'in_progress',
-    assignee: 'Laura Conti',
-    reporter: 'Andrea Ferri',
-    createdAt: '2026-07-06T14:00:00Z',
-    updatedAt: '2026-07-07T08:45:00Z',
-    tags: ['report', 'pdf', 'export'],
-  },
-  {
-    id: 'KFT-003',
-    requestType: 'Giacenza Articolo',
-    customerName: 'Gamma Logistica S.r.l.',
-    title: 'Aggiornare logo aziendale',
-    description: 'Il logo nella navbar deve essere sostituito con la nuova versione fornita dal team marketing.',
-    status: 'open',
-    assignee: '',
-    reporter: 'Sara Mancini',
-    createdAt: '2026-07-05T10:00:00Z',
-    updatedAt: '2026-07-05T10:00:00Z',
-    tags: ['ui', 'branding'],
-  },
-  {
-    id: 'KFT-004',
-    requestType: 'Sposta Data',
-    customerName: 'Delta Commerce S.r.l.',
-    title: 'Lentezza nel caricamento della dashboard',
-    description: 'La dashboard impiega oltre 8 secondi a caricarsi. Necessaria ottimizzazione query o caching.',
-    status: 'in_progress',
-    assignee: 'Marco Rossi',
-    reporter: 'Paolo Vitale',
-    createdAt: '2026-07-04T16:30:00Z',
-    updatedAt: '2026-07-07T09:00:00Z',
-    tags: ['performance', 'dashboard'],
-  },
-  {
-    id: 'KFT-005',
-    requestType: 'Sollecito',
-    customerName: 'Epsilon Trading S.p.A.',
-    title: 'Errore invio email di notifica',
-    description: 'Le email di notifica per i nuovi ticket non vengono inviate agli assegnatari.',
-    status: 'resolved',
-    assignee: 'Laura Conti',
-    reporter: 'Marco Rossi',
-    createdAt: '2026-07-03T11:00:00Z',
-    updatedAt: '2026-07-06T15:00:00Z',
-    tags: ['email', 'notifiche'],
-  },
-  {
-    id: 'KFT-006',
-    requestType: 'Giacenza Articolo',
-    customerName: 'Zeta Solutions S.r.l.',
-    title: 'Richiesta nuova funzione: filtro per data',
-    description: 'Gli utenti richiedono la possibilità di filtrare i ticket per intervallo di date nella vista lista.',
-    status: 'closed',
-    assignee: 'Andrea Ferri',
-    reporter: 'Giulia Bianchi',
-    createdAt: '2026-06-28T09:00:00Z',
-    updatedAt: '2026-07-04T17:00:00Z',
-    tags: ['feature', 'filtri'],
-  },
+const CUSTOMERS = [
+  'Alfa Distribuzione S.r.l.',
+  'Beta Forniture S.p.A.',
+  'Gamma Logistica S.r.l.',
+  'Delta Commerce S.r.l.',
+  'Epsilon Trading S.p.A.',
+  'Zeta Solutions S.r.l.',
+  'Eta Group S.p.A.',
+  'Theta Retail S.r.l.',
+  'Iota Service S.r.l.',
+  'Kappa Industrial S.p.A.',
 ]
+
+const REPORTERS = [
+  'Giulia Bianchi',
+  'Marco Rossi',
+  'Laura Conti',
+  'Andrea Ferri',
+  'Sara Mancini',
+  'Paolo Vitale',
+]
+
+const ASSIGNEES = ['Marco Rossi', 'Laura Conti', 'Andrea Ferri', 'Sara Mancini']
+
+const TAG_POOL = ['urgente', 'cliente', 'ordine', 'spedizione', 'documenti', 'supporto', 'priorita']
+
+function buildDate(baseIndex: number, extraDays: number) {
+  const day = (baseIndex % 28) + 1 + extraDays
+  return new Date(Date.UTC(2026, 6, day, 8 + (baseIndex % 9), 10 + (baseIndex % 40), 0)).toISOString()
+}
+
+function toTag(value: string) {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .split(' ')[0]
+}
+
+function buildTicket(index: number, status: 'open' | 'closed'): Ticket {
+  const serial = String(index + 1).padStart(3, '0')
+  const requestType = REQUEST_TYPES[index % REQUEST_TYPES.length]
+  const customerName = CUSTOMERS[index % CUSTOMERS.length]
+  const reporter = REPORTERS[index % REPORTERS.length]
+  const assignee = ASSIGNEES[index % ASSIGNEES.length]
+
+  return {
+    id: `KFT-${serial}`,
+    requestType,
+    customerName,
+    title: `${requestType} #${serial}`,
+    description: `Richiesta ${requestType.toLowerCase()} per ${customerName}. Verificare priorita, informazioni cliente e completare l'azione richiesta.`,
+    status,
+    assignee,
+    reporter,
+    createdAt: buildDate(index, 0),
+    updatedAt: buildDate(index, status === 'closed' ? 2 : 1),
+    tags: [toTag(requestType), TAG_POOL[index % TAG_POOL.length], TAG_POOL[(index + 3) % TAG_POOL.length]],
+  }
+}
+
+const openTickets: Ticket[] = Array.from({ length: 50 }, (_, index) => buildTicket(index, 'open'))
+const closedTickets: Ticket[] = Array.from({ length: 100 }, (_, index) => buildTicket(index + 50, 'closed'))
+
+export const mockTickets: Ticket[] = [...openTickets, ...closedTickets]
+

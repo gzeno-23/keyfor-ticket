@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 
 const items = [
-  { to: '/dashboard', label: 'Home', icon: LayoutDashboard, end: true },
+  { to: '/tickets?status=open', label: 'Home', icon: LayoutDashboard, end: true },
   { to: '/tickets', label: 'Ticket', icon: List, end: true },
   { to: '/tickets/new', label: 'Nuovo', icon: PlusCircle, special: true },
   { to: '/settings', label: 'Impostazioni', icon: Settings },
