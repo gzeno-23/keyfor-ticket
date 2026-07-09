@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useState, type ChangeEvent, type ReactNode } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Calendar, CheckCircle2, Edit, Tag, User, UserCheck, XCircle } from 'lucide-react'
 import { mockTickets, type Status } from '@/data/mock-tickets'
@@ -23,6 +23,8 @@ export function TicketDetailPage() {
   const [comments, setComments] = useState<Comment[]>([])
   const [commentText, setCommentText] = useState('')
   const [activeTab, setActiveTab] = useState<TicketTab>('details')
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([])
+  const [attachedImages, setAttachedImages] = useState<File[]>([])
 
   if (!ticket) {
     return (
@@ -62,6 +64,20 @@ export function TicketDetailPage() {
     setCommentText('')
   }
 
+  const handleFileAttach = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? [])
+    if (files.length === 0) return
+    setAttachedFiles((current) => [...current, ...files])
+    event.target.value = ''
+  }
+
+  const handleImageAttach = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? [])
+    if (files.length === 0) return
+    setAttachedImages((current) => [...current, ...files])
+    event.target.value = ''
+  }
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 sm:py-6">
       <div className="flex flex-col gap-4 border-b border-[#EDEBE9] pb-4 md:flex-row md:items-start md:justify-between">
@@ -75,22 +91,32 @@ export function TicketDetailPage() {
             <p className="mt-1 text-xs text-[#605E5C]">{ticket.id}</p>
           </div>
         </div>
-        <div className="md:pt-1">
-          <StatusBadge status={status} />
-        </div>
       </div>
 
-      <div className="mt-4 rounded-2xl border border-[#EDEBE9] bg-white px-4 py-3 text-sm text-[#605E5C]">
-        Segnalato: <span className="text-[#323130]">{ticket.reporter}</span>
-        <span className="mx-2 hidden text-[#C8C6C4] sm:inline">|</span>
-        Data: <span className="text-[#323130]">{new Date(ticket.createdAt).toLocaleDateString('it-IT')}</span>
+      <div className="mt-4 rounded-2xl border border-[#EDEBE9] bg-white px-4 py-3 text-sm">
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div>
+            <p className="text-xs text-[#605E5C]">Segnalato da</p>
+            <p className="mt-0.5 text-[#323130]">{ticket.reporter}</p>
+          </div>
+          <div>
+            <p className="text-xs text-[#605E5C]">Data richiesta</p>
+            <p className="mt-0.5 text-[#323130]">{new Date(ticket.createdAt).toLocaleDateString('it-IT')}</p>
+          </div>
+          <div>
+            <p className="text-xs text-[#605E5C]">Stato</p>
+            <div className="mt-1">
+              <StatusBadge status={status} />
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="mt-4 flex gap-4 overflow-x-auto border-b border-[#EDEBE9] text-sm">
         {[
           { id: 'details' as TicketTab, label: 'Dettagli' },
-          { id: 'comments' as TicketTab, label: 'Commenti' },
-          { id: 'attachments' as TicketTab, label: 'Allegati (0)' },
+          { id: 'comments' as TicketTab, label: `Commenti (${comments.length})` },
+          { id: 'attachments' as TicketTab, label: `Allegati (${attachedFiles.length + attachedImages.length})` },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -105,7 +131,7 @@ export function TicketDetailPage() {
         ))}
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div className={`mt-6 grid grid-cols-1 gap-6 ${activeTab === 'details' ? 'xl:grid-cols-[minmax(0,1fr)_320px]' : ''}`}>
         <div className="space-y-8">
           {activeTab === 'details' && (
             <>
@@ -185,13 +211,43 @@ export function TicketDetailPage() {
           {activeTab === 'attachments' && (
             <section>
               <h2 className="mb-4 text-base font-semibold text-[#323130]">Allegati</h2>
-              <div className="border-b border-dotted border-[#EDEBE9] py-6 text-sm text-[#605E5C]">
-                Nessun allegato presente.
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="rounded-xl border border-[#EDEBE9] bg-white p-4">
+                  <p className="text-sm font-semibold text-[#323130]">File</p>
+                  <label className="mt-3 inline-flex cursor-pointer items-center rounded-md border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] hover:bg-[#F3F2F1]">
+                    Inserisci file
+                    <input type="file" multiple className="hidden" onChange={handleFileAttach} />
+                  </label>
+                  <div className="mt-3 space-y-1 text-xs text-[#605E5C]">
+                    {attachedFiles.length === 0 ? (
+                      <p>Nessun file allegato.</p>
+                    ) : (
+                      attachedFiles.map((file, index) => <p key={`${file.name}-${index}`}>{file.name}</p>)
+                    )}
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-[#EDEBE9] bg-white p-4">
+                  <p className="text-sm font-semibold text-[#323130]">Immagini</p>
+                  <label className="mt-3 inline-flex cursor-pointer items-center rounded-md border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] hover:bg-[#F3F2F1]">
+                    Inserisci immagine
+                    <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageAttach} />
+                  </label>
+                  <div className="mt-3 space-y-1 text-xs text-[#605E5C]">
+                    {attachedImages.length === 0 ? (
+                      <p>Nessuna immagine allegata.</p>
+                    ) : (
+                      attachedImages.map((file, index) => <p key={`${file.name}-${index}`}>{file.name}</p>)
+                    )}
+                  </div>
+                </div>
               </div>
             </section>
           )}
         </div>
 
+        {activeTab === 'details' && (
         <aside className="h-fit rounded-2xl border border-[#EDEBE9] bg-white p-4 xl:sticky xl:top-32">
           <h2 className="mb-4 text-sm font-semibold text-[#323130]">Azioni</h2>
           <div className="space-y-2">
@@ -249,6 +305,7 @@ export function TicketDetailPage() {
             </div>
           </div>
         </aside>
+        )}
       </div>
     </div>
   )
