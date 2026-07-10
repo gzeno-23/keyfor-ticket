@@ -77,8 +77,12 @@ function LookupDialog({
     : items
 
   return (
-    <div className="fixed inset-0 z-50 flex min-h-[100dvh] items-center justify-center bg-black/40 overscroll-contain" onClick={onClose}>
-      <div className="relative mx-4 flex w-full max-w-lg flex-col bg-white shadow-2xl" style={{ maxHeight: '80dvh' }} onClick={(event) => event.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex min-h-[100dvh] items-start justify-center bg-black/40 px-4 pt-20 overscroll-contain sm:pt-24" onClick={onClose}>
+      <div
+        className="relative flex w-full max-w-lg flex-col bg-white shadow-2xl"
+        style={{ maxHeight: 'calc(100dvh - 6rem)' }}
+        onClick={(event) => event.stopPropagation()}
+      >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[#EDEBE9] px-5 py-3">
           <h2 className="text-sm font-semibold text-[#323130]">{title}</h2>
@@ -91,7 +95,6 @@ function LookupDialog({
         <div className="flex items-center gap-2 border-b border-[#EDEBE9] px-4 py-2.5">
           <Search className="h-4 w-4 shrink-0 text-[#A19F9D]" />
           <input
-            autoFocus
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
