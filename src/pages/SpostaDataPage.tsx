@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Search, X } from 'lucide-react'
 import { BackButton } from '@/components/ui/back-button'
 import { CancelConfirmDialog } from '@/components/ui/CancelConfirmDialog'
+import { handleHorizontalWheelScroll } from '@/lib/horizontal-wheel-scroll'
 import { getRequestTypeColor } from '@/lib/request-type'
 import { useBodyScrollLock } from '@/lib/use-body-scroll-lock'
 
@@ -394,7 +395,7 @@ export function SpostaDataPage() {
             </div>
           </div>
 
-        <div className="no-scrollbar mt-4 flex items-center gap-6 overflow-x-auto text-sm">
+        <div onWheel={handleHorizontalWheelScroll} className="no-scrollbar mt-4 flex items-center gap-6 overflow-x-auto text-sm">
           <button
             type="button"
             onClick={() => setActiveTab('details')}
@@ -423,10 +424,12 @@ export function SpostaDataPage() {
             Allegati ({attachedFiles.length + attachedImages.length})
           </button>
         </div>
+        <div className="h-px w-full bg-[#EDEBE9]" />
+        <div className="h-6 w-full bg-[#F8F9FA]" />
       </div>
 
       {activeTab === 'details' && (
-        <form id="sposta-data-form" onSubmit={handleSubmit} className="mt-6 space-y-1">
+        <form id="sposta-data-form" onSubmit={handleSubmit} className="mt-0 space-y-1">
           <LookupField
             name="cliente"
             label="Nome cliente"
@@ -449,7 +452,7 @@ export function SpostaDataPage() {
       )}
 
       {activeTab === 'attachments' && (
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
+        <div className="mt-0 grid gap-4 md:grid-cols-2">
           <div className="rounded-xl border border-[#EDEBE9] bg-white p-4">
             <p className="text-sm font-semibold text-[#323130]">Immagini</p>
             <label className="mt-3 inline-flex cursor-pointer items-center rounded-md border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] hover:bg-[#F3F2F1]">
@@ -515,7 +518,7 @@ export function SpostaDataPage() {
       )}
 
       {activeTab === 'comments' && (
-        <div className="mt-6 rounded-xl border border-[#EDEBE9] bg-white p-4">
+        <div className="mt-0 rounded-xl border border-[#EDEBE9] bg-white p-4">
           <textarea
             rows={4}
             value={commentText}

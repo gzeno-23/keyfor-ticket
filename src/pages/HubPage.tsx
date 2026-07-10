@@ -75,7 +75,7 @@ export function HubPage() {
             key={id}
             type="button"
             onClick={() => navigate(to)}
-            className="flex-1 w-full transition-all duration-200 hover:brightness-95"
+            className="w-full transition-all duration-200 hover:brightness-95 min-h-[180px] md:min-h-[260px]"
             style={{ backgroundColor: color }}
           >
             <div className="h-full w-full flex flex-col items-center justify-center gap-4 py-6">

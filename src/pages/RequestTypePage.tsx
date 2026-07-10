@@ -4,6 +4,7 @@ import { MoveRight, Bell } from 'lucide-react'
 import { BackButton } from '@/components/ui/back-button'
 import { UserProfileMenu } from '@/components/layout/UserProfileMenu'
 import { resetNotificationsForDemo, useNotifications } from '@/lib/notifications'
+import { handleHorizontalWheelScroll } from '@/lib/horizontal-wheel-scroll'
 
 type RequestArea = 'ordini' | 'magazzino' | 'logistica' | 'amministrazione'
 type RequestTypeId =
@@ -225,7 +226,7 @@ export function RequestTypePage() {
               </div>
             </div>
 
-            <div className="no-scrollbar mt-4 flex items-center gap-6 overflow-x-auto text-sm">
+            <div onWheel={handleHorizontalWheelScroll} className="no-scrollbar mt-4 flex items-center gap-6 overflow-x-auto text-sm">
               {requestAreaTabs.map((tab) => (
                 <button
                   key={tab.id}
@@ -239,9 +240,11 @@ export function RequestTypePage() {
                 </button>
               ))}
             </div>
+            <div className="h-px w-full bg-[#EDEBE9]" />
+            <div className="h-5 w-full bg-[#F8F9FA]" />
           </div>
 
-          <div className="mt-5 space-y-5">
+          <div className="mt-0 space-y-5">
             {filteredRequestTypes.map(({ id, label, color, to }) => (
               <button
                 key={id}

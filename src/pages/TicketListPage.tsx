@@ -5,6 +5,7 @@ import { StatusBadge } from '@/components/ui/badges'
 import { mockTickets, type Status, type Ticket } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
 import { getRequestTypeColor } from '@/lib/request-type'
+import { handleHorizontalWheelScroll } from '@/lib/horizontal-wheel-scroll'
 
 type RequestTypeFilter =
   | 'all'
@@ -130,7 +131,7 @@ export function TicketListPage() {
         {isSpecialLayout ? (
           <div className="mt-4 px-1">
             <div className="relative">
-              <div className="no-scrollbar flex items-center gap-6 overflow-x-auto text-sm">
+              <div onWheel={handleHorizontalWheelScroll} className="no-scrollbar flex items-center gap-6 overflow-x-auto text-sm">
                 {requestTypeTabs.map((tab) => (
                   <button
                     key={tab.id}
@@ -145,6 +146,8 @@ export function TicketListPage() {
                 ))}
               </div>
             </div>
+            <div className="h-px w-full bg-[#EDEBE9]" />
+            <div className="h-4 w-full bg-[#F8F9FA]" />
           </div>
         ) : (
           <div className="mt-4 rounded-2xl border border-[#EDEBE9] bg-white px-4 py-3 sm:px-6">
@@ -198,7 +201,7 @@ export function TicketListPage() {
         </div>
       )}
 
-      <div className="mt-4 rounded-2xl border border-[#EDEBE9] bg-white">
+      <div className="mt-0 rounded-2xl border border-[#EDEBE9] bg-white">
         {/* Mobile list */}
         <div className="divide-y divide-[#EDEBE9] md:hidden">
           {filtered.length === 0 ? (

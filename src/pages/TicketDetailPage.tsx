@@ -1,9 +1,10 @@
 import { useState, type ChangeEvent, type ReactNode } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { CheckCircle2, Edit, UserCheck, XCircle } from 'lucide-react'
+import { CheckCircle2, Edit, Send, UserCheck, XCircle } from 'lucide-react'
 import { mockTickets, type Status } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
 import { StatusBadge } from '@/components/ui/badges'
+import { handleHorizontalWheelScroll } from '@/lib/horizontal-wheel-scroll'
 
 interface Comment {
   text: string
@@ -60,6 +61,10 @@ export function TicketDetailPage() {
 
   const handleClose = () => {
     setStatus('closed')
+  }
+
+  const handleForward = () => {
+    navigate('/team')
   }
 
   const handleComment = () => {
@@ -153,7 +158,7 @@ export function TicketDetailPage() {
           </div>
         </div>
 
-        <div className="no-scrollbar mt-4 flex gap-4 overflow-x-auto text-sm">
+        <div onWheel={handleHorizontalWheelScroll} className="no-scrollbar mt-4 flex gap-4 overflow-x-auto text-sm">
           {[
             { id: 'details' as TicketTab, label: 'Dettagli' },
             { id: 'comments' as TicketTab, label: `Note (${comments.length})` },
@@ -172,9 +177,11 @@ export function TicketDetailPage() {
             </button>
           ))}
         </div>
+        <div className="h-px w-full bg-[#EDEBE9]" />
+        <div className="h-6 w-full bg-[#F8F9FA]" />
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-6">
+      <div className="mt-0 grid grid-cols-1 gap-6">
         <div className="space-y-8">
           {activeTab === 'details' && (
             <>
@@ -325,6 +332,14 @@ export function TicketDetailPage() {
                 >
                   <UserCheck className="h-4 w-4 text-[#009B9B]" />
                   Prendi in carico
+                </button>
+                <button
+                  type="button"
+                  onClick={handleForward}
+                  className="flex w-full items-center gap-2 border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] hover:bg-[#F3F2F1]"
+                >
+                  <Send className="h-4 w-4 text-[#009B9B]" />
+                  Inoltra
                 </button>
                 <button
                   type="button"
