@@ -20,3 +20,11 @@ html {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* Desktop zoom for consistent UI scale */
+@media (min-width: 1024px) {
+  html {
+    zoom: 125%;
+  }
+}
+
