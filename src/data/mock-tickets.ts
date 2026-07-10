@@ -73,7 +73,7 @@ function toTag(value: string) {
     .split(' ')[0]
 }
 
-function buildTicket(index: number, status: 'open' | 'closed'): Ticket {
+function buildTicket(index: number, status: 'open' | 'in_progress' | 'closed'): Ticket {
   const serial = String(index + 1).padStart(3, '0')
   const requestType = REQUEST_TYPES[index % REQUEST_TYPES.length]
   const customerName = CUSTOMERS[index % CUSTOMERS.length]
@@ -95,8 +95,9 @@ function buildTicket(index: number, status: 'open' | 'closed'): Ticket {
   }
 }
 
-const openTickets: Ticket[] = Array.from({ length: 50 }, (_, index) => buildTicket(index, 'open'))
+const openTickets: Ticket[] = Array.from({ length: 50 }, (_, index) =>
+  buildTicket(index, index % 3 === 0 ? 'in_progress' : 'open')
+)
 const closedTickets: Ticket[] = Array.from({ length: 100 }, (_, index) => buildTicket(index + 50, 'closed'))
 
 export const mockTickets: Ticket[] = [...openTickets, ...closedTickets]
-

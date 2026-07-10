@@ -6,6 +6,7 @@ import { mockTickets, type Status, type Ticket } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
 import { getRequestTypeColor } from '@/lib/request-type'
 import { handleHorizontalMouseDragScroll, handleHorizontalWheelScroll } from '@/lib/horizontal-wheel-scroll'
+import { TICKET_LIST_COLUMN_LABELS, TICKET_LIST_COLUMN_ORDER, useTicketListCustomization, type TicketListColumnKey } from '@/lib/ticket-list-customization'
 
 type RequestTypeFilter =
   | 'all'
@@ -69,8 +70,17 @@ function normalizeText(value: string) {
     .replace(/[\u0300-\u036f]/g, '')
 }
 
+const specialColumnWidths: Record<TicketListColumnKey, string> = {
+  requestType: '1fr',
+  assignee: '220px',
+  customerName: '1fr',
+  createdAt: '140px',
+  status: '120px',
+}
+
 export function TicketListPage() {
   const navigate = useNavigate()
+  const { visibleColumns, groupingMode } = useTicketListCustomization()
   const [searchParams, setSearchParams] = useSearchParams()
   const [search, setSearch] = useState(searchParams.get('q') ?? '')
   const statusFilter = (searchParams.get('status') as Status | 'all') ?? 'all'
@@ -99,7 +109,9 @@ export function TicketListPage() {
       ticket.id.toLowerCase().includes(search.toLowerCase()) ||
       ticket.customerName.toLowerCase().includes(search.toLowerCase()) ||
       (ticket.requestType ?? '').toLowerCase().includes(search.toLowerCase())
-    const matchStatus = statusFilter === 'all' || ticket.status === statusFilter
+    const matchStatus =
+      statusFilter === 'all' ||
+      (statusFilter === 'open' ? ticket.status === 'open' || ticket.status === 'in_progress' : ticket.status === statusFilter)
     return matchSearch && matchStatus && matchRequestType
   })
 
@@ -110,6 +122,11 @@ export function TicketListPage() {
       : statusFilter === 'closed'
         ? 'Seleziona una richiesta chiusa per visualizzarla'
         : ''
+  const activeColumns = TICKET_LIST_COLUMN_ORDER.filter((columnKey) => visibleColumns[columnKey])
+  const effectiveGroupingMode = requestTypeFilter !== 'all' ? groupingMode : 'none'
+  const specialColumns = getSpecialColumnsForGrouping(activeColumns, effectiveGroupingMode)
+  const specialGridTemplateColumns = specialColumns.map((columnKey) => specialColumnWidths[columnKey]).join(' ')
+  const groupedSpecialTickets = groupTicketsForSpecialLayout(filtered, effectiveGroupingMode)
 
   return (
     <div className="mx-auto max-w-6xl px-4 pb-6 sm:px-6">
@@ -181,12 +198,12 @@ export function TicketListPage() {
         {/* Desktop table header - inside sticky area */}
         {isSpecialLayout && (
           <div className="mt-0 hidden rounded-t-2xl border border-b-0 border-[#EDEBE9] bg-[#FAF9F8] md:block">
-            <div className="grid grid-cols-[1fr_220px_1fr_140px_120px] px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">
-              <span>Tipo richiesta</span>
-              <span className="text-center">Presa in carico</span>
-              <span>Cliente</span>
-              <span>Data</span>
-              <span>Stato</span>
+            <div className="grid px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]" style={{ gridTemplateColumns: specialGridTemplateColumns }}>
+              {specialColumns.map((columnKey) => (
+                <span key={columnKey} className={columnKey === 'assignee' ? 'text-center' : ''}>
+                  {TICKET_LIST_COLUMN_LABELS[columnKey]}
+                </span>
+              ))}
             </div>
           </div>
         )}
@@ -238,7 +255,9 @@ export function TicketListPage() {
                       className="h-2 w-2 shrink-0 rounded-[2px]"
                       style={{ backgroundColor: getRequestTypeColor(ticket.requestType, '#A19F9D') }}
                     />
-                    <p className="truncate text-sm font-medium text-[#323130]">{ticket.requestType ?? 'Richiesta'}</p>
+                    <p className="truncate text-sm font-medium text-[#323130]">
+                      {getMobilePrimaryLabel(ticket, effectiveGroupingMode)}
+                    </p>
                   </div>
                   <p className="mt-1 truncate text-xs text-[#605E5C]">{ticket.customerName}</p>
                   <p className="mt-0.5 text-xs text-[#A19F9D]">{new Date(ticket.createdAt).toLocaleDateString('it-IT')}</p>
@@ -260,24 +279,23 @@ export function TicketListPage() {
                 Nessun ticket trovato con i filtri selezionati.
               </div>
             ) : (
-              filtered.map((ticket, index) => (
-                <Link
-                  key={ticket.id}
-                  to={`/tickets/${ticket.id}`}
-                  className={`grid grid-cols-[1fr_220px_1fr_140px_120px] px-6 py-3 text-sm hover:bg-[#F3F2F1] ${index % 2 === 0 ? 'bg-white' : 'bg-[#FCFBFA]'}`}
-                >
-                  <span className="flex items-center gap-2 font-medium text-[#323130]">
-                    <span
-                      className="h-2 w-2 shrink-0 rounded-[2px]"
-                      style={{ backgroundColor: getRequestTypeColor(ticket.requestType, '#A19F9D') }}
-                    />
-                    {ticket.requestType ?? 'Richiesta'}
-                  </span>
-                  <span className="text-center text-[#605E5C]">{ticket.status !== 'open' ? ticket.assignee : ''}</span>
-                  <span className="text-[#323130]">{ticket.customerName}</span>
-                  <span className="text-[#605E5C]">{new Date(ticket.createdAt).toLocaleDateString('it-IT')}</span>
-                  <span><StatusBadge status={ticket.status} /></span>
-                </Link>
+              groupedSpecialTickets.map((group) => (
+                <div key={group.key}>
+                  {group.tickets.map((ticket, index) => (
+                    <Link
+                      key={ticket.id}
+                      to={`/tickets/${ticket.id}`}
+                      className={`grid px-6 py-3 text-sm hover:bg-[#F3F2F1] ${index % 2 === 0 ? 'bg-white' : 'bg-[#FCFBFA]'}`}
+                      style={{ gridTemplateColumns: specialGridTemplateColumns }}
+                    >
+                      {specialColumns.map((columnKey) => (
+                        <span key={`${ticket.id}-${columnKey}`} className={columnKey === 'assignee' ? 'text-center text-[#605E5C]' : ''}>
+                          {renderSpecialLayoutCell(ticket, columnKey)}
+                        </span>
+                      ))}
+                    </Link>
+                  ))}
+                </div>
               ))
             )}
           </div>
@@ -290,23 +308,28 @@ export function TicketListPage() {
           <table className="w-full text-sm">
             <thead className="bg-[#FAF9F8]">
               <tr>
-                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Tipo richiesta</th>
-                <th className="px-6 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Presa in carico</th>
-                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Cliente</th>
-                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Data</th>
-                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Stato</th>
+                {activeColumns.map((columnKey) => (
+                  <th
+                    key={columnKey}
+                    className={`px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C] ${
+                      columnKey === 'assignee' ? 'text-center' : 'text-left'
+                    }`}
+                  >
+                    {TICKET_LIST_COLUMN_LABELS[columnKey]}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-16 text-center text-sm text-[#605E5C]">
+                  <td colSpan={activeColumns.length} className="px-6 py-16 text-center text-sm text-[#605E5C]">
                     Nessun ticket trovato con i filtri selezionati.
                   </td>
                 </tr>
               ) : (
                 filtered.map((ticket, index) => (
-                  <TicketListRow key={ticket.id} ticket={ticket} index={index} />
+                  <TicketListRow key={ticket.id} ticket={ticket} index={index} activeColumns={activeColumns} />
                 ))
               )}
             </tbody>
@@ -317,26 +340,128 @@ export function TicketListPage() {
   )
 }
 
-function TicketListRow({ ticket, index }: { ticket: Ticket; index: number }) {
+function renderSpecialLayoutCell(ticket: Ticket, columnKey: TicketListColumnKey) {
+  if (columnKey === 'requestType') {
+    return (
+      <span className="flex items-center gap-2 font-medium text-[#323130]">
+        <span
+          className="h-2 w-2 shrink-0 rounded-[2px]"
+          style={{ backgroundColor: getRequestTypeColor(ticket.requestType, '#A19F9D') }}
+        />
+        {ticket.requestType ?? 'Richiesta'}
+      </span>
+    )
+  }
+  if (columnKey === 'assignee') return ticket.status !== 'open' ? ticket.assignee : ''
+  if (columnKey === 'customerName') return <span className="text-[#323130]">{ticket.customerName}</span>
+  if (columnKey === 'createdAt') return <span className="text-[#605E5C]">{new Date(ticket.createdAt).toLocaleDateString('it-IT')}</span>
+  return <StatusBadge status={ticket.status} />
+}
+
+function getGroupingLabel(ticket: Ticket, groupingMode: 'assignee' | 'requestType' | 'monthYear') {
+  if (groupingMode === 'assignee') return ticket.status !== 'open' ? ticket.assignee : 'Non assegnato'
+  if (groupingMode === 'requestType') return ticket.requestType ?? 'Richiesta'
+  return new Date(ticket.createdAt).toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })
+}
+
+function getMobilePrimaryLabel(ticket: Ticket, groupingMode: 'none' | 'assignee' | 'requestType' | 'monthYear') {
+  if (groupingMode === 'none') return ticket.requestType ?? 'Richiesta'
+  if (groupingMode === 'assignee') return ticket.status !== 'open' ? ticket.assignee : 'Non assegnato'
+  if (groupingMode === 'monthYear') {
+    return new Date(ticket.createdAt).toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })
+  }
+  return ticket.requestType ?? 'Richiesta'
+}
+
+function groupTicketsForSpecialLayout(tickets: Ticket[], groupingMode: 'none' | 'assignee' | 'requestType' | 'monthYear') {
+  if (groupingMode === 'none') {
+    return [{ key: 'all', title: '', tickets }]
+  }
+
+  const grouped = new Map<string, Ticket[]>()
+  tickets.forEach((ticket) => {
+    const label = getGroupingLabel(ticket, groupingMode)
+    const current = grouped.get(label) ?? []
+    current.push(ticket)
+    grouped.set(label, current)
+  })
+
+  return Array.from(grouped.entries()).map(([title, groupedTickets]) => ({
+    key: `${groupingMode}-${title}`,
+    title,
+    tickets: groupedTickets,
+  }))
+}
+
+function getSpecialColumnsForGrouping(
+  activeColumns: TicketListColumnKey[],
+  groupingMode: 'none' | 'assignee' | 'requestType' | 'monthYear'
+): TicketListColumnKey[] {
+  if (groupingMode === 'none') return activeColumns
+
+  const groupingColumnKey: TicketListColumnKey =
+    groupingMode === 'assignee' ? 'assignee' : groupingMode === 'monthYear' ? 'createdAt' : 'requestType'
+
+  const remainingColumns = activeColumns.filter((columnKey) => columnKey !== groupingColumnKey)
+  return [groupingColumnKey, ...remainingColumns]
+}
+
+function TicketListRow({
+  ticket,
+  index,
+  activeColumns,
+}: {
+  ticket: Ticket
+  index: number
+  activeColumns: TicketListColumnKey[]
+}) {
   return (
     <tr className={index % 2 === 0 ? 'bg-white' : 'bg-[#FCFBFA]'}>
-      <td className="px-6 py-3 align-top">
-        <Link to={`/tickets/${ticket.id}`} className="inline-flex items-center gap-2 font-medium text-[#323130] hover:text-[#009B9B]">
-          <span
-            className="h-2 w-2 shrink-0 rounded-[2px]"
-            style={{ backgroundColor: getRequestTypeColor(ticket.requestType, '#A19F9D') }}
-          />
-          <span>{ticket.requestType ?? 'Richiesta'}</span>
-        </Link>
-      </td>
-      <td className="px-6 py-3 align-top text-center text-[#605E5C]">{ticket.status !== 'open' ? ticket.assignee : ''}</td>
-      <td className="px-6 py-3 align-top text-[#323130]">{ticket.customerName}</td>
-      <td className="px-6 py-3 align-top text-[#605E5C]">
-        {new Date(ticket.createdAt).toLocaleDateString('it-IT')}
-      </td>
-      <td className="px-6 py-3 align-top">
-        <StatusBadge status={ticket.status} />
-      </td>
+      {activeColumns.map((columnKey) => {
+        if (columnKey === 'requestType') {
+          return (
+            <td key={columnKey} className="px-6 py-3 align-top">
+              <Link to={`/tickets/${ticket.id}`} className="inline-flex items-center gap-2 font-medium text-[#323130] hover:text-[#009B9B]">
+                <span
+                  className="h-2 w-2 shrink-0 rounded-[2px]"
+                  style={{ backgroundColor: getRequestTypeColor(ticket.requestType, '#A19F9D') }}
+                />
+                <span>{ticket.requestType ?? 'Richiesta'}</span>
+              </Link>
+            </td>
+          )
+        }
+
+        if (columnKey === 'assignee') {
+          return (
+            <td key={columnKey} className="px-6 py-3 align-top text-center text-[#605E5C]">
+              {ticket.status !== 'open' ? ticket.assignee : ''}
+            </td>
+          )
+        }
+
+        if (columnKey === 'customerName') {
+          return (
+            <td key={columnKey} className="px-6 py-3 align-top text-[#323130]">
+              {ticket.customerName}
+            </td>
+          )
+        }
+
+        if (columnKey === 'createdAt') {
+          return (
+            <td key={columnKey} className="px-6 py-3 align-top text-[#605E5C]">
+              {new Date(ticket.createdAt).toLocaleDateString('it-IT')}
+            </td>
+          )
+        }
+
+        return (
+          <td key={columnKey} className="px-6 py-3 align-top">
+            <StatusBadge status={ticket.status} />
+          </td>
+        )
+      })}
     </tr>
   )
 }
