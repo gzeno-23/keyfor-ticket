@@ -471,10 +471,10 @@ function applyGroupingTabFilter(
   return tickets.filter((ticket) => {
     if (groupingMode === 'assignee') {
       if (normalizeTabValue(groupingTabFilter) === normalizeText('Non assegnato')) {
-        return ticket.status === 'open' || ticket.assignee.trim() === ''
+        return ticket.status === 'open'
       }
       const assigneeLabel = ticket.assignee.trim() === '' ? 'Non assegnato' : ticket.assignee
-      return normalizeText(assigneeLabel) === normalizeTabValue(groupingTabFilter)
+      return ticket.status === 'in_progress' && normalizeText(assigneeLabel) === normalizeTabValue(groupingTabFilter)
     }
     if (groupingMode === 'monthYear') {
       const date = new Date(ticket.createdAt)
