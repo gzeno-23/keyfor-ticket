@@ -6,7 +6,13 @@ import { mockTickets, type Status, type Ticket } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
 import { getRequestTypeColor } from '@/lib/request-type'
 import { handleHorizontalMouseDragScroll, handleHorizontalWheelScroll } from '@/lib/horizontal-wheel-scroll'
-import { TICKET_LIST_COLUMN_LABELS, TICKET_LIST_COLUMN_ORDER, useTicketListCustomization, type TicketListColumnKey } from '@/lib/ticket-list-customization'
+import {
+  TICKET_LIST_COLUMN_LABELS,
+  TICKET_LIST_COLUMN_ORDER,
+  setTicketListGroupingYear,
+  useTicketListCustomization,
+  type TicketListColumnKey,
+} from '@/lib/ticket-list-customization'
 
 type RequestTypeFilter =
   | 'all'
@@ -25,6 +31,23 @@ type RequestTypeFilter =
   | 'priorita-consegna'
   | 'richiesta-documenti'
   | 'cambio-vettore'
+
+type DynamicTab = { id: string; label: string }
+
+const monthTabs: DynamicTab[] = [
+  { id: '1', label: 'Gennaio' },
+  { id: '2', label: 'Febbraio' },
+  { id: '3', label: 'Marzo' },
+  { id: '4', label: 'Aprile' },
+  { id: '5', label: 'Maggio' },
+  { id: '6', label: 'Giugno' },
+  { id: '7', label: 'Luglio' },
+  { id: '8', label: 'Agosto' },
+  { id: '9', label: 'Settembre' },
+  { id: '10', label: 'Ottobre' },
+  { id: '11', label: 'Novembre' },
+  { id: '12', label: 'Dicembre' },
+]
 
 const requestTypeTabs: { id: RequestTypeFilter; label: string }[] = [
   { id: 'all', label: 'Tutte' },
@@ -70,6 +93,10 @@ function normalizeText(value: string) {
     .replace(/[\u0300-\u036f]/g, '')
 }
 
+function normalizeTabValue(value: string) {
+  return normalizeText(value.replace(/-/g, ' '))
+}
+
 const specialColumnWidths: Record<TicketListColumnKey, string> = {
   requestType: '1fr',
   assignee: '220px',
@@ -80,15 +107,18 @@ const specialColumnWidths: Record<TicketListColumnKey, string> = {
 
 export function TicketListPage() {
   const navigate = useNavigate()
-  const { visibleColumns, groupingMode } = useTicketListCustomization()
+  const { visibleColumns, groupingMode, groupingYear } = useTicketListCustomization()
   const [searchParams, setSearchParams] = useSearchParams()
   const [search, setSearch] = useState(searchParams.get('q') ?? '')
   const statusFilter = (searchParams.get('status') as Status | 'all') ?? 'all'
   const [requestTypeFilter, setRequestTypeFilter] = useState<RequestTypeFilter>(
     (searchParams.get('type') as RequestTypeFilter | null) ?? 'all'
   )
+  const [groupingTabFilter, setGroupingTabFilter] = useState('all')
   const [isSearchOpen, setIsSearchOpen] = useState(Boolean(search))
   const isSpecialLayout = statusFilter === 'open' || statusFilter === 'closed'
+  const bypassTypeFilterForNonAssigned =
+    groupingMode === 'assignee' && normalizeTabValue(groupingTabFilter) === normalizeText('Non assegnato')
 
   useEffect(() => {
     const nextParams = new URLSearchParams()
@@ -98,9 +128,10 @@ export function TicketListPage() {
     setSearchParams(nextParams, { replace: true })
   }, [search, setSearchParams, statusFilter, requestTypeFilter])
 
-  const filtered = mockTickets.filter((ticket) => {
+  const filteredByTypeAndSearch = mockTickets.filter((ticket) => {
     const normalizedRequestType = normalizeText(ticket.requestType ?? '')
     const matchRequestType =
+      bypassTypeFilterForNonAssigned ||
       requestTypeFilter === 'all' ||
       normalizedRequestType.includes(requestTypeFilterValue[requestTypeFilter])
     const matchSearch =
@@ -125,10 +156,44 @@ export function TicketListPage() {
   const configuredColumns = TICKET_LIST_COLUMN_ORDER.filter((columnKey) => visibleColumns[columnKey])
   const safeColumns: TicketListColumnKey[] =
     configuredColumns.length <= 1 ? ['requestType', 'assignee', 'customerName', 'createdAt', 'status'] : configuredColumns
-  const effectiveGroupingMode = requestTypeFilter !== 'all' ? groupingMode : 'none'
-  const specialColumns = getSpecialColumnsForGrouping(safeColumns, effectiveGroupingMode)
+  const effectiveGroupingMode = statusFilter === 'closed' && groupingMode === 'assignee' ? 'none' : groupingMode
+  const availableYears = getAvailableYears(mockTickets)
+  const selectedGroupingYear = availableYears.includes(groupingYear) ? groupingYear : (availableYears[0] ?? '')
+  const showNonAssignedTab = statusFilter !== 'closed'
+  const groupingTabs = getGroupingTabs(filteredByTypeAndSearch, effectiveGroupingMode, mockTickets, showNonAssignedTab)
+  const tabsForBar: DynamicTab[] = effectiveGroupingMode === 'none' ? requestTypeTabs : groupingTabs
+  const specialColumns = safeColumns
   const specialGridTemplateColumns = specialColumns.map((columnKey) => specialColumnWidths[columnKey]).join(' ')
-  const groupedSpecialTickets = groupTicketsForSpecialLayout(filtered, effectiveGroupingMode)
+  const availableMonths = getAvailableMonths(filteredByTypeAndSearch, selectedGroupingYear)
+  const filtered = applyGroupingTabFilter(filteredByTypeAndSearch, effectiveGroupingMode, groupingTabFilter, selectedGroupingYear)
+  const groupedSpecialTickets: { key: string; tickets: Ticket[] }[] = [{ key: 'all', tickets: filtered }]
+
+  useEffect(() => {
+    if (availableYears.length > 0 && !availableYears.includes(groupingYear)) {
+      setTicketListGroupingYear(availableYears[0])
+    }
+  }, [availableYears, groupingYear])
+
+  useEffect(() => {
+    if (effectiveGroupingMode === 'none') {
+      if (groupingTabFilter !== 'all') setGroupingTabFilter('all')
+      return
+    }
+
+    if (effectiveGroupingMode === 'monthYear') {
+      if (availableMonths.length === 0) {
+        if (groupingTabFilter !== 'all') setGroupingTabFilter('all')
+      } else if (!availableMonths.includes(groupingTabFilter)) {
+        setGroupingTabFilter(availableMonths[0])
+      }
+      return
+    }
+
+    const availableTabIds = new Set(tabsForBar.map((tab) => tab.id))
+    if (!availableTabIds.has(groupingTabFilter)) {
+      setGroupingTabFilter('all')
+    }
+  }, [effectiveGroupingMode, availableMonths, groupingTabFilter, tabsForBar])
 
   return (
     <div className="mx-auto max-w-6xl px-4 pb-6 sm:px-6">
@@ -149,19 +214,27 @@ export function TicketListPage() {
         {/* Filter bar */}
         {isSpecialLayout ? (
           <div className="mt-4 px-1">
-            <div className="relative">
+            <div className="relative flex items-center gap-3">
               <div
                 onWheel={handleHorizontalWheelScroll}
                 onMouseMove={handleHorizontalMouseDragScroll}
-                className="no-scrollbar flex cursor-grab items-center gap-6 overflow-x-auto whitespace-nowrap scroll-smooth text-sm active:cursor-grabbing"
+                className="no-scrollbar flex min-w-0 flex-1 cursor-grab items-center gap-6 overflow-x-auto whitespace-nowrap scroll-smooth text-sm active:cursor-grabbing"
               >
-                {requestTypeTabs.map((tab) => (
+                {tabsForBar.map((tab) => (
                   <button
                     key={tab.id}
                     type="button"
-                    onClick={() => setRequestTypeFilter(tab.id)}
+                    onClick={() => {
+                      if (effectiveGroupingMode === 'none') {
+                        setRequestTypeFilter(tab.id as RequestTypeFilter)
+                      } else {
+                        setGroupingTabFilter(tab.id)
+                      }
+                    }}
                     className={`shrink-0 border-b-2 px-1 py-3 ${
-                      requestTypeFilter === tab.id ? 'border-[#009B9B] text-[#009B9B]' : 'border-transparent text-[#605E5C]'
+                      (effectiveGroupingMode === 'none' ? requestTypeFilter : groupingTabFilter) === tab.id
+                        ? 'border-[#009B9B] text-[#009B9B]'
+                        : 'border-transparent text-[#605E5C]'
                     }`}
                   >
                     {tab.label}
@@ -258,7 +331,7 @@ export function TicketListPage() {
                       style={{ backgroundColor: getRequestTypeColor(ticket.requestType, '#A19F9D') }}
                     />
                     <p className="truncate text-sm font-medium text-[#323130]">
-                      {getMobilePrimaryLabel(ticket, effectiveGroupingMode)}
+                      {ticket.requestType ?? 'Richiesta'}
                     </p>
                   </div>
                   <p className="mt-1 truncate text-xs text-[#605E5C]">{ticket.customerName}</p>
@@ -361,52 +434,76 @@ function renderSpecialLayoutCell(ticket: Ticket, columnKey: TicketListColumnKey)
   return <StatusBadge status={ticket.status} />
 }
 
-function getGroupingLabel(ticket: Ticket, groupingMode: 'assignee' | 'requestType' | 'monthYear') {
-  if (groupingMode === 'assignee') return ticket.status !== 'open' ? ticket.assignee : 'Non assegnato'
-  if (groupingMode === 'requestType') return ticket.requestType ?? 'Richiesta'
-  return new Date(ticket.createdAt).toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })
-}
-
-function getMobilePrimaryLabel(ticket: Ticket, groupingMode: 'none' | 'assignee' | 'requestType' | 'monthYear') {
-  if (groupingMode === 'none') return ticket.requestType ?? 'Richiesta'
-  if (groupingMode === 'assignee') return ticket.status !== 'open' ? ticket.assignee : 'Non assegnato'
-  if (groupingMode === 'monthYear') {
-    return new Date(ticket.createdAt).toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })
-  }
-  return ticket.requestType ?? 'Richiesta'
-}
-
-function groupTicketsForSpecialLayout(tickets: Ticket[], groupingMode: 'none' | 'assignee' | 'requestType' | 'monthYear') {
-  if (groupingMode === 'none') {
-    return [{ key: 'all', title: '', tickets }]
+function getGroupingTabs(
+  tickets: Ticket[],
+  groupingMode: 'none' | 'assignee' | 'requestType' | 'monthYear',
+  allTickets: Ticket[],
+  showNonAssignedTab: boolean
+): DynamicTab[] {
+  if (groupingMode === 'none') return [{ id: 'all', label: 'Tutte' }]
+  if (groupingMode === 'monthYear') return monthTabs
+  if (groupingMode === 'assignee') {
+    const assignees = Array.from(new Set(allTickets.map((ticket) => ticket.assignee.trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'it'))
+    return [
+      { id: 'all', label: 'Tutte' },
+      ...(showNonAssignedTab ? [{ id: 'Non assegnato', label: 'Non assegnato' }] : []),
+      ...assignees.map((value) => ({ id: value, label: value })),
+    ]
   }
 
-  const grouped = new Map<string, Ticket[]>()
-  tickets.forEach((ticket) => {
-    const label = getGroupingLabel(ticket, groupingMode)
-    const current = grouped.get(label) ?? []
-    current.push(ticket)
-    grouped.set(label, current)
+  const values = Array.from(
+    new Set(
+      tickets.map((ticket) => ticket.requestType ?? 'Richiesta')
+    )
+  )
+
+  return [{ id: 'all', label: 'Tutte' }, ...values.map((value) => ({ id: value, label: value }))]
+}
+
+function applyGroupingTabFilter(
+  tickets: Ticket[],
+  groupingMode: 'none' | 'assignee' | 'requestType' | 'monthYear',
+  groupingTabFilter: string,
+  groupingYear: string
+): Ticket[] {
+  if (groupingMode === 'none' || groupingTabFilter === 'all') return tickets
+
+  return tickets.filter((ticket) => {
+    if (groupingMode === 'assignee') {
+      if (normalizeTabValue(groupingTabFilter) === normalizeText('Non assegnato')) {
+        return ticket.status === 'open' || ticket.assignee.trim() === ''
+      }
+      const assigneeLabel = ticket.assignee.trim() === '' ? 'Non assegnato' : ticket.assignee
+      return normalizeText(assigneeLabel) === normalizeTabValue(groupingTabFilter)
+    }
+    if (groupingMode === 'monthYear') {
+      const date = new Date(ticket.createdAt)
+      const selectedYear = Number(groupingYear)
+      const selectedMonth = Number(groupingTabFilter)
+      if (!selectedYear || !selectedMonth) return true
+      return date.getFullYear() === selectedYear && date.getMonth() + 1 === selectedMonth
+    }
+    const requestTypeLabel = ticket.requestType ?? 'Richiesta'
+    const normalizedRequestType = normalizeText(requestTypeLabel)
+    const normalizedTab = normalizeTabValue(groupingTabFilter)
+    return normalizedRequestType.includes(normalizedTab)
   })
-
-  return Array.from(grouped.entries()).map(([title, groupedTickets]) => ({
-    key: `${groupingMode}-${title}`,
-    title,
-    tickets: groupedTickets,
-  }))
 }
 
-function getSpecialColumnsForGrouping(
-  activeColumns: TicketListColumnKey[],
-  groupingMode: 'none' | 'assignee' | 'requestType' | 'monthYear'
-): TicketListColumnKey[] {
-  if (groupingMode === 'none') return activeColumns
+function getAvailableYears(tickets: Ticket[]): string[] {
+  return Array.from(new Set(tickets.map((ticket) => new Date(ticket.createdAt).getFullYear().toString()))).sort((a, b) => Number(b) - Number(a))
+}
 
-  const groupingColumnKey: TicketListColumnKey =
-    groupingMode === 'assignee' ? 'assignee' : groupingMode === 'monthYear' ? 'createdAt' : 'requestType'
-
-  const remainingColumns = activeColumns.filter((columnKey) => columnKey !== groupingColumnKey)
-  return [groupingColumnKey, ...remainingColumns]
+function getAvailableMonths(tickets: Ticket[], year: string): string[] {
+  const selectedYear = Number(year)
+  if (!selectedYear) return []
+  return Array.from(
+    new Set(
+      tickets
+        .filter((ticket) => new Date(ticket.createdAt).getFullYear() === selectedYear)
+        .map((ticket) => String(new Date(ticket.createdAt).getMonth() + 1))
+    )
+  ).sort((a, b) => Number(a) - Number(b))
 }
 
 function TicketListRow({

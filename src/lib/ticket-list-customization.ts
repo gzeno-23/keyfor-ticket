@@ -23,6 +23,7 @@ type TicketListColumnVisibility = Record<TicketListColumnKey, boolean>
 interface TicketListCustomizationState {
   columns: TicketListColumnVisibility
   groupingMode: TicketListGroupingMode
+  groupingYear: string
 }
 
 const STORAGE_KEY = 'keyfor-ticket-customization'
@@ -43,6 +44,7 @@ function getDefaultCustomizationState(): TicketListCustomizationState {
   return {
     columns: { ...DEFAULT_TICKET_LIST_COLUMNS },
     groupingMode: 'none',
+    groupingYear: '',
   }
 }
 
@@ -56,6 +58,7 @@ function readTicketListCustomizationFromStorage(): TicketListCustomizationState 
     const parsed = JSON.parse(rawValue) as {
       columns?: Partial<TicketListColumnVisibility>
       groupingMode?: TicketListGroupingMode
+      groupingYear?: string
     }
     const parsedColumns = parsed.columns ?? {}
     const nextValue: TicketListColumnVisibility = {
@@ -74,6 +77,7 @@ function readTicketListCustomizationFromStorage(): TicketListCustomizationState 
     return {
       columns: hasAtLeastOneColumnVisible(nextValue) ? nextValue : { ...DEFAULT_TICKET_LIST_COLUMNS },
       groupingMode: nextGroupingMode,
+      groupingYear: typeof parsed.groupingYear === 'string' ? parsed.groupingYear : '',
     }
   } catch {
     return getDefaultCustomizationState()
@@ -112,6 +116,7 @@ export function useTicketListCustomization() {
   return {
     visibleColumns: customization.columns,
     groupingMode: customization.groupingMode,
+    groupingYear: customization.groupingYear,
   }
 }
 
@@ -126,6 +131,12 @@ export function setTicketListColumnVisibility(column: TicketListColumnKey, visib
 
 export function setTicketListGroupingMode(groupingMode: TicketListGroupingMode) {
   ticketListCustomizationState = { ...ticketListCustomizationState, groupingMode }
+  persistTicketListCustomization(ticketListCustomizationState)
+  emitTicketListColumnsChange()
+}
+
+export function setTicketListGroupingYear(groupingYear: string) {
+  ticketListCustomizationState = { ...ticketListCustomizationState, groupingYear }
   persistTicketListCustomization(ticketListCustomizationState)
   emitTicketListColumnsChange()
 }
