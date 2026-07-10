@@ -1,7 +1,8 @@
+import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Bell } from 'lucide-react'
 import { BackButton } from '@/components/ui/back-button'
-import { useNotifications } from '@/lib/notifications'
+import { markNotificationAsRead, useNotifications } from '@/lib/notifications'
 
 export function NotificationsPage() {
   const location = useLocation()
@@ -10,6 +11,13 @@ export function NotificationsPage() {
   const fromPathFromState = (location.state as { from?: string } | undefined)?.from
   const fromPathFromQuery = new URLSearchParams(location.search).get('from') ?? undefined
   const fromPath = fromPathFromState ?? fromPathFromQuery ?? '/hub'
+
+  useEffect(() => {
+    const firstUnread = notifications.find((item) => item.unread)
+    if (!firstUnread) return
+    markNotificationAsRead(firstUnread.id)
+    navigate(`/tickets/${firstUnread.ticketId}`)
+  }, [notifications, navigate])
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
@@ -30,7 +38,10 @@ export function NotificationsPage() {
           <button
             key={item.id}
             type="button"
-            onClick={() => navigate(`/notifications/${item.id}`, { state: { from: fromPath } })}
+            onClick={() => {
+              markNotificationAsRead(item.id)
+              navigate(`/tickets/${item.ticketId}`, { state: { from: fromPath } })
+            }}
             className={`w-full border-b border-[#EDEBE9] px-4 py-4 text-left last:border-b-0 hover:bg-[#FAF9F8] ${
               item.unread ? 'bg-[#FDFDFC]' : ''
             }`}

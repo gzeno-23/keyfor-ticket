@@ -13,6 +13,7 @@ export interface AppNotification {
   preview: string
   time: string
   unread: boolean
+  ticketId: string
   messages: NotificationMessage[]
 }
 
@@ -23,6 +24,7 @@ const INITIAL_NOTIFICATIONS: AppNotification[] = [
     preview: 'Sposta Data',
     time: 'Oggi, 09:15',
     unread: true,
+    ticketId: 'KFT-001',
     messages: [
       { id: 'N-001-M1', author: 'Sistema', text: 'Nuova richiesta ricevuta: Sposta Data.', time: '09:15' },
       { id: 'N-001-M2', author: 'Sistema', text: 'Controlla i dettagli e conferma la presa in carico.', time: '09:16' },
@@ -34,6 +36,7 @@ const INITIAL_NOTIFICATIONS: AppNotification[] = [
     preview: 'KFT-002 è stata aggiornata',
     time: 'Ieri, 17:42',
     unread: true,
+    ticketId: 'KFT-002',
     messages: [
       { id: 'N-002-M1', author: 'Sistema', text: 'La richiesta KFT-002 è stata aggiornata.', time: '17:42' },
       { id: 'N-002-M2', author: 'Sistema', text: 'Nuovo stato: In lavorazione.', time: '17:43' },
@@ -45,6 +48,7 @@ const INITIAL_NOTIFICATIONS: AppNotification[] = [
     preview: 'KFT-005 è stata chiusa',
     time: 'Ieri, 11:08',
     unread: false,
+    ticketId: 'KFT-005',
     messages: [
       { id: 'N-003-M1', author: 'Sistema', text: 'La richiesta KFT-005 è stata chiusa.', time: '11:08' },
     ],

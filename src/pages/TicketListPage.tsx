@@ -164,7 +164,7 @@ export function TicketListPage() {
                   placeholder="Cerca ticket..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full bg-transparent px-2 py-2 text-sm text-[#323130] outline-none"
+                  className="w-full bg-transparent px-2 py-2 text-base text-[#323130] outline-none sm:text-sm"
                 />
               </div>
             </div>
@@ -184,7 +184,7 @@ export function TicketListPage() {
       )}
 
       {isSpecialLayout && isSearchOpen && (
-        <div className="fixed bottom-20 right-4 z-30 w-[min(320px,calc(100vw-2rem))] rounded-lg border border-[#EDEBE9] bg-white p-2 shadow-2xl sm:bottom-24 sm:right-8">
+        <div className="fixed bottom-20 left-1/2 z-30 w-[min(560px,calc(100vw-2rem))] -translate-x-1/2 rounded-lg border border-[#EDEBE9] bg-white p-2 shadow-2xl sm:bottom-24">
           <div className="flex items-center rounded-md border border-[#EDEBE9] px-2 text-[#605E5C] focus-within:border-[#009B9B]">
             <Search className="h-3.5 w-3.5" />
             <input
@@ -192,7 +192,7 @@ export function TicketListPage() {
               placeholder="Cerca ticket..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-transparent px-2 py-2 text-sm text-[#323130] outline-none"
+              className="w-full bg-transparent px-2 py-2 text-base text-[#323130] outline-none sm:text-sm"
             />
           </div>
         </div>

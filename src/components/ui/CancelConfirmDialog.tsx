@@ -13,7 +13,7 @@ export function CancelConfirmDialog({
   onConfirm,
   message = 'Sei sicuro di annullare?',
 }: CancelConfirmDialogProps) {
-  useBodyScrollLock(open)
+  useBodyScrollLock(open, { blockNavigationWhileLocked: true })
 
   if (!open) return null
 

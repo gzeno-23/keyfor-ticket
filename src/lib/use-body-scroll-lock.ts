@@ -4,9 +4,24 @@ let lockCount = 0
 let lockedScrollY = 0
 let previousBodyStyles: Partial<CSSStyleDeclaration> | null = null
 
-export function useBodyScrollLock(locked: boolean) {
+interface BodyScrollLockOptions {
+  blockNavigationWhileLocked?: boolean
+}
+
+export function useBodyScrollLock(locked: boolean, options: BodyScrollLockOptions = {}) {
+  const { blockNavigationWhileLocked = false } = options
+
   useEffect(() => {
     if (!locked) return
+
+    const handleNavigationBack = () => {
+      window.history.go(1)
+    }
+
+    if (blockNavigationWhileLocked) {
+      window.addEventListener('popstate', handleNavigationBack)
+      window.addEventListener('hashchange', handleNavigationBack)
+    }
 
     if (lockCount === 0) {
       const bodyStyle = document.body.style
@@ -29,6 +44,11 @@ export function useBodyScrollLock(locked: boolean) {
     lockCount += 1
 
     return () => {
+      if (blockNavigationWhileLocked) {
+        window.removeEventListener('popstate', handleNavigationBack)
+        window.removeEventListener('hashchange', handleNavigationBack)
+      }
+
       lockCount = Math.max(0, lockCount - 1)
       if (lockCount > 0) return
 
@@ -41,6 +61,5 @@ export function useBodyScrollLock(locked: boolean) {
       window.scrollTo(0, lockedScrollY)
       previousBodyStyles = null
     }
-  }, [locked])
+  }, [locked, blockNavigationWhileLocked])
 }
-
