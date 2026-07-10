@@ -1,4 +1,4 @@
-import type { WheelEvent } from 'react'
+import type { MouseEvent, WheelEvent } from 'react'
 
 export function handleHorizontalWheelScroll(event: WheelEvent<HTMLDivElement>) {
   const element = event.currentTarget
@@ -16,4 +16,12 @@ export function handleHorizontalWheelScroll(event: WheelEvent<HTMLDivElement>) {
   event.preventDefault()
   const nextScrollLeft = element.scrollLeft + primaryDelta
   element.scrollLeft = Math.min(maxScrollLeft, Math.max(0, nextScrollLeft))
+}
+
+export function handleHorizontalMouseDragScroll(event: MouseEvent<HTMLDivElement>) {
+  if (event.buttons !== 1) return
+  const element = event.currentTarget
+  if (element.scrollWidth <= element.clientWidth) return
+  event.preventDefault()
+  element.scrollLeft -= event.movementX
 }

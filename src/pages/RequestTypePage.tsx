@@ -4,7 +4,7 @@ import { MoveRight, Bell } from 'lucide-react'
 import { BackButton } from '@/components/ui/back-button'
 import { UserProfileMenu } from '@/components/layout/UserProfileMenu'
 import { resetNotificationsForDemo, useNotifications } from '@/lib/notifications'
-import { handleHorizontalWheelScroll } from '@/lib/horizontal-wheel-scroll'
+import { handleHorizontalMouseDragScroll, handleHorizontalWheelScroll } from '@/lib/horizontal-wheel-scroll'
 
 type RequestArea = 'ordini' | 'magazzino' | 'logistica' | 'amministrazione'
 type RequestTypeId =
@@ -228,7 +228,8 @@ export function RequestTypePage() {
 
             <div
               onWheel={handleHorizontalWheelScroll}
-              className="no-scrollbar mt-4 flex items-center gap-6 overflow-x-auto whitespace-nowrap scroll-smooth text-sm"
+              onMouseMove={handleHorizontalMouseDragScroll}
+              className="no-scrollbar mt-4 flex cursor-grab items-center gap-6 overflow-x-auto whitespace-nowrap scroll-smooth text-sm active:cursor-grabbing"
             >
               {requestAreaTabs.map((tab) => (
                 <button

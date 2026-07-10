@@ -4,7 +4,7 @@ import { CheckCircle2, Edit, Send, UserCheck, XCircle } from 'lucide-react'
 import { mockTickets, type Status } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
 import { StatusBadge } from '@/components/ui/badges'
-import { handleHorizontalWheelScroll } from '@/lib/horizontal-wheel-scroll'
+import { handleHorizontalMouseDragScroll, handleHorizontalWheelScroll } from '@/lib/horizontal-wheel-scroll'
 
 interface Comment {
   text: string
@@ -160,7 +160,8 @@ export function TicketDetailPage() {
 
         <div
           onWheel={handleHorizontalWheelScroll}
-          className="no-scrollbar mt-4 flex gap-4 overflow-x-auto whitespace-nowrap scroll-smooth text-sm"
+          onMouseMove={handleHorizontalMouseDragScroll}
+          className="no-scrollbar mt-4 flex cursor-grab gap-4 overflow-x-auto whitespace-nowrap scroll-smooth text-sm active:cursor-grabbing"
         >
           {[
             { id: 'details' as TicketTab, label: 'Dettagli' },

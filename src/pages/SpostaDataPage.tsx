@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Search, X } from 'lucide-react'
 import { BackButton } from '@/components/ui/back-button'
 import { CancelConfirmDialog } from '@/components/ui/CancelConfirmDialog'
-import { handleHorizontalWheelScroll } from '@/lib/horizontal-wheel-scroll'
+import { handleHorizontalMouseDragScroll, handleHorizontalWheelScroll } from '@/lib/horizontal-wheel-scroll'
 import { getRequestTypeColor } from '@/lib/request-type'
 import { useBodyScrollLock } from '@/lib/use-body-scroll-lock'
 
@@ -397,7 +397,8 @@ export function SpostaDataPage() {
 
         <div
           onWheel={handleHorizontalWheelScroll}
-          className="no-scrollbar mt-4 flex items-center gap-6 overflow-x-auto whitespace-nowrap scroll-smooth text-sm"
+          onMouseMove={handleHorizontalMouseDragScroll}
+          className="no-scrollbar mt-4 flex cursor-grab items-center gap-6 overflow-x-auto whitespace-nowrap scroll-smooth text-sm active:cursor-grabbing"
         >
           <button
             type="button"

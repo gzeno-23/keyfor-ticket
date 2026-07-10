@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, MoveRight, Plus, Search } from 'lucide-react'
+import { MoveRight, Plus, Search } from 'lucide-react'
 import { StatusBadge } from '@/components/ui/badges'
 import { mockTickets, type Status, type Ticket } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
 import { getRequestTypeColor } from '@/lib/request-type'
-import { handleHorizontalWheelScroll } from '@/lib/horizontal-wheel-scroll'
+import { handleHorizontalMouseDragScroll, handleHorizontalWheelScroll } from '@/lib/horizontal-wheel-scroll'
 
 type RequestTypeFilter =
   | 'all'
@@ -71,7 +71,6 @@ function normalizeText(value: string) {
 
 export function TicketListPage() {
   const navigate = useNavigate()
-  const tabScrollRef = useRef<HTMLDivElement | null>(null)
   const [searchParams, setSearchParams] = useSearchParams()
   const [search, setSearch] = useState(searchParams.get('q') ?? '')
   const statusFilter = (searchParams.get('status') as Status | 'all') ?? 'all'
@@ -112,13 +111,6 @@ export function TicketListPage() {
         ? 'Seleziona una richiesta chiusa per visualizzarla'
         : ''
 
-  const scrollTabs = (direction: 'left' | 'right') => {
-    const element = tabScrollRef.current
-    if (!element) return
-    const amount = direction === 'left' ? -260 : 260
-    element.scrollBy({ left: amount, behavior: 'smooth' })
-  }
-
   return (
     <div className="mx-auto max-w-6xl px-4 pb-6 sm:px-6">
       <div className="sticky top-14 z-20 bg-[#F8F9FA] pt-6">
@@ -139,18 +131,10 @@ export function TicketListPage() {
         {isSpecialLayout ? (
           <div className="mt-4 px-1">
             <div className="relative">
-              <button
-                type="button"
-                onClick={() => scrollTabs('left')}
-                className="absolute left-0 top-1/2 z-10 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#F8F9FA] text-[#605E5C] md:flex"
-                aria-label="Scorri tab a sinistra"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
               <div
-                ref={tabScrollRef}
                 onWheel={handleHorizontalWheelScroll}
-                className="no-scrollbar flex items-center gap-6 overflow-x-auto whitespace-nowrap px-8 scroll-smooth text-sm"
+                onMouseMove={handleHorizontalMouseDragScroll}
+                className="no-scrollbar flex cursor-grab items-center gap-6 overflow-x-auto whitespace-nowrap scroll-smooth text-sm active:cursor-grabbing"
               >
                 {requestTypeTabs.map((tab) => (
                   <button
@@ -165,14 +149,6 @@ export function TicketListPage() {
                   </button>
                 ))}
               </div>
-              <button
-                type="button"
-                onClick={() => scrollTabs('right')}
-                className="absolute right-0 top-1/2 z-10 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#F8F9FA] text-[#605E5C] md:flex"
-                aria-label="Scorri tab a destra"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
             </div>
             <div className="h-px w-full bg-[#EDEBE9]" />
             <div className="h-4 w-full bg-[#F8F9FA]" />
