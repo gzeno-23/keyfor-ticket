@@ -153,7 +153,7 @@ export function TicketDetailPage() {
           </div>
         </div>
 
-        <div className="mt-4 flex gap-4 overflow-x-auto text-sm">
+        <div className="no-scrollbar mt-4 flex gap-4 overflow-x-auto text-sm">
           {[
             { id: 'details' as TicketTab, label: 'Dettagli' },
             { id: 'comments' as TicketTab, label: `Note (${comments.length})` },
@@ -172,7 +172,6 @@ export function TicketDetailPage() {
             </button>
           ))}
         </div>
-        <div className="h-1 w-full bg-[#C8C6C4]" />
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-6">
@@ -233,6 +232,39 @@ export function TicketDetailPage() {
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="rounded-xl border border-[#EDEBE9] bg-white p-4">
+                  <p className="text-sm font-semibold text-[#323130]">Immagini</p>
+                  <label className="mt-3 inline-flex cursor-pointer items-center rounded-md border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] hover:bg-[#F3F2F1]">
+                    Inserisci immagine
+                    <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageAttach} />
+                  </label>
+                  <div className="mt-3 space-y-1 text-xs text-[#605E5C]">
+                    {attachedImages.length === 0 ? (
+                      <p>Nessuna immagine allegata.</p>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-3">
+                        {attachedImages.map((image) => (
+                          <div key={image.id} className="rounded-md border border-[#EDEBE9] p-2">
+                            <img
+                              src={image.previewUrl}
+                              alt={image.file.name}
+                              className="h-20 w-full rounded object-cover"
+                            />
+                            <p className="mt-1 truncate text-[11px] text-[#323130]">{image.file.name}</p>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveImage(image.id)}
+                              className="mt-1 text-[11px] font-medium text-[#A4262C] hover:underline"
+                            >
+                              Elimina
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-[#EDEBE9] bg-white p-4">
                   <p className="text-sm font-semibold text-[#323130]">File</p>
                   <label className="mt-3 inline-flex cursor-pointer items-center rounded-md border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] hover:bg-[#F3F2F1]">
                     Inserisci file
@@ -264,39 +296,6 @@ export function TicketDetailPage() {
                           </button>
                         </div>
                       ))
-                    )}
-                  </div>
-                </div>
-
-                <div className="rounded-xl border border-[#EDEBE9] bg-white p-4">
-                  <p className="text-sm font-semibold text-[#323130]">Immagini</p>
-                  <label className="mt-3 inline-flex cursor-pointer items-center rounded-md border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] hover:bg-[#F3F2F1]">
-                    Inserisci immagine
-                    <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageAttach} />
-                  </label>
-                  <div className="mt-3 space-y-1 text-xs text-[#605E5C]">
-                    {attachedImages.length === 0 ? (
-                      <p>Nessuna immagine allegata.</p>
-                    ) : (
-                      <div className="grid grid-cols-2 gap-3">
-                        {attachedImages.map((image) => (
-                          <div key={image.id} className="rounded-md border border-[#EDEBE9] p-2">
-                            <img
-                              src={image.previewUrl}
-                              alt={image.file.name}
-                              className="h-20 w-full rounded object-cover"
-                            />
-                            <p className="mt-1 truncate text-[11px] text-[#323130]">{image.file.name}</p>
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveImage(image.id)}
-                              className="mt-1 text-[11px] font-medium text-[#A4262C] hover:underline"
-                            >
-                              Elimina
-                            </button>
-                          </div>
-                        ))}
-                      </div>
                     )}
                   </div>
                 </div>

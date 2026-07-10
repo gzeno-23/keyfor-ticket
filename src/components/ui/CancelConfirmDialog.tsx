@@ -1,3 +1,5 @@
+import { useBodyScrollLock } from '@/lib/use-body-scroll-lock'
+
 interface CancelConfirmDialogProps {
   open: boolean
   onClose: () => void
@@ -11,10 +13,12 @@ export function CancelConfirmDialog({
   onConfirm,
   message = 'Sei sicuro di annullare?',
 }: CancelConfirmDialogProps) {
+  useBodyScrollLock(open)
+
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex min-h-[100dvh] items-center justify-center bg-black/30 px-4 overscroll-contain" onClick={onClose}>
       <div
         className="w-full max-w-sm rounded-lg border border-[#EDEBE9] bg-white p-5 shadow-2xl"
         onClick={(event) => event.stopPropagation()}

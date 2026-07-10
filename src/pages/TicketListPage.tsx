@@ -130,7 +130,7 @@ export function TicketListPage() {
         {isSpecialLayout ? (
           <div className="mt-4 px-1">
             <div className="relative">
-              <div className="flex items-center gap-6 overflow-x-auto text-sm">
+              <div className="no-scrollbar flex items-center gap-6 overflow-x-auto text-sm">
                 {requestTypeTabs.map((tab) => (
                   <button
                     key={tab.id}
@@ -144,7 +144,6 @@ export function TicketListPage() {
                   </button>
                 ))}
               </div>
-              <div className="h-1 w-full bg-[#C8C6C4]" />
             </div>
           </div>
         ) : (

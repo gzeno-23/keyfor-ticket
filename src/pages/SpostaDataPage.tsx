@@ -4,6 +4,7 @@ import { Search, X } from 'lucide-react'
 import { BackButton } from '@/components/ui/back-button'
 import { CancelConfirmDialog } from '@/components/ui/CancelConfirmDialog'
 import { getRequestTypeColor } from '@/lib/request-type'
+import { useBodyScrollLock } from '@/lib/use-body-scroll-lock'
 
 // ── Mock BC data ──────────────────────────────────────────────────────────────
 const BC_CLIENTI = [
@@ -64,6 +65,7 @@ function LookupDialog({
 }) {
   const [query, setQuery] = useState('')
   const normalizedQuery = query.trim()
+  useBodyScrollLock(true)
 
   const filtered = normalizedQuery
     ? items.filter(
@@ -74,8 +76,8 @@ function LookupDialog({
     : items
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
-      <div className="relative mx-4 flex w-full max-w-lg flex-col bg-white shadow-2xl" style={{ maxHeight: '80vh' }} onClick={(event) => event.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex min-h-[100dvh] items-center justify-center bg-black/40 overscroll-contain" onClick={onClose}>
+      <div className="relative mx-4 flex w-full max-w-lg flex-col bg-white shadow-2xl" style={{ maxHeight: '80dvh' }} onClick={(event) => event.stopPropagation()}>
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[#EDEBE9] px-5 py-3">
           <h2 className="text-sm font-semibold text-[#323130]">{title}</h2>
@@ -368,6 +370,7 @@ export function SpostaDataPage() {
   const currentRequest = requestConfig[requestKey] ?? requestConfig['sposta-data']
   const currentRequestColor = getRequestTypeColor(currentRequest.label)
   const isDetailsComplete = Boolean(form.cliente && form.articolo && form.vecchiaData && form.nuovaData)
+  useBodyScrollLock(isInfoOpen)
 
   return (
     <div className="mx-auto max-w-2xl px-4 pb-6 sm:px-6">
@@ -391,7 +394,7 @@ export function SpostaDataPage() {
             </div>
           </div>
 
-        <div className="mt-4 flex items-center gap-6 text-sm">
+        <div className="no-scrollbar mt-4 flex items-center gap-6 overflow-x-auto text-sm">
           <button
             type="button"
             onClick={() => setActiveTab('details')}
@@ -420,7 +423,6 @@ export function SpostaDataPage() {
             Allegati ({attachedFiles.length + attachedImages.length})
           </button>
         </div>
-        <div className="h-1 w-full bg-[#C8C6C4]" />
       </div>
 
       {activeTab === 'details' && (
@@ -448,6 +450,35 @@ export function SpostaDataPage() {
 
       {activeTab === 'attachments' && (
         <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <div className="rounded-xl border border-[#EDEBE9] bg-white p-4">
+            <p className="text-sm font-semibold text-[#323130]">Immagini</p>
+            <label className="mt-3 inline-flex cursor-pointer items-center rounded-md border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] hover:bg-[#F3F2F1]">
+              Inserisci immagine
+              <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageAttach} />
+            </label>
+            <div className="mt-3 space-y-1 text-xs text-[#605E5C]">
+              {attachedImages.length === 0 ? (
+                <p>Nessuna immagine allegata.</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  {attachedImages.map((image) => (
+                    <div key={image.id} className="rounded-md border border-[#EDEBE9] p-2">
+                      <img src={image.previewUrl} alt={image.file.name} className="h-20 w-full rounded object-cover" />
+                      <p className="mt-1 truncate text-[11px] text-[#323130]">{image.file.name}</p>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(image.id)}
+                        className="mt-1 text-[11px] font-medium text-[#A4262C] hover:underline"
+                      >
+                        Elimina
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className="rounded-xl border border-[#EDEBE9] bg-white p-4">
             <p className="text-sm font-semibold text-[#323130]">File</p>
             <label className="mt-3 inline-flex cursor-pointer items-center rounded-md border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] hover:bg-[#F3F2F1]">
@@ -477,35 +508,6 @@ export function SpostaDataPage() {
                     </button>
                   </div>
                 ))
-              )}
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-[#EDEBE9] bg-white p-4">
-            <p className="text-sm font-semibold text-[#323130]">Immagini</p>
-            <label className="mt-3 inline-flex cursor-pointer items-center rounded-md border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] hover:bg-[#F3F2F1]">
-              Inserisci immagine
-              <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageAttach} />
-            </label>
-            <div className="mt-3 space-y-1 text-xs text-[#605E5C]">
-              {attachedImages.length === 0 ? (
-                <p>Nessuna immagine allegata.</p>
-              ) : (
-                <div className="grid grid-cols-2 gap-3">
-                  {attachedImages.map((image) => (
-                    <div key={image.id} className="rounded-md border border-[#EDEBE9] p-2">
-                      <img src={image.previewUrl} alt={image.file.name} className="h-20 w-full rounded object-cover" />
-                      <p className="mt-1 truncate text-[11px] text-[#323130]">{image.file.name}</p>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveImage(image.id)}
-                        className="mt-1 text-[11px] font-medium text-[#A4262C] hover:underline"
-                      >
-                        Elimina
-                      </button>
-                    </div>
-                  ))}
-                </div>
               )}
             </div>
           </div>
@@ -598,7 +600,7 @@ export function SpostaDataPage() {
       )}
 
       {isInfoOpen && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 px-4" onClick={() => setIsInfoOpen(false)}>
+        <div className="fixed inset-0 z-40 flex min-h-[100dvh] items-center justify-center bg-black/30 px-4 overscroll-contain" onClick={() => setIsInfoOpen(false)}>
           <div className="w-full max-w-md rounded-lg border border-[#EDEBE9] bg-white p-5 shadow-2xl" onClick={(event) => event.stopPropagation()}>
             <h3 className="text-base font-semibold text-[#323130]">{currentRequest.label}</h3>
             <p className="mt-2 text-sm leading-6 text-[#605E5C]">
