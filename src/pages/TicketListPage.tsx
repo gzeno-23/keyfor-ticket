@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { MoveRight, Plus, Search } from 'lucide-react'
+import { MoveRight, Plus, Search, Settings } from 'lucide-react'
 import { StatusBadge } from '@/components/ui/badges'
 import { mockTickets, type Status, type Ticket } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
@@ -88,6 +88,7 @@ export function TicketListPage() {
     (searchParams.get('type') as RequestTypeFilter | null) ?? 'all'
   )
   const [isSearchOpen, setIsSearchOpen] = useState(Boolean(search))
+  const [settingsColumn, setSettingsColumn] = useState<TicketListColumnKey | null>(null)
   const isSpecialLayout = statusFilter === 'open' || statusFilter === 'closed'
 
   useEffect(() => {
@@ -122,9 +123,11 @@ export function TicketListPage() {
       : statusFilter === 'closed'
         ? 'Seleziona una richiesta chiusa per visualizzarla'
         : ''
-  const activeColumns = TICKET_LIST_COLUMN_ORDER.filter((columnKey) => visibleColumns[columnKey])
+  const configuredColumns = TICKET_LIST_COLUMN_ORDER.filter((columnKey) => visibleColumns[columnKey])
+  const safeColumns: TicketListColumnKey[] =
+    configuredColumns.length <= 1 ? ['requestType', 'assignee', 'customerName', 'createdAt', 'status'] : configuredColumns
   const effectiveGroupingMode = requestTypeFilter !== 'all' ? groupingMode : 'none'
-  const specialColumns = getSpecialColumnsForGrouping(activeColumns, effectiveGroupingMode)
+  const specialColumns = getSpecialColumnsForGrouping(safeColumns, effectiveGroupingMode)
   const specialGridTemplateColumns = specialColumns.map((columnKey) => specialColumnWidths[columnKey]).join(' ')
   const groupedSpecialTickets = groupTicketsForSpecialLayout(filtered, effectiveGroupingMode)
 
@@ -200,8 +203,17 @@ export function TicketListPage() {
           <div className="mt-0 hidden rounded-t-2xl border border-b-0 border-[#EDEBE9] bg-[#FAF9F8] md:block">
             <div className="grid px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]" style={{ gridTemplateColumns: specialGridTemplateColumns }}>
               {specialColumns.map((columnKey) => (
-                <span key={columnKey} className={columnKey === 'assignee' ? 'text-center' : ''}>
-                  {TICKET_LIST_COLUMN_LABELS[columnKey]}
+                <span key={columnKey} className={`flex items-center gap-1 ${columnKey === 'assignee' ? 'justify-center' : ''}`}>
+                  <span>{TICKET_LIST_COLUMN_LABELS[columnKey]}</span>
+                  <button
+                    type="button"
+                    onClick={() => setSettingsColumn(columnKey)}
+                    className="inline-flex h-5 w-5 items-center justify-center rounded border border-[#D2D0CE] bg-white text-[#605E5C] hover:border-[#009B9B] hover:text-[#009B9B]"
+                    aria-label={`Impostazioni colonna ${TICKET_LIST_COLUMN_LABELS[columnKey]}`}
+                    title={`Impostazioni ${TICKET_LIST_COLUMN_LABELS[columnKey]}`}
+                  >
+                    <Settings className="h-3.5 w-3.5" />
+                  </button>
                 </span>
               ))}
             </div>
@@ -308,14 +320,25 @@ export function TicketListPage() {
           <table className="w-full text-sm">
             <thead className="bg-[#FAF9F8]">
               <tr>
-                {activeColumns.map((columnKey) => (
+                {safeColumns.map((columnKey) => (
                   <th
                     key={columnKey}
                     className={`px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C] ${
                       columnKey === 'assignee' ? 'text-center' : 'text-left'
                     }`}
                   >
-                    {TICKET_LIST_COLUMN_LABELS[columnKey]}
+                    <span className={`flex items-center gap-1 ${columnKey === 'assignee' ? 'justify-center' : ''}`}>
+                      <span>{TICKET_LIST_COLUMN_LABELS[columnKey]}</span>
+                      <button
+                        type="button"
+                        onClick={() => setSettingsColumn(columnKey)}
+                        className="inline-flex h-5 w-5 items-center justify-center rounded border border-[#D2D0CE] bg-white text-[#605E5C] hover:border-[#009B9B] hover:text-[#009B9B]"
+                        aria-label={`Impostazioni colonna ${TICKET_LIST_COLUMN_LABELS[columnKey]}`}
+                        title={`Impostazioni ${TICKET_LIST_COLUMN_LABELS[columnKey]}`}
+                      >
+                        <Settings className="h-3.5 w-3.5" />
+                      </button>
+                    </span>
                   </th>
                 ))}
               </tr>
@@ -323,17 +346,39 @@ export function TicketListPage() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={activeColumns.length} className="px-6 py-16 text-center text-sm text-[#605E5C]">
+                  <td colSpan={safeColumns.length} className="px-6 py-16 text-center text-sm text-[#605E5C]">
                     Nessun ticket trovato con i filtri selezionati.
                   </td>
                 </tr>
               ) : (
                 filtered.map((ticket, index) => (
-                  <TicketListRow key={ticket.id} ticket={ticket} index={index} activeColumns={activeColumns} />
+                  <TicketListRow key={ticket.id} ticket={ticket} index={index} activeColumns={safeColumns} />
                 ))
               )}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {settingsColumn && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/30 p-4">
+          <div className="w-full max-w-md rounded-lg border border-[#EDEBE9] bg-white p-5 shadow-2xl">
+            <h2 className="text-lg font-semibold text-[#201F1E]">
+              Impostazioni colonna: {TICKET_LIST_COLUMN_LABELS[settingsColumn]}
+            </h2>
+            <div className="mt-4 min-h-16 rounded-md border border-dashed border-[#EDEBE9] bg-[#FAF9F8] p-3 text-sm text-[#605E5C]">
+              Opzioni in arrivo.
+            </div>
+            <div className="mt-5 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setSettingsColumn(null)}
+                className="rounded-md bg-[#009B9B] px-4 py-2 text-sm font-medium text-white hover:bg-[#007575]"
+              >
+                Chiudi
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
