@@ -61,8 +61,9 @@ const ASSIGNEES = ['Marco Rossi', 'Laura Conti', 'Andrea Ferri', 'Sara Mancini']
 const TAG_POOL = ['urgente', 'cliente', 'ordine', 'spedizione', 'documenti', 'supporto', 'priorita']
 
 function buildDate(baseIndex: number, extraDays: number) {
-  const day = (baseIndex % 28) + 1 + extraDays
-  return new Date(Date.UTC(2026, 6, day, 8 + (baseIndex % 9), 10 + (baseIndex % 40), 0)).toISOString()
+  const month = baseIndex % 12
+  const day = ((baseIndex * 3) % 27) + 1 + extraDays
+  return new Date(Date.UTC(2026, month, day, 8 + (baseIndex % 9), 10 + (baseIndex % 40), 0)).toISOString()
 }
 
 function toTag(value: string) {

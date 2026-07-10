@@ -164,7 +164,6 @@ export function TicketListPage() {
   const tabsForBar: DynamicTab[] = effectiveGroupingMode === 'none' ? requestTypeTabs : groupingTabs
   const specialColumns = safeColumns
   const specialGridTemplateColumns = specialColumns.map((columnKey) => specialColumnWidths[columnKey]).join(' ')
-  const availableMonths = getAvailableMonths(filteredByTypeAndSearch, selectedGroupingYear)
   const filtered = applyGroupingTabFilter(filteredByTypeAndSearch, effectiveGroupingMode, groupingTabFilter, selectedGroupingYear)
   const groupedSpecialTickets: { key: string; tickets: Ticket[] }[] = [{ key: 'all', tickets: filtered }]
 
@@ -181,10 +180,9 @@ export function TicketListPage() {
     }
 
     if (effectiveGroupingMode === 'monthYear') {
-      if (availableMonths.length === 0) {
-        if (groupingTabFilter !== 'all') setGroupingTabFilter('all')
-      } else if (!availableMonths.includes(groupingTabFilter)) {
-        setGroupingTabFilter(availableMonths[0])
+      const monthTabIds = new Set(monthTabs.map((tab) => tab.id))
+      if (!monthTabIds.has(groupingTabFilter)) {
+        setGroupingTabFilter(monthTabs[0]?.id ?? '1')
       }
       return
     }
@@ -193,7 +191,7 @@ export function TicketListPage() {
     if (!availableTabIds.has(groupingTabFilter)) {
       setGroupingTabFilter('all')
     }
-  }, [effectiveGroupingMode, availableMonths, groupingTabFilter, tabsForBar])
+  }, [effectiveGroupingMode, groupingTabFilter, tabsForBar])
 
   return (
     <div className="mx-auto max-w-6xl px-4 pb-6 sm:px-6">
@@ -492,18 +490,6 @@ function applyGroupingTabFilter(
 
 function getAvailableYears(tickets: Ticket[]): string[] {
   return Array.from(new Set(tickets.map((ticket) => new Date(ticket.createdAt).getFullYear().toString()))).sort((a, b) => Number(b) - Number(a))
-}
-
-function getAvailableMonths(tickets: Ticket[], year: string): string[] {
-  const selectedYear = Number(year)
-  if (!selectedYear) return []
-  return Array.from(
-    new Set(
-      tickets
-        .filter((ticket) => new Date(ticket.createdAt).getFullYear() === selectedYear)
-        .map((ticket) => String(new Date(ticket.createdAt).getMonth() + 1))
-    )
-  ).sort((a, b) => Number(a) - Number(b))
 }
 
 function TicketListRow({
