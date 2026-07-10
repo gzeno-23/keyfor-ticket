@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { MoveRight, Plus, Search } from 'lucide-react'
+import { ChevronLeft, ChevronRight, MoveRight, Plus, Search } from 'lucide-react'
 import { StatusBadge } from '@/components/ui/badges'
 import { mockTickets, type Status, type Ticket } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
@@ -71,6 +71,7 @@ function normalizeText(value: string) {
 
 export function TicketListPage() {
   const navigate = useNavigate()
+  const tabScrollRef = useRef<HTMLDivElement | null>(null)
   const [searchParams, setSearchParams] = useSearchParams()
   const [search, setSearch] = useState(searchParams.get('q') ?? '')
   const statusFilter = (searchParams.get('status') as Status | 'all') ?? 'all'
@@ -111,6 +112,13 @@ export function TicketListPage() {
         ? 'Seleziona una richiesta chiusa per visualizzarla'
         : ''
 
+  const scrollTabs = (direction: 'left' | 'right') => {
+    const element = tabScrollRef.current
+    if (!element) return
+    const amount = direction === 'left' ? -260 : 260
+    element.scrollBy({ left: amount, behavior: 'smooth' })
+  }
+
   return (
     <div className="mx-auto max-w-6xl px-4 pb-6 sm:px-6">
       <div className="sticky top-14 z-20 bg-[#F8F9FA] pt-6">
@@ -131,7 +139,19 @@ export function TicketListPage() {
         {isSpecialLayout ? (
           <div className="mt-4 px-1">
             <div className="relative">
-              <div onWheel={handleHorizontalWheelScroll} className="no-scrollbar flex items-center gap-6 overflow-x-auto text-sm">
+              <button
+                type="button"
+                onClick={() => scrollTabs('left')}
+                className="absolute left-0 top-1/2 z-10 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#F8F9FA] text-[#605E5C] md:flex"
+                aria-label="Scorri tab a sinistra"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <div
+                ref={tabScrollRef}
+                onWheel={handleHorizontalWheelScroll}
+                className="no-scrollbar flex items-center gap-6 overflow-x-auto whitespace-nowrap px-8 scroll-smooth text-sm"
+              >
                 {requestTypeTabs.map((tab) => (
                   <button
                     key={tab.id}
@@ -145,6 +165,14 @@ export function TicketListPage() {
                   </button>
                 ))}
               </div>
+              <button
+                type="button"
+                onClick={() => scrollTabs('right')}
+                className="absolute right-0 top-1/2 z-10 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#F8F9FA] text-[#605E5C] md:flex"
+                aria-label="Scorri tab a destra"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
             </div>
             <div className="h-px w-full bg-[#EDEBE9]" />
             <div className="h-4 w-full bg-[#F8F9FA]" />
@@ -170,6 +198,19 @@ export function TicketListPage() {
                   className="w-full bg-transparent px-2 py-2 text-base text-[#323130] outline-none sm:text-sm"
                 />
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Desktop table header - inside sticky area */}
+        {isSpecialLayout && (
+          <div className="mt-0 hidden rounded-t-2xl border border-b-0 border-[#EDEBE9] bg-[#FAF9F8] md:block">
+            <div className="grid grid-cols-[1fr_220px_1fr_140px_120px] px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">
+              <span>Tipo richiesta</span>
+              <span className="text-center">Presa in carico</span>
+              <span>Cliente</span>
+              <span>Data</span>
+              <span>Stato</span>
             </div>
           </div>
         )}
@@ -201,9 +242,9 @@ export function TicketListPage() {
         </div>
       )}
 
-      <div className="mt-0 rounded-2xl border border-[#EDEBE9] bg-white">
-        {/* Mobile list */}
-        <div className="divide-y divide-[#EDEBE9] md:hidden">
+      {/* Mobile list */}
+      <div className="mt-0 rounded-2xl border border-[#EDEBE9] bg-white md:hidden">
+        <div className="divide-y divide-[#EDEBE9]">
           {filtered.length === 0 ? (
             <div className="px-4 py-10 text-center text-sm text-[#605E5C]">
               Nessun ticket trovato con i filtri selezionati.
@@ -232,13 +273,49 @@ export function TicketListPage() {
             ))
           )}
         </div>
+      </div>
 
-        {/* Desktop table */}
-        <div className="hidden overflow-x-auto md:block">
+      {/* Desktop table body - scrolls below sticky header */}
+      {isSpecialLayout && (
+        <div className="mt-0 hidden rounded-b-2xl border border-t-0 border-[#EDEBE9] bg-white md:block">
+          <div className="divide-y divide-[#EDEBE9]">
+            {filtered.length === 0 ? (
+              <div className="px-6 py-16 text-center text-sm text-[#605E5C]">
+                Nessun ticket trovato con i filtri selezionati.
+              </div>
+            ) : (
+              filtered.map((ticket, index) => (
+                <Link
+                  key={ticket.id}
+                  to={`/tickets/${ticket.id}`}
+                  className={`grid grid-cols-[1fr_220px_1fr_140px_120px] px-6 py-3 text-sm hover:bg-[#F3F2F1] ${index % 2 === 0 ? 'bg-white' : 'bg-[#FCFBFA]'}`}
+                >
+                  <span className="flex items-center gap-2 font-medium text-[#323130]">
+                    <span
+                      className="h-2 w-2 shrink-0 rounded-[2px]"
+                      style={{ backgroundColor: getRequestTypeColor(ticket.requestType, '#A19F9D') }}
+                    />
+                    {ticket.requestType ?? 'Richiesta'}
+                  </span>
+                  <span className="text-center text-[#605E5C]">{ticket.status !== 'open' ? ticket.assignee : ''}</span>
+                  <span className="text-[#323130]">{ticket.customerName}</span>
+                  <span className="text-[#605E5C]">{new Date(ticket.createdAt).toLocaleDateString('it-IT')}</span>
+                  <span><StatusBadge status={ticket.status} /></span>
+                </Link>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Non-special layout table (legacy) */}
+      {!isSpecialLayout && (
+        <div className="mt-4 hidden rounded-2xl border border-[#EDEBE9] bg-white md:block">
           <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-[#FAF9F8]">
+            <thead className="bg-[#FAF9F8]">
+              <tr>
                 <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Tipo richiesta</th>
+                <th className="px-6 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Presa in carico</th>
                 <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Cliente</th>
                 <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Data</th>
                 <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]">Stato</th>
@@ -247,7 +324,7 @@ export function TicketListPage() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-16 text-center text-sm text-[#605E5C]">
+                  <td colSpan={5} className="px-6 py-16 text-center text-sm text-[#605E5C]">
                     Nessun ticket trovato con i filtri selezionati.
                   </td>
                 </tr>
@@ -259,7 +336,7 @@ export function TicketListPage() {
             </tbody>
           </table>
         </div>
-      </div>
+      )}
     </div>
   )
 }
@@ -276,6 +353,7 @@ function TicketListRow({ ticket, index }: { ticket: Ticket; index: number }) {
           <span>{ticket.requestType ?? 'Richiesta'}</span>
         </Link>
       </td>
+      <td className="px-6 py-3 align-top text-center text-[#605E5C]">{ticket.status !== 'open' ? ticket.assignee : ''}</td>
       <td className="px-6 py-3 align-top text-[#323130]">{ticket.customerName}</td>
       <td className="px-6 py-3 align-top text-[#605E5C]">
         {new Date(ticket.createdAt).toLocaleDateString('it-IT')}

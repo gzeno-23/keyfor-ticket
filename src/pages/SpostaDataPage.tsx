@@ -395,7 +395,10 @@ export function SpostaDataPage() {
             </div>
           </div>
 
-        <div onWheel={handleHorizontalWheelScroll} className="no-scrollbar mt-4 flex items-center gap-6 overflow-x-auto text-sm">
+        <div
+          onWheel={handleHorizontalWheelScroll}
+          className="no-scrollbar mt-4 flex items-center gap-6 overflow-x-auto whitespace-nowrap scroll-smooth text-sm"
+        >
           <button
             type="button"
             onClick={() => setActiveTab('details')}

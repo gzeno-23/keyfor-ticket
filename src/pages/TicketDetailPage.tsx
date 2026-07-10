@@ -158,7 +158,10 @@ export function TicketDetailPage() {
           </div>
         </div>
 
-        <div onWheel={handleHorizontalWheelScroll} className="no-scrollbar mt-4 flex gap-4 overflow-x-auto text-sm">
+        <div
+          onWheel={handleHorizontalWheelScroll}
+          className="no-scrollbar mt-4 flex gap-4 overflow-x-auto whitespace-nowrap scroll-smooth text-sm"
+        >
           {[
             { id: 'details' as TicketTab, label: 'Dettagli' },
             { id: 'comments' as TicketTab, label: `Note (${comments.length})` },
