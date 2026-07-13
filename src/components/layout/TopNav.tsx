@@ -24,7 +24,7 @@ export function TopNav() {
   const currentPath = `${location.pathname}${location.search}`
   const statusParam = new URLSearchParams(location.search).get('status')
   const canCustomizeTicketList = location.pathname === '/tickets' && (statusParam === 'open' || statusParam === 'closed')
-  const canUseAssigneeGrouping = statusParam === 'open'
+  const canUseAssigneeGrouping = statusParam === 'open' || statusParam === 'closed'
   const availableYears = getAvailableYears(mockTickets)
 
   useEffect(() => {

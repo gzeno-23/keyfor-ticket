@@ -95,17 +95,21 @@ export function HubPage() {
   const [hubStyle, setHubStyle] = useState<HubStyle>(() => readHubStyleFromStorage())
   const currentPath = `${location.pathname}${location.search}`
   const loginMessageFromState = ((location.state as { loginMessage?: string } | null)?.loginMessage ?? '').trim()
-  const [postLoginMessage, setPostLoginMessage] = useState(loginMessageFromState)
-  const [isPostLoginMessageOpen, setIsPostLoginMessageOpen] = useState(Boolean(loginMessageFromState))
+  const alreadyShown = sessionStorage.getItem('keyfor-login-msg-shown') === '1'
+  const effectiveLoginMessage = loginMessageFromState && !alreadyShown ? loginMessageFromState : ''
+  const [postLoginMessage, setPostLoginMessage] = useState(effectiveLoginMessage)
+  const [isPostLoginMessageOpen, setIsPostLoginMessageOpen] = useState(Boolean(effectiveLoginMessage))
 
   useEffect(() => {
-    if (!loginMessageFromState) return
+    if (!loginMessageFromState || alreadyShown) return
+    sessionStorage.setItem('keyfor-login-msg-shown', '1')
     setPostLoginMessage(loginMessageFromState)
     setIsPostLoginMessageOpen(true)
-  }, [loginMessageFromState])
+  }, [loginMessageFromState, alreadyShown])
 
   const handleLogout = () => {
     resetNotificationsForDemo()
+    sessionStorage.removeItem('keyfor-login-msg-shown')
     navigate('/login')
   }
 

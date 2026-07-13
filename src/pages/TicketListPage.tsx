@@ -6,6 +6,7 @@ import { mockTickets, type Status, type Ticket } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
 import { getRequestTypeColor } from '@/lib/request-type'
 import { handleHorizontalMouseDragScroll, handleHorizontalWheelScroll } from '@/lib/horizontal-wheel-scroll'
+import { isTicketRead } from '@/lib/ticket-read-state'
 import {
   TICKET_LIST_COLUMN_LABELS,
   setTicketListColumnOrder,
@@ -35,6 +36,7 @@ type RequestTypeFilter =
 type DynamicTab = { id: string; label: string }
 
 const monthTabs: DynamicTab[] = [
+  { id: 'all', label: 'Tutte' },
   { id: '1', label: 'Gennaio' },
   { id: '2', label: 'Febbraio' },
   { id: '3', label: 'Marzo' },
@@ -335,12 +337,15 @@ export function TicketListPage() {
   const configuredColumns = columnOrder.filter((columnKey) => visibleColumns[columnKey])
   const safeColumns: TicketListColumnKey[] =
     configuredColumns.length === 0 ? ['requestType', 'assignee', 'customerName', 'createdAt', 'status'] : configuredColumns
-  const effectiveGroupingMode = statusFilter === 'closed' && groupingMode === 'assignee' ? 'none' : groupingMode
+  const effectiveGroupingMode = groupingMode
   const availableYears = getAvailableYears(mockTickets)
   const selectedGroupingYear = availableYears.includes(groupingYear) ? groupingYear : (availableYears[0] ?? '')
   const showNonAssignedTab = statusFilter !== 'closed'
   const groupingTabs = getGroupingTabs(filteredByTypeAndSearch, effectiveGroupingMode, mockTickets, showNonAssignedTab)
-  const tabsForBar: DynamicTab[] = effectiveGroupingMode === 'none' ? requestTypeTabs : groupingTabs
+  const groupingTabsWithYear: DynamicTab[] = effectiveGroupingMode === 'monthYear'
+    ? groupingTabs.map((t) => t.id === 'all' ? t : { ...t, label: `${t.label} ${selectedGroupingYear}` })
+    : groupingTabs
+  const tabsForBar: DynamicTab[] = effectiveGroupingMode === 'none' ? requestTypeTabs : groupingTabsWithYear
   const specialColumns = safeColumns
   const specialGridTemplateColumns = specialColumns.map((columnKey) => specialColumnWidths[columnKey]).join(' ')
   const filtered = applyGroupingTabFilter(filteredByTypeAndSearch, effectiveGroupingMode, groupingTabFilter, selectedGroupingYear)
@@ -394,7 +399,7 @@ export function TicketListPage() {
     if (effectiveGroupingMode === 'monthYear') {
       const monthTabIds = new Set(monthTabs.map((tab) => tab.id))
       if (!monthTabIds.has(groupingTabFilter)) {
-        setGroupingTabFilter(monthTabs[0]?.id ?? '1')
+        setGroupingTabFilter('all')
       }
       return
     }
@@ -554,6 +559,9 @@ export function TicketListPage() {
                         style={{ backgroundColor: getRequestTypeColor(ticket.requestType, '#A19F9D') }}
                       />
                       <p className="truncate text-sm font-medium text-[#323130]">{ticket.requestType ?? 'Richiesta'}</p>
+                      {ticket.isNew && !isTicketRead(ticket.id) && (
+                        <span className="inline-flex shrink-0 items-center rounded-full bg-[#009B9B] px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">NEW</span>
+                      )}
                     </div>
                   ) : (
                     <p className="truncate text-sm font-medium text-[#323130]">{ticket.id}</p>
@@ -726,6 +734,7 @@ function SollecitiDots({ count }: { count: number }) {
 
 function renderSpecialLayoutCell(ticket: Ticket, columnKey: TicketListColumnKey) {
   if (columnKey === 'requestType') {
+    const showNew = ticket.isNew && !isTicketRead(ticket.id)
     return (
       <span className="flex items-center gap-2 font-medium text-[#323130]">
         <span
@@ -733,6 +742,9 @@ function renderSpecialLayoutCell(ticket: Ticket, columnKey: TicketListColumnKey)
           style={{ backgroundColor: getRequestTypeColor(ticket.requestType, '#A19F9D') }}
         />
         {ticket.requestType ?? 'Richiesta'}
+        {showNew && (
+          <span className="inline-flex items-center rounded-full bg-[#009B9B] px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">NEW</span>
+        )}
       </span>
     )
   }
@@ -784,7 +796,8 @@ function applyGroupingTabFilter(
         return ticket.status === 'open'
       }
       const assigneeLabel = ticket.assignee.trim() === '' ? 'Non assegnato' : ticket.assignee
-      return ticket.status === 'in_progress' && normalizeText(assigneeLabel) === normalizeTabValue(groupingTabFilter)
+      const matchesAssignee = normalizeText(assigneeLabel) === normalizeTabValue(groupingTabFilter)
+      return matchesAssignee && (ticket.status === 'in_progress' || ticket.status === 'closed')
     }
     if (groupingMode === 'monthYear') {
       const date = new Date(ticket.createdAt)
@@ -817,6 +830,7 @@ function TicketListRow({
     <tr className={`cursor-pointer hover:bg-[#DEECF9] ${index % 2 === 0 ? 'bg-white' : 'bg-[#FCFBFA]'}`}>
       {activeColumns.map((columnKey) => {
         if (columnKey === 'requestType') {
+          const showNew = ticket.isNew && !isTicketRead(ticket.id)
           return (
             <td key={columnKey} className="px-6 py-3 align-top">
               <Link to={`/tickets/${ticket.id}`} className="inline-flex items-center gap-2 font-medium text-[#323130] hover:text-[#009B9B]">
@@ -825,6 +839,9 @@ function TicketListRow({
                   style={{ backgroundColor: getRequestTypeColor(ticket.requestType, '#A19F9D') }}
                 />
                 <span>{ticket.requestType ?? 'Richiesta'}</span>
+                {showNew && (
+                  <span className="inline-flex items-center rounded-full bg-[#009B9B] px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">NEW</span>
+                )}
               </Link>
             </td>
           )

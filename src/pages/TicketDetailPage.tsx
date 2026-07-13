@@ -6,6 +6,7 @@ import { BackButton } from '@/components/ui/back-button'
 import { StatusBadge } from '@/components/ui/badges'
 import { handleHorizontalMouseDragScroll, handleHorizontalWheelScroll } from '@/lib/horizontal-wheel-scroll'
 import { getBookmarked, setBookmarked } from '@/lib/bookmarks'
+import { markTicketRead } from '@/lib/ticket-read-state'
 
 interface Comment {
   text: string
@@ -45,6 +46,7 @@ export function TicketDetailPage() {
   useEffect(() => {
     if (!id) return
     setIsBookmarked(getBookmarked(`ticket:${id}`))
+    markTicketRead(id)
   }, [id])
 
   if (!ticket) {
