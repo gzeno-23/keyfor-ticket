@@ -211,8 +211,8 @@ export function RequestTypePage() {
           </button>
           <button
             type="button"
-            onClick={() => setIsSettingsOpen(true)}
-            className="relative flex h-8 w-8 items-center justify-center rounded-md text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+            disabled
+            className="relative flex h-8 w-8 cursor-not-allowed items-center justify-center rounded-md text-white/30 transition-colors"
             aria-label="Impostazioni"
             title="Impostazioni"
           >

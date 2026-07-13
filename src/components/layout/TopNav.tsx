@@ -24,6 +24,7 @@ export function TopNav() {
   const currentPath = `${location.pathname}${location.search}`
   const statusParam = new URLSearchParams(location.search).get('status')
   const canCustomizeTicketList = location.pathname === '/tickets' && (statusParam === 'open' || statusParam === 'closed')
+  const hasSettings = canCustomizeTicketList
   const canUseAssigneeGrouping = statusParam === 'open' || statusParam === 'closed'
   const availableYears = getAvailableYears(mockTickets)
 
@@ -73,8 +74,9 @@ export function TopNav() {
         <button
           type="button"
           title="Impostazioni"
-          onClick={() => setIsSettingsOpen(true)}
-          className="relative flex h-8 w-8 items-center justify-center rounded-md text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+          onClick={() => hasSettings && setIsSettingsOpen(true)}
+          disabled={!hasSettings}
+          className={`relative flex h-8 w-8 items-center justify-center rounded-md transition-colors ${hasSettings ? 'text-white/80 hover:bg-white/10 hover:text-white cursor-pointer' : 'cursor-not-allowed text-white/30'}`}
         >
           <Settings className="h-4 w-4" />
         </button>
