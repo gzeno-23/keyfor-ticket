@@ -1,16 +1,42 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
 import { resetNotificationsForDemo } from '@/lib/notifications'
 
 export function LoginPage() {
   const navigate = useNavigate()
+
+  useEffect(() => {
+    const htmlStyle = document.documentElement.style
+    const bodyStyle = document.body.style
+    const previous = {
+      htmlOverflow: htmlStyle.overflow,
+      htmlOverscrollBehavior: htmlStyle.overscrollBehavior,
+      bodyOverflow: bodyStyle.overflow,
+      bodyOverscrollBehavior: bodyStyle.overscrollBehavior,
+    }
+
+    htmlStyle.overflow = 'hidden'
+    htmlStyle.overscrollBehavior = 'none'
+    bodyStyle.overflow = 'hidden'
+    bodyStyle.overscrollBehavior = 'none'
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+
+    return () => {
+      htmlStyle.overflow = previous.htmlOverflow
+      htmlStyle.overscrollBehavior = previous.htmlOverscrollBehavior
+      bodyStyle.overflow = previous.bodyOverflow
+      bodyStyle.overscrollBehavior = previous.bodyOverscrollBehavior
+    }
+  }, [])
+
   const handleSignIn = () => {
     resetNotificationsForDemo()
     navigate('/hub', { replace: true })
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] flex flex-col items-center justify-center px-4">
+    <div className="fixed inset-0 flex w-full flex-col items-center justify-center overflow-hidden bg-[#F8F9FA] px-4">
       <div className="flex flex-col items-center gap-5">
         {/* Logo */}
         <div className="w-36 h-36 flex items-center justify-center">

@@ -154,7 +154,7 @@ export function HubPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] flex flex-col">
+    <div className="flex h-[100dvh] flex-col overflow-hidden bg-[#F8F9FA] md:h-auto md:min-h-screen md:overflow-visible">
       <header className="bg-[#1F1F1F] pl-3 pr-6 py-0 h-14 flex items-center gap-1">
         <div className="w-14 h-14 flex items-center justify-center shrink-0">
           <img
@@ -193,7 +193,7 @@ export function HubPage() {
       </header>
 
       {hubStyle === 'classic' ? (
-        <div className="flex-1 flex flex-col w-full">
+        <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden">
           {styledChoices.map(({ id, iconSrc, label, color, to }) => (
             <button
               key={id}
@@ -233,8 +233,8 @@ export function HubPage() {
           ))}
         </div>
       ) : hubStyle === 'business' ? (
-        <div className="flex-1 w-full px-4 py-4 sm:px-6 sm:py-6">
-          <div className="grid h-full min-h-[calc(100dvh-4.5rem)] w-full grid-rows-[repeat(3,minmax(0,1fr))] gap-4 md:min-h-0 md:grid-cols-3 md:grid-rows-1">
+        <div className="flex min-h-0 w-full flex-1 overflow-hidden px-4 py-4 sm:px-6 sm:py-6">
+          <div className="grid h-full min-h-0 w-full grid-rows-[repeat(3,minmax(0,1fr))] gap-4 md:min-h-[calc(100dvh-4.5rem)] md:grid-cols-3 md:grid-rows-1">
             {styledChoices.map(({ id, iconSrc, label, color, to }) => (
               <button
                 key={id}
@@ -275,8 +275,8 @@ export function HubPage() {
           </div>
         </div>
       ) : (
-        <div className="flex-1 w-full bg-[#F8F9FA] px-4 py-4 sm:px-6 sm:py-6">
-          <div className="grid h-full min-h-[calc(100dvh-4.5rem)] w-full gap-4 md:grid-cols-6 md:grid-rows-[minmax(0,1.15fr)_minmax(0,1fr)]">
+        <div className="flex min-h-0 w-full flex-1 overflow-hidden bg-[#F8F9FA] px-4 py-4 sm:px-6 sm:py-6">
+          <div className="grid h-full min-h-0 w-full gap-4 md:min-h-[calc(100dvh-4.5rem)] md:grid-cols-6 md:grid-rows-[minmax(0,1.15fr)_minmax(0,1fr)]">
             {styledChoices.map(({ id, iconSrc, label, color, to }) => (
               <button
                 key={id}

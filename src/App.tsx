@@ -1,4 +1,5 @@
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { LoginPage } from '@/pages/LoginPage'
 import { HubPage } from '@/pages/HubPage'
@@ -12,9 +13,22 @@ import { TicketReviewPage } from '@/pages/TicketReviewPage'
 import { NotificationsPage } from '@/pages/NotificationsPage'
 import { NotificationDetailPage } from '@/pages/NotificationDetailPage'
 
+function ScrollToTopOnDesktop() {
+  const location = useLocation()
+
+  useEffect(() => {
+    if (window.innerWidth >= 1024) {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+    }
+  }, [location.pathname, location.search, location.hash])
+
+  return null
+}
+
 function App() {
   return (
     <HashRouter>
+      <ScrollToTopOnDesktop />
       <Routes>
         {/* Pagine senza TopNav */}
         <Route path="/login" element={<LoginPage />} />
