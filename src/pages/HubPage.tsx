@@ -46,9 +46,9 @@ const HUB_COLORS: Record<HubStyle, Record<HubChoiceId, string>> = {
     history: '#5C2D91',
   },
   spotlight: {
-    new: '#00A3A3',
-    manage: '#2E86C1',
-    history: '#9C6CC3',
+    new: '#2F80ED',
+    manage: '#F2994A',
+    history: '#6B7280',
   },
 }
 
