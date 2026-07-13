@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Bell, ChevronRight, Plus, Settings } from 'lucide-react'
 import { UserProfileMenu } from '@/components/layout/UserProfileMenu'
-import { mockTickets } from '@/data/mock-tickets'
 import { listBookmarkedKeys } from '@/lib/bookmarks'
 import { resetNotificationsForDemo, useNotifications } from '@/lib/notifications'
 import { getRequestTypeColor } from '@/lib/request-type'
@@ -73,6 +72,20 @@ const REQUEST_TYPE_TO_ID: Record<string, string> = {
 const REQUEST_TYPE_ID_TO_LABEL: Record<string, string> = Object.fromEntries(
   Object.entries(REQUEST_TYPE_TO_ID).map(([label, id]) => [id, label])
 )
+const MONTH_LABELS: Record<string, string> = {
+  '1': 'Gennaio',
+  '2': 'Febbraio',
+  '3': 'Marzo',
+  '4': 'Aprile',
+  '5': 'Maggio',
+  '6': 'Giugno',
+  '7': 'Luglio',
+  '8': 'Agosto',
+  '9': 'Settembre',
+  '10': 'Ottobre',
+  '11': 'Novembre',
+  '12': 'Dicembre',
+}
 
 type FavoriteLink = { label: string; to: string }
 
@@ -127,26 +140,30 @@ export function HubPage() {
     const bookmarkedKeys = listBookmarkedKeys()
 
     bookmarkedKeys.forEach((key) => {
-      if (key.startsWith('create:')) {
-        const requestTypeId = key.replace('create:', '')
-        const requestTypeLabel = REQUEST_TYPE_ID_TO_LABEL[requestTypeId] ?? requestTypeId
-        links.new.push({ label: requestTypeLabel, to: `/richieste/${requestTypeId}` })
-        return
-      }
+      if (key.startsWith('tickets-tab:')) {
+        const [, rawStatus = 'open', mode = 'none', rawValue = 'all', rawYear = ''] = key.split(':')
+        const status = rawStatus === 'closed' ? 'closed' : 'open'
+        let label = 'Tutte'
+        let to = `/tickets?status=${status}`
 
-      if (key.startsWith('ticket:')) {
-        const ticketId = key.replace('ticket:', '')
-        const ticket = mockTickets.find((item) => item.id === ticketId)
-        if (!ticket?.requestType) return
-
-        const requestTypeId = REQUEST_TYPE_TO_ID[ticket.requestType]
-        const status = ticket.status === 'closed' ? 'closed' : 'open'
-        const to = requestTypeId ? `/tickets?status=${status}&type=${requestTypeId}` : `/tickets?status=${status}`
+        if (mode === 'none' && rawValue !== 'all') {
+          label = REQUEST_TYPE_ID_TO_LABEL[rawValue] ?? rawValue
+          to = `${to}&type=${rawValue}`
+        } else if (mode === 'assignee') {
+          label = rawValue === 'all' ? 'Tutte assegnazioni' : rawValue
+        } else if (mode === 'monthYear') {
+          if (rawValue === 'all') {
+            label = rawYear ? `Tutti i mesi ${rawYear}` : 'Tutti i mesi'
+          } else {
+            const monthLabel = MONTH_LABELS[rawValue] ?? `Mese ${rawValue}`
+            label = rawYear ? `${monthLabel} ${rawYear}` : monthLabel
+          }
+        }
 
         if (status === 'closed') {
-          links.history.push({ label: ticket.requestType, to })
+          links.history.push({ label, to })
         } else {
-          links.manage.push({ label: ticket.requestType, to })
+          links.manage.push({ label, to })
         }
       }
     })

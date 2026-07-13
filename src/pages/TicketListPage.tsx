@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, Filter, FilterX, HelpCircle, Plus, Search } from 'lucide-react'
+import { ArrowDown, ArrowUp, Bookmark, ChevronDown, ChevronRight, Plus, Search } from 'lucide-react'
 import { StatusBadge } from '@/components/ui/badges'
 import { mockTickets, type Status, type Ticket } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
 import { getRequestTypeColor } from '@/lib/request-type'
 import { handleHorizontalMouseDragScroll, handleHorizontalWheelScroll } from '@/lib/horizontal-wheel-scroll'
+import { getBookmarked, setBookmarked } from '@/lib/bookmarks'
 import { isTicketRead } from '@/lib/ticket-read-state'
 import {
   TICKET_LIST_COLUMN_LABELS,
@@ -101,6 +102,7 @@ function normalizeTabValue(value: string) {
 
 const specialColumnWidths: Record<TicketListColumnKey, string> = {
   requestType: '1fr',
+  title: '1.2fr',
   assignee: '220px',
   customerName: '1fr',
   createdAt: '140px',
@@ -115,10 +117,7 @@ function ColumnHeaderMenu({
   columnKey,
   label,
   sort,
-  filterValue,
   onSort,
-  onFilter,
-  onClearFilter,
   draggable,
   onDragStart,
   onDragOver,
@@ -129,10 +128,7 @@ function ColumnHeaderMenu({
   columnKey: TicketListColumnKey
   label: string
   sort: SortState
-  filterValue: string
   onSort: (col: TicketListColumnKey, dir: 'asc' | 'desc') => void
-  onFilter: (col: TicketListColumnKey) => void
-  onClearFilter: (col: TicketListColumnKey) => void
   draggable?: boolean
   onDragStart?: () => void
   onDragOver?: (e: React.DragEvent) => void
@@ -143,7 +139,6 @@ function ColumnHeaderMenu({
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const isActive = sort?.col === columnKey
-  const hasFilter = filterValue !== ''
 
   useEffect(() => {
     if (!open) return
@@ -157,7 +152,7 @@ function ColumnHeaderMenu({
   return (
     <div
       ref={ref}
-      className={`group relative flex select-none items-center gap-1 ${isDragOver ? 'text-[#009B9B]' : ''}`}
+      className={`group relative flex w-full select-none items-center justify-start gap-1 ${isDragOver ? 'text-[#009B9B]' : ''}`}
       draggable={draggable}
       onDragStart={onDragStart}
       onDragOver={onDragOver}
@@ -170,67 +165,31 @@ function ColumnHeaderMenu({
           ? <ArrowUp className="h-3 w-3 shrink-0 text-[#009B9B]" />
           : <ArrowDown className="h-3 w-3 shrink-0 text-[#009B9B]" />
       )}
-      {hasFilter && !isActive && <Filter className="h-3 w-3 shrink-0 text-[#009B9B]" />}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded transition-colors hover:bg-[#EDEBE9] ${open || isActive || hasFilter ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+        className="flex h-5 w-5 shrink-0 items-center justify-center rounded transition-colors hover:bg-[#EDEBE9]"
+        title="Ordina"
       >
-        <ChevronDown className="h-3 w-3" />
+        <ChevronDown className="h-3 w-3 text-[#605E5C]" />
       </button>
-
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-1 min-w-[220px] rounded-md border border-[#EDEBE9] bg-white py-1 shadow-xl">
+        <div className="absolute left-0 top-full z-50 mt-1 min-w-[180px] rounded-md border border-[#EDEBE9] bg-white py-1 shadow-xl">
           <button
             type="button"
             onClick={() => { onSort(columnKey, 'asc'); setOpen(false) }}
-            className={`flex w-full items-center gap-3 px-4 py-2 text-sm hover:bg-[#DEECF9] ${isActive && sort!.dir === 'asc' ? 'font-semibold text-[#009B9B]' : 'text-[#323130]'}`}
+            className={`flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-[#DEECF9] ${isActive && sort?.dir === 'asc' ? 'text-[#009B9B] font-semibold' : 'text-[#323130]'}`}
           >
-            <ArrowUp className="h-4 w-4 shrink-0 text-[#009B9B]" />
+            <ArrowUp className="h-4 w-4 shrink-0" />
             Crescente
           </button>
           <button
             type="button"
             onClick={() => { onSort(columnKey, 'desc'); setOpen(false) }}
-            className={`flex w-full items-center gap-3 px-4 py-2 text-sm hover:bg-[#DEECF9] ${isActive && sort!.dir === 'desc' ? 'font-semibold text-[#009B9B]' : 'text-[#323130]'}`}
+            className={`flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-[#DEECF9] ${isActive && sort?.dir === 'desc' ? 'text-[#009B9B] font-semibold' : 'text-[#323130]'}`}
           >
-            <ArrowDown className="h-4 w-4 shrink-0 text-[#009B9B]" />
+            <ArrowDown className="h-4 w-4 shrink-0" />
             Decrescente
-          </button>
-          <div className="my-1 border-t border-[#EDEBE9]" />
-          <button
-            type="button"
-            onClick={() => { onFilter(columnKey); setOpen(false) }}
-            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-[#323130] hover:bg-[#DEECF9]"
-          >
-            <Filter className="h-4 w-4 shrink-0 text-[#605E5C]" />
-            Filtra...
-          </button>
-          <button
-            type="button"
-            disabled
-            className="flex w-full cursor-not-allowed items-center gap-3 px-4 py-2 text-sm text-[#A19F9D]"
-          >
-            <Filter className="h-4 w-4 shrink-0 text-[#A19F9D]" />
-            Filtra in base a questo valore
-          </button>
-          <button
-            type="button"
-            onClick={() => { onClearFilter(columnKey); setOpen(false) }}
-            disabled={!hasFilter}
-            className={`flex w-full items-center gap-3 px-4 py-2 text-sm ${hasFilter ? 'text-[#323130] hover:bg-[#DEECF9]' : 'cursor-not-allowed text-[#A19F9D]'}`}
-          >
-            <FilterX className="h-4 w-4 shrink-0" />
-            Cancella filtro
-          </button>
-          <div className="my-1 border-t border-[#EDEBE9]" />
-          <button
-            type="button"
-            disabled
-            className="flex w-full cursor-not-allowed items-center gap-3 px-4 py-2 text-sm text-[#A19F9D]"
-          >
-            <HelpCircle className="h-4 w-4 shrink-0" />
-            Guida rapida
           </button>
         </div>
       )}
@@ -252,24 +211,12 @@ export function TicketListPage() {
   const [dragOverCol, setDragOverCol] = useState<TicketListColumnKey | null>(null)
   const draggedCol = useRef<TicketListColumnKey | null>(null)
   const [sort, setSort] = useState<SortState>(null)
-  const [colFilters, setColFilters] = useState<Partial<Record<TicketListColumnKey, string>>>({})
-  const [filterPromptCol, setFilterPromptCol] = useState<TicketListColumnKey | null>(null)
-  const [filterInputValue, setFilterInputValue] = useState('')
   const isSpecialLayout = statusFilter === 'open' || statusFilter === 'closed'
   const bypassTypeFilterForNonAssigned =
     groupingMode === 'assignee' && normalizeTabValue(groupingTabFilter) === normalizeText('Non assegnato')
 
   function handleColSort(col: TicketListColumnKey, dir: 'asc' | 'desc') {
-    setSort((prev) => prev?.col === col && prev.dir === dir ? null : { col, dir })
-  }
-
-  function handleColFilter(col: TicketListColumnKey) {
-    setFilterInputValue(colFilters[col] ?? '')
-    setFilterPromptCol(col)
-  }
-
-  function handleClearFilter(col: TicketListColumnKey) {
-    setColFilters((prev) => { const next = { ...prev }; delete next[col]; return next })
+    setSort({ col, dir })
   }
 
   function handleColDragStart(col: TicketListColumnKey) {
@@ -336,7 +283,7 @@ export function TicketListPage() {
         : ''
   const configuredColumns = columnOrder.filter((columnKey) => visibleColumns[columnKey])
   const safeColumns: TicketListColumnKey[] =
-    configuredColumns.length === 0 ? ['requestType', 'assignee', 'customerName', 'createdAt', 'status'] : configuredColumns
+    configuredColumns.length === 0 ? ['requestType', 'title', 'assignee', 'customerName', 'createdAt', 'status'] : configuredColumns
   const effectiveGroupingMode = groupingMode
   const availableYears = getAvailableYears(mockTickets)
   const selectedGroupingYear = availableYears.includes(groupingYear) ? groupingYear : (availableYears[0] ?? '')
@@ -346,32 +293,24 @@ export function TicketListPage() {
     ? groupingTabs.map((t) => t.id === 'all' ? t : { ...t, label: `${t.label} ${selectedGroupingYear}` })
     : groupingTabs
   const tabsForBar: DynamicTab[] = effectiveGroupingMode === 'none' ? requestTypeTabs : groupingTabsWithYear
+  const activeTabId = effectiveGroupingMode === 'none' ? requestTypeFilter : groupingTabFilter
+  const activeTabLabel = tabsForBar.find((tab) => tab.id === activeTabId)?.label ?? 'Tab'
+  const tabBookmarkKey =
+    effectiveGroupingMode === 'monthYear'
+      ? `tickets-tab:${statusFilter}:${effectiveGroupingMode}:${activeTabId}:${selectedGroupingYear}`
+      : `tickets-tab:${statusFilter}:${effectiveGroupingMode}:${activeTabId}`
+  const [isTabBookmarked, setIsTabBookmarked] = useState(() => getBookmarked(tabBookmarkKey))
   const specialColumns = safeColumns
   const specialGridTemplateColumns = specialColumns.map((columnKey) => specialColumnWidths[columnKey]).join(' ')
   const filtered = applyGroupingTabFilter(filteredByTypeAndSearch, effectiveGroupingMode, groupingTabFilter, selectedGroupingYear)
 
-  // Apply column filters
-  const filteredWithColFilters = Object.entries(colFilters).reduce((acc, [col, val]) => {
-    if (!val) return acc
-    const v = val.toLowerCase()
-    return acc.filter((t) => {
-      if (col === 'requestType') return (t.requestType ?? '').toLowerCase().includes(v)
-      if (col === 'customerName') return t.customerName.toLowerCase().includes(v)
-      if (col === 'assignee') return t.assignee.toLowerCase().includes(v)
-      if (col === 'createdAt') return new Date(t.createdAt).toLocaleDateString('it-IT').includes(v)
-      if (col === 'updatedAt') return new Date(t.updatedAt).toLocaleDateString('it-IT').includes(v)
-      if (col === 'status') return t.status.toLowerCase().includes(v)
-      if (col === 'solleciti') return String(t.solleciti).includes(v)
-      return true
-    })
-  }, filtered)
-
   // Apply sort
   const sortedFiltered = sort
-    ? [...filteredWithColFilters].sort((a, b) => {
+    ? [...filtered].sort((a, b) => {
         let aVal = ''
         let bVal = ''
         if (sort.col === 'requestType') { aVal = a.requestType ?? ''; bVal = b.requestType ?? '' }
+        else if (sort.col === 'title') { aVal = a.title; bVal = b.title }
         else if (sort.col === 'customerName') { aVal = a.customerName; bVal = b.customerName }
         else if (sort.col === 'assignee') { aVal = a.assignee; bVal = b.assignee }
         else if (sort.col === 'createdAt') { aVal = a.createdAt; bVal = b.createdAt }
@@ -380,7 +319,7 @@ export function TicketListPage() {
         else if (sort.col === 'solleciti') { return sort.dir === 'asc' ? a.solleciti - b.solleciti : b.solleciti - a.solleciti }
         return sort.dir === 'asc' ? aVal.localeCompare(bVal, 'it') : bVal.localeCompare(aVal, 'it')
       })
-    : filteredWithColFilters
+    : filtered
 
   const groupedSpecialTickets: { key: string; tickets: Ticket[] }[] = [{ key: 'all', tickets: sortedFiltered }]
 
@@ -409,6 +348,16 @@ export function TicketListPage() {
       setGroupingTabFilter('all')
     }
   }, [effectiveGroupingMode, groupingTabFilter, tabsForBar])
+
+  useEffect(() => {
+    setIsTabBookmarked(getBookmarked(tabBookmarkKey))
+  }, [tabBookmarkKey])
+
+  const handleToggleTabBookmark = () => {
+    const nextValue = !isTabBookmarked
+    setIsTabBookmarked(nextValue)
+    setBookmarked(tabBookmarkKey, nextValue)
+  }
 
   return (
     <div className="w-full px-4 pb-6 sm:px-6 lg:px-8">
@@ -455,6 +404,17 @@ export function TicketListPage() {
                   </button>
                 ))}
               </div>
+              <button
+                type="button"
+                onClick={handleToggleTabBookmark}
+                className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors ${
+                  isTabBookmarked ? 'text-[#009B9B]' : 'text-[#605E5C] hover:bg-[#EDEBE9] hover:text-[#323130]'
+                }`}
+                aria-label={isTabBookmarked ? `Rimuovi bookmark da ${activeTabLabel}` : `Aggiungi bookmark a ${activeTabLabel}`}
+                title={isTabBookmarked ? `Rimuovi bookmark da ${activeTabLabel}` : `Aggiungi bookmark a ${activeTabLabel}`}
+              >
+                <Bookmark className={`h-[18px] w-[18px] stroke-[1.8] ${isTabBookmarked ? 'fill-current text-[#009B9B]' : ''}`} />
+              </button>
             </div>
             <div className="h-px w-full bg-[#EDEBE9]" />
             <div className="h-4 w-full bg-[#F8F9FA]" />
@@ -494,10 +454,7 @@ export function TicketListPage() {
                   columnKey={columnKey}
                   label={TICKET_LIST_COLUMN_LABELS[columnKey]}
                   sort={sort}
-                  filterValue={colFilters[columnKey] ?? ''}
                   onSort={handleColSort}
-                  onFilter={handleColFilter}
-                  onClearFilter={handleClearFilter}
                   draggable
                   onDragStart={() => handleColDragStart(columnKey)}
                   onDragOver={(e) => handleColDragOver(e, columnKey)}
@@ -560,7 +517,7 @@ export function TicketListPage() {
                       />
                       <p className="truncate text-sm font-medium text-[#323130]">{ticket.requestType ?? 'Richiesta'}</p>
                       {ticket.isNew && !isTicketRead(ticket.id) && (
-                        <span className="inline-flex shrink-0 items-center rounded-full bg-[#009B9B] px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">NEW</span>
+                        <span className="ml-0.5 inline-flex shrink-0 items-center rounded-full bg-[#009B9B] px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">NEW</span>
                       )}
                     </div>
                   ) : (
@@ -568,6 +525,9 @@ export function TicketListPage() {
                   )}
                   {safeColumns.includes('customerName') && (
                     <p className="mt-1 truncate text-xs text-[#605E5C]">{ticket.customerName}</p>
+                  )}
+                  {safeColumns.includes('title') && (
+                    <p className="mt-0.5 truncate text-xs text-[#605E5C]">{ticket.title}</p>
                   )}
                   {safeColumns.includes('assignee') && ticket.status !== 'open' && (
                     <p className="mt-0.5 truncate text-xs text-[#605E5C]">
@@ -608,7 +568,7 @@ export function TicketListPage() {
                       style={{ gridTemplateColumns: specialGridTemplateColumns }}
                     >
                       {specialColumns.map((columnKey) => (
-                        <span key={`${ticket.id}-${columnKey}`} className={columnKey === 'assignee' ? 'text-center text-[#605E5C]' : ''}>
+                        <span key={`${ticket.id}-${columnKey}`} className={columnKey === 'assignee' ? 'text-[#605E5C]' : ''}>
                           {renderSpecialLayoutCell(ticket, columnKey)}
                         </span>
                       ))}
@@ -631,17 +591,14 @@ export function TicketListPage() {
                   <th
                     key={columnKey}
                     className={`px-6 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C] ${
-                      columnKey === 'assignee' ? 'text-center' : 'text-left'
+                      'text-left'
                     }`}
                   >
                     <ColumnHeaderMenu
                       columnKey={columnKey}
                       label={TICKET_LIST_COLUMN_LABELS[columnKey]}
                       sort={sort}
-                      filterValue={colFilters[columnKey] ?? ''}
                       onSort={handleColSort}
-                      onFilter={handleColFilter}
-                      onClearFilter={handleClearFilter}
                       draggable
                       onDragStart={() => handleColDragStart(columnKey)}
                       onDragOver={(e) => handleColDragOver(e, columnKey)}
@@ -670,51 +627,13 @@ export function TicketListPage() {
         </div>
       )}
 
-      {/* Filter dialog */}
-      {filterPromptCol && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/30 p-4" onClick={() => setFilterPromptCol(null)}>
-          <div className="w-full max-w-sm rounded-lg border border-[#EDEBE9] bg-white p-5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-sm font-semibold text-[#201F1E]">Filtra per {TICKET_LIST_COLUMN_LABELS[filterPromptCol]}</h3>
-            <input
-              autoFocus
-              type="text"
-              value={filterInputValue}
-              onChange={(e) => setFilterInputValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  setColFilters((prev) => filterInputValue ? { ...prev, [filterPromptCol!]: filterInputValue } : (({ [filterPromptCol!]: _, ...rest }) => rest)(prev as Record<string, string>))
-                  setFilterPromptCol(null)
-                }
-                if (e.key === 'Escape') setFilterPromptCol(null)
-              }}
-              placeholder="Valore filtro..."
-              className="mt-3 w-full rounded-md border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] outline-none focus:border-[#009B9B]"
-            />
-            <div className="mt-4 flex justify-end gap-2">
-              <button type="button" onClick={() => setFilterPromptCol(null)} className="rounded-md border border-[#EDEBE9] px-4 py-2 text-sm text-[#605E5C] hover:bg-[#F3F2F1]">Annulla</button>
-              <button
-                type="button"
-                onClick={() => {
-                  const col = filterPromptCol!
-                  setColFilters((prev) => filterInputValue ? { ...prev, [col]: filterInputValue } : (({ [col]: _, ...rest }) => rest)(prev as Record<string, string>))
-                  setFilterPromptCol(null)
-                }}
-                className="rounded-md bg-[#009B9B] px-4 py-2 text-sm font-medium text-white hover:bg-[#007575]"
-              >
-                Applica
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
     </div>
   )
 }
 
 function SollecitiDots({ count }: { count: number }) {
   if (count === 0) return null
-  const color = '#F59E0B'
+  const color = '#D13438'
   if (count <= 3) {
     return (
       <span className="flex items-center gap-0.5">
@@ -736,19 +655,20 @@ function renderSpecialLayoutCell(ticket: Ticket, columnKey: TicketListColumnKey)
   if (columnKey === 'requestType') {
     const showNew = ticket.isNew && !isTicketRead(ticket.id)
     return (
-      <span className="flex items-center gap-2 font-medium text-[#323130]">
+      <span className="inline-flex items-center gap-1 font-medium text-[#323130]">
         <span
           className="h-2 w-2 shrink-0 rounded-[2px]"
           style={{ backgroundColor: getRequestTypeColor(ticket.requestType, '#A19F9D') }}
         />
         {ticket.requestType ?? 'Richiesta'}
         {showNew && (
-          <span className="inline-flex items-center rounded-full bg-[#009B9B] px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">NEW</span>
+          <span className="ml-0.5 inline-flex items-center rounded-full bg-[#009B9B] px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">NEW</span>
         )}
       </span>
     )
   }
   if (columnKey === 'assignee') return ticket.status !== 'open' ? ticket.assignee : ''
+  if (columnKey === 'title') return <span className="text-[#323130]">{ticket.title}</span>
   if (columnKey === 'customerName') return <span className="text-[#323130]">{ticket.customerName}</span>
   if (columnKey === 'createdAt') return <span className="text-[#605E5C]">{new Date(ticket.createdAt).toLocaleDateString('it-IT')}</span>
   if (columnKey === 'updatedAt') return <span className="text-[#605E5C]">{new Date(ticket.updatedAt).toLocaleDateString('it-IT')}</span>
@@ -833,14 +753,14 @@ function TicketListRow({
           const showNew = ticket.isNew && !isTicketRead(ticket.id)
           return (
             <td key={columnKey} className="px-6 py-3 align-top">
-              <Link to={`/tickets/${ticket.id}`} className="inline-flex items-center gap-2 font-medium text-[#323130] hover:text-[#009B9B]">
+              <Link to={`/tickets/${ticket.id}`} className="inline-flex items-center gap-1 font-medium text-[#323130] hover:text-[#009B9B]">
                 <span
                   className="h-2 w-2 shrink-0 rounded-[2px]"
                   style={{ backgroundColor: getRequestTypeColor(ticket.requestType, '#A19F9D') }}
                 />
                 <span>{ticket.requestType ?? 'Richiesta'}</span>
                 {showNew && (
-                  <span className="inline-flex items-center rounded-full bg-[#009B9B] px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">NEW</span>
+                  <span className="ml-0.5 inline-flex items-center rounded-full bg-[#009B9B] px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">NEW</span>
                 )}
               </Link>
             </td>
@@ -849,8 +769,16 @@ function TicketListRow({
 
         if (columnKey === 'assignee') {
           return (
-            <td key={columnKey} className="px-6 py-3 align-top text-center text-[#605E5C]">
+            <td key={columnKey} className="px-6 py-3 align-top text-[#605E5C]">
               {ticket.status !== 'open' ? ticket.assignee : ''}
+            </td>
+          )
+        }
+
+        if (columnKey === 'title') {
+          return (
+            <td key={columnKey} className="px-6 py-3 align-top text-[#323130]">
+              {ticket.title}
             </td>
           )
         }

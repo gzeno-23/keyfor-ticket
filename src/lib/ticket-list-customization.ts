@@ -1,10 +1,11 @@
 import { useSyncExternalStore } from 'react'
 
-export type TicketListColumnKey = 'requestType' | 'assignee' | 'customerName' | 'createdAt' | 'updatedAt' | 'status' | 'solleciti'
+export type TicketListColumnKey = 'requestType' | 'title' | 'assignee' | 'customerName' | 'createdAt' | 'updatedAt' | 'status' | 'solleciti'
 export type TicketListGroupingMode = 'none' | 'assignee' | 'requestType' | 'monthYear'
 
 export const TICKET_LIST_COLUMN_ORDER: TicketListColumnKey[] = [
   'requestType',
+  'title',
   'assignee',
   'customerName',
   'createdAt',
@@ -15,6 +16,7 @@ export const TICKET_LIST_COLUMN_ORDER: TicketListColumnKey[] = [
 
 export const TICKET_LIST_COLUMN_LABELS: Record<TicketListColumnKey, string> = {
   requestType: 'Tipo richiesta',
+  title: 'Titolo',
   assignee: 'Presa in carico',
   customerName: 'Cliente',
   createdAt: 'Data creazione',
@@ -35,6 +37,7 @@ const STORAGE_KEY = 'keyfor-ticket-customization'
 
 const DEFAULT_TICKET_LIST_COLUMNS: TicketListColumnVisibility = {
   requestType: true,
+  title: true,
   assignee: true,
   customerName: true,
   createdAt: true,
@@ -72,6 +75,7 @@ function readTicketListCustomizationFromStorage(): TicketListCustomizationState 
     const parsedColumns = parsed.columns ?? {}
     const nextValue: TicketListColumnVisibility = {
       requestType: parsedColumns.requestType ?? DEFAULT_TICKET_LIST_COLUMNS.requestType,
+      title: parsedColumns.title ?? DEFAULT_TICKET_LIST_COLUMNS.title,
       assignee: parsedColumns.assignee ?? DEFAULT_TICKET_LIST_COLUMNS.assignee,
       customerName: parsedColumns.customerName ?? DEFAULT_TICKET_LIST_COLUMNS.customerName,
       createdAt: parsedColumns.createdAt ?? DEFAULT_TICKET_LIST_COLUMNS.createdAt,

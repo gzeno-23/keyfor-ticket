@@ -1,11 +1,10 @@
 import { useEffect, useState, type ChangeEvent, type ReactNode } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Bookmark, CheckCircle2, Edit, Send, UserCheck, XCircle } from 'lucide-react'
+import { CheckCircle2, Edit, Send, UserCheck, XCircle } from 'lucide-react'
 import { mockTickets, type Status } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
 import { StatusBadge } from '@/components/ui/badges'
 import { handleHorizontalMouseDragScroll, handleHorizontalWheelScroll } from '@/lib/horizontal-wheel-scroll'
-import { getBookmarked, setBookmarked } from '@/lib/bookmarks'
 import { markTicketRead } from '@/lib/ticket-read-state'
 
 interface Comment {
@@ -40,12 +39,8 @@ export function TicketDetailPage() {
   const [activeTab, setActiveTab] = useState<TicketTab>('details')
   const [attachedFiles, setAttachedFiles] = useState<FileAttachment[]>([])
   const [attachedImages, setAttachedImages] = useState<ImageAttachment[]>([])
-  const bookmarkKey = id ? `ticket:${id}` : ''
-  const [isBookmarked, setIsBookmarked] = useState(() => (id ? getBookmarked(`ticket:${id}`) : false))
-
   useEffect(() => {
     if (!id) return
-    setIsBookmarked(getBookmarked(`ticket:${id}`))
     markTicketRead(id)
   }, [id])
 
@@ -75,12 +70,6 @@ export function TicketDetailPage() {
 
   const handleForward = () => {
     navigate('/team')
-  }
-
-  const handleToggleBookmark = () => {
-    const nextValue = !isBookmarked
-    setIsBookmarked(nextValue)
-    setBookmarked(bookmarkKey, nextValue)
   }
 
   const handleComment = () => {
@@ -150,18 +139,7 @@ export function TicketDetailPage() {
           </div>
         </div>
 
-        <div className="relative mt-4 rounded-2xl border border-[#EDEBE9] bg-white px-4 py-3 pr-14 text-sm">
-          <button
-            type="button"
-            onClick={handleToggleBookmark}
-            className={`absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center transition-colors ${
-              isBookmarked ? 'text-[#009B9B]' : 'text-[#605E5C] hover:text-[#323130]'
-            }`}
-            aria-label={isBookmarked ? 'Rimuovi bookmark' : 'Aggiungi bookmark'}
-            title={isBookmarked ? 'Rimuovi bookmark' : 'Aggiungi bookmark'}
-          >
-            <Bookmark className={`h-[18px] w-[18px] stroke-[1.8] ${isBookmarked ? 'fill-current text-[#009B9B]' : ''}`} />
-          </button>
+        <div className="relative mt-4 rounded-2xl border border-[#EDEBE9] bg-white px-4 py-3 text-sm">
           <div className="grid gap-x-8 gap-y-2 sm:grid-cols-2">
             <div className="flex items-center gap-2">
               <p className="text-xs font-semibold text-[#201F1E]">Numero richiesta</p>
