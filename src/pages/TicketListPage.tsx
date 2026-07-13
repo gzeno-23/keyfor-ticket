@@ -155,7 +155,7 @@ export function TicketListPage() {
         : ''
   const configuredColumns = TICKET_LIST_COLUMN_ORDER.filter((columnKey) => visibleColumns[columnKey])
   const safeColumns: TicketListColumnKey[] =
-    configuredColumns.length <= 1 ? ['requestType', 'assignee', 'customerName', 'createdAt', 'status'] : configuredColumns
+    configuredColumns.length === 0 ? ['requestType', 'assignee', 'customerName', 'createdAt', 'status'] : configuredColumns
   const effectiveGroupingMode = statusFilter === 'closed' && groupingMode === 'assignee' ? 'none' : groupingMode
   const availableYears = getAvailableYears(mockTickets)
   const selectedGroupingYear = availableYears.includes(groupingYear) ? groupingYear : (availableYears[0] ?? '')
@@ -322,19 +322,30 @@ export function TicketListPage() {
                 className="flex cursor-pointer items-center gap-3 px-4 py-3 hover:bg-[#F3F2F1]"
               >
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="h-2 w-2 shrink-0 rounded-[2px]"
-                      style={{ backgroundColor: getRequestTypeColor(ticket.requestType, '#A19F9D') }}
-                    />
-                    <p className="truncate text-sm font-medium text-[#323130]">
-                      {ticket.requestType ?? 'Richiesta'}
+                  {safeColumns.includes('requestType') ? (
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="h-2 w-2 shrink-0 rounded-[2px]"
+                        style={{ backgroundColor: getRequestTypeColor(ticket.requestType, '#A19F9D') }}
+                      />
+                      <p className="truncate text-sm font-medium text-[#323130]">{ticket.requestType ?? 'Richiesta'}</p>
+                    </div>
+                  ) : (
+                    <p className="truncate text-sm font-medium text-[#323130]">{ticket.id}</p>
+                  )}
+                  {safeColumns.includes('customerName') && (
+                    <p className="mt-1 truncate text-xs text-[#605E5C]">{ticket.customerName}</p>
+                  )}
+                  {safeColumns.includes('assignee') && ticket.status !== 'open' && (
+                    <p className="mt-0.5 truncate text-xs text-[#605E5C]">
+                      {ticket.assignee}
                     </p>
-                  </div>
-                  <p className="mt-1 truncate text-xs text-[#605E5C]">{ticket.customerName}</p>
-                  <p className="mt-0.5 text-xs text-[#A19F9D]">{new Date(ticket.createdAt).toLocaleDateString('it-IT')}</p>
+                  )}
+                  {safeColumns.includes('createdAt') && (
+                    <p className="mt-0.5 text-xs text-[#A19F9D]">{new Date(ticket.createdAt).toLocaleDateString('it-IT')}</p>
+                  )}
                 </div>
-                <StatusBadge status={ticket.status} />
+                {safeColumns.includes('status') && <StatusBadge status={ticket.status} />}
                 <ChevronRight className="h-4 w-4 shrink-0 text-[#A19F9D]" />
               </div>
             ))
