@@ -24,12 +24,13 @@ export function NotificationDetailPage() {
 
   if (!notification) {
     return (
-      <div className="w-full px-4 py-6 sm:px-6">
+      <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
         <div className="border-b border-[#EDEBE9] pb-4">
-          <div className="flex items-center gap-3">
-            <BackButton to={listPath} />
-            <div>
-              <h1 className="text-3xl font-light text-[#323130]">Notifica non trovata</h1>
+          <div className="flex items-start gap-3">
+            <BackButton to={listPath} className="mt-1 shrink-0" />
+            <div className="min-w-0 space-y-1">
+              <h1 className="truncate text-3xl font-light leading-tight text-[#323130]">Notifica non trovata</h1>
+              <p className="text-sm leading-5 text-[#605E5C]">Dettaglio notifica</p>
             </div>
           </div>
         </div>
@@ -48,4 +49,3 @@ export function NotificationDetailPage() {
 
   return null
 }
-

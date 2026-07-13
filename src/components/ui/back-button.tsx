@@ -1,4 +1,4 @@
-import { MoveLeft } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 
@@ -32,7 +32,7 @@ export function BackButton({ to = -1, className }: BackButtonProps) {
         className
       )}
     >
-      <MoveLeft className="h-3.5 w-3.5 shrink-0" />
+      <ChevronLeft className="h-4 w-4 shrink-0" />
     </button>
   )
 }

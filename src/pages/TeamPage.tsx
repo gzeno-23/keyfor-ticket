@@ -7,14 +7,14 @@ export function TeamPage() {
   ]
 
   return (
-    <div className="w-full px-6 py-6 lg:px-8">
+    <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
       <div className="border-b border-[#EDEBE9] pb-4">
         <p className="text-xs uppercase tracking-[0.18em] text-[#605E5C]">Dashboard / Team</p>
-        <h1 className="mt-2 text-[28px] font-light text-[#323130]">Team</h1>
-        <p className="mt-1 text-sm text-[#605E5C]">Panoramica dei membri del team di supporto.</p>
+        <h1 className="mt-2 text-3xl font-light leading-tight text-[#323130]">Team</h1>
+        <p className="mt-1 text-sm leading-5 text-[#605E5C]">Panoramica dei membri del team di supporto.</p>
       </div>
 
-      <div className="mt-4 border-b border-[#EDEBE9] bg-white px-6 py-2">
+      <div className="mt-4 border-b border-[#EDEBE9] bg-white px-4 py-2 sm:px-6">
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" className="border border-[#EDEBE9] px-3 py-1.5 text-sm text-[#323130] hover:bg-[#F3F2F1]">
             + Nuovo

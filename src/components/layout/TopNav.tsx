@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ArrowLeft, Bell, Settings } from 'lucide-react'
+import { ChevronLeft, Bell, Settings } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { UserProfileMenu } from './UserProfileMenu'
 import { mockTickets } from '@/data/mock-tickets'
@@ -93,7 +93,7 @@ export function TopNav() {
               className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-[#EDEBE9] text-[#605E5C] hover:bg-[#F3F2F1]"
               aria-label="Chiudi impostazioni"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ChevronLeft className="h-4 w-4" />
             </button>
             <h2 className="mt-3 text-lg font-semibold text-[#201F1E]">Impostazioni</h2>
 

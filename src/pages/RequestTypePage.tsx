@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
-import { MoveRight, Bell, Settings, ArrowLeft } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Bell, Settings } from 'lucide-react'
 import { BackButton } from '@/components/ui/back-button'
 import { UserProfileMenu } from '@/components/layout/UserProfileMenu'
 import { resetNotificationsForDemo, useNotifications } from '@/lib/notifications'
@@ -227,11 +227,11 @@ export function RequestTypePage() {
         <div className="flex w-full flex-col px-4 pb-6 sm:px-6 lg:px-8">
           <div className="sticky top-0 z-20 bg-[#F8F9FA] pt-6">
             <div className="pb-4">
-              <div className="flex items-center gap-3">
-                <BackButton to="/hub" />
-                <div>
-                  <h1 className="text-3xl font-light text-[#323130]">Nuova richiesta</h1>
-                  <p className="mt-2 text-sm text-[#605E5C]">Seleziona una tipologia di richiesta</p>
+              <div className="flex items-start gap-3">
+                <BackButton to="/hub" className="mt-1 shrink-0" />
+                <div className="min-w-0 space-y-1">
+                  <h1 className="truncate text-3xl font-light leading-tight text-[#323130]">Nuova richiesta</h1>
+                  <p className="text-sm leading-5 text-[#605E5C]">Seleziona una tipologia di richiesta</p>
                 </div>
               </div>
             </div>
@@ -274,7 +274,7 @@ export function RequestTypePage() {
                     style={{ color }}
                   >
                     <span>Seleziona</span>
-                    <MoveRight className="h-3.5 w-3.5 shrink-0" />
+                    <ChevronRight className="h-4 w-4 shrink-0" />
                   </div>
                 </div>
               </button>
@@ -300,7 +300,7 @@ export function RequestTypePage() {
               className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-[#EDEBE9] text-[#605E5C] hover:bg-[#F3F2F1]"
               aria-label="Chiudi impostazioni"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ChevronLeft className="h-4 w-4" />
             </button>
             <h2 className="mt-3 text-lg font-semibold text-[#201F1E]">Impostazioni</h2>
             <div className="mt-4 min-h-16 rounded-md border border-dashed border-[#EDEBE9] bg-[#FAF9F8] p-3 text-sm text-[#605E5C]">

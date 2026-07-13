@@ -220,7 +220,7 @@ export function HubPage() {
                           }}
                           className="inline-flex max-w-full items-center gap-1.5 truncate text-sm leading-none text-white/95 hover:underline"
                         >
-                          {id === 'new' ? <Plus className="h-3 w-3 shrink-0" /> : <ChevronRight className="h-3 w-3 shrink-0" />}
+                          {id === 'new' ? <Plus className="h-3 w-3 shrink-0" /> : <ChevronRight className="h-4 w-4 shrink-0" />}
                           <span className="truncate">{favorite.label}</span>
                         </button>
                       ))}
@@ -263,7 +263,7 @@ export function HubPage() {
                           }}
                           className="inline-flex max-w-full items-center gap-1.5 truncate text-sm leading-none text-[#0078D4] hover:underline"
                         >
-                          {id === 'new' ? <Plus className="h-3 w-3 shrink-0" /> : <ChevronRight className="h-3 w-3 shrink-0" />}
+                          {id === 'new' ? <Plus className="h-3 w-3 shrink-0" /> : <ChevronRight className="h-4 w-4 shrink-0" />}
                           <span className="truncate">{favorite.label}</span>
                         </button>
                       ))}
@@ -315,7 +315,7 @@ export function HubPage() {
                             color: getRequestTypeColor(favorite.label, color),
                           }}
                         >
-                          {id === 'new' ? <Plus className="h-3 w-3 shrink-0" /> : <ChevronRight className="h-3 w-3 shrink-0" />}
+                          {id === 'new' ? <Plus className="h-3 w-3 shrink-0" /> : <ChevronRight className="h-4 w-4 shrink-0" />}
                           <span className="truncate">{favorite.label}</span>
                         </button>
                       ))}

@@ -425,13 +425,13 @@ export function SpostaDataPage() {
     <div className="w-full px-4 pb-6 sm:px-6 lg:px-8">
       <div className="sticky top-14 z-20 bg-[#F8F9FA] pt-6">
         <div className="flex items-center justify-between gap-3 pb-4">
-          <div className="flex items-center gap-3">
-            <BackButton to="/request-type" />
-            <div>
-              <h1 className="text-3xl font-light text-[#323130]">Nuova richiesta</h1>
-              <div className="mt-1.5 inline-flex items-center gap-1.5">
+          <div className="flex min-w-0 items-start gap-3">
+            <BackButton to="/request-type" className="mt-1 shrink-0" />
+            <div className="min-w-0 space-y-1">
+              <h1 className="truncate text-3xl font-light leading-tight text-[#323130]">Nuova richiesta</h1>
+              <div className="inline-flex items-center gap-1.5">
                 <span className="h-2 w-2 shrink-0 rounded-[2px]" style={{ backgroundColor: currentRequestColor }} />
-                <p className="text-sm text-[#605E5C]">{currentRequest.label}</p>
+                <p className="text-sm leading-5 text-[#605E5C]">{currentRequest.label}</p>
                 <button
                   type="button"
                   onClick={() => setIsInfoOpen(true)}
@@ -446,7 +446,7 @@ export function SpostaDataPage() {
           <button
             type="button"
             onClick={handleToggleBookmark}
-            className="mt-1 inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#EDEBE9] text-[#605E5C] hover:bg-[#F3F2F1] hover:text-[#323130]"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#EDEBE9] text-[#605E5C] hover:bg-[#F3F2F1] hover:text-[#323130]"
             aria-label={isBookmarked ? 'Rimuovi bookmark' : 'Aggiungi bookmark'}
             title={isBookmarked ? 'Rimuovi bookmark' : 'Aggiungi bookmark'}
           >

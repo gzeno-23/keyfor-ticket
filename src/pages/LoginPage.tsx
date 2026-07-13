@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { MoveRight } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { resetNotificationsForDemo } from '@/lib/notifications'
 
 export function LoginPage() {
@@ -28,7 +28,7 @@ export function LoginPage() {
           className="mt-4 inline-flex items-center justify-center gap-2.5 bg-[#009B9B] px-10 py-3 text-sm font-medium leading-none tracking-wide text-white shadow transition-colors hover:bg-[#007575]"
         >
           Sign In
-          <MoveRight className="h-4 w-4 shrink-0" />
+          <ChevronRight className="h-4 w-4 shrink-0" />
         </button>
       </div>
     </div>

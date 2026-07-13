@@ -138,11 +138,12 @@ export function TicketDetailPage() {
   return (
     <div className="w-full px-4 pb-6 sm:px-6 lg:px-8">
       <div className="sticky top-14 z-20 bg-[#F8F9FA] pt-6">
-        <div className="flex flex-col gap-4 border-b border-[#EDEBE9] pb-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-3">
-            <BackButton to="/tickets" />
-            <div>
-              <h1 className="text-3xl font-light text-[#323130]">{ticket.requestType ?? ticket.title}</h1>
+        <div className="border-b border-[#EDEBE9] pb-4">
+          <div className="flex items-start gap-3">
+            <BackButton to="/tickets" className="mt-1 shrink-0" />
+            <div className="min-w-0 flex-1">
+              <h1 className="truncate text-3xl font-light leading-tight text-[#323130]">{ticket.requestType ?? ticket.title}</h1>
+              <div className="mt-1 h-5" aria-hidden="true" />
             </div>
           </div>
         </div>

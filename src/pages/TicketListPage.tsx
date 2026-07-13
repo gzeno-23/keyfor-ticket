@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { MoveRight, Plus, Search } from 'lucide-react'
+import { ChevronRight, Plus, Search } from 'lucide-react'
 import { StatusBadge } from '@/components/ui/badges'
 import { mockTickets, type Status, type Ticket } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
@@ -197,15 +197,14 @@ export function TicketListPage() {
     <div className="w-full px-4 pb-6 sm:px-6 lg:px-8">
       <div className="sticky top-14 z-20 bg-[#F8F9FA] pt-6">
         <div className={isSpecialLayout ? 'pb-4' : 'border-b border-[#EDEBE9] pb-4'}>
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <BackButton />
-              <div>
-                <h1 className="text-3xl font-light text-[#323130]">{pageTitle}</h1>
-                {pageSubtitle && <p className="mt-1 text-sm text-[#605E5C]">{pageSubtitle}</p>}
+          <div className="flex items-start gap-3">
+            <div className="flex min-w-0 items-start gap-3">
+              <BackButton className="mt-1 shrink-0" />
+              <div className="min-w-0 space-y-1">
+                <h1 className="truncate text-3xl font-light leading-tight text-[#323130]">{pageTitle}</h1>
+                {pageSubtitle && <p className="text-sm leading-5 text-[#605E5C]">{pageSubtitle}</p>}
               </div>
             </div>
-            <div />
           </div>
         </div>
 
@@ -249,9 +248,9 @@ export function TicketListPage() {
               <button
                 type="button"
                 onClick={() => navigate('/request-type')}
-                className="flex items-center gap-1 rounded-lg border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] hover:bg-[#F3F2F1]"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[#EDEBE9] px-3 py-2 text-sm leading-none text-[#323130] hover:bg-[#F3F2F1]"
               >
-                <Plus className="h-3.5 w-3.5" />
+                <Plus className="h-3.5 w-3.5 shrink-0" />
                 <span className="hidden sm:inline">Nuovo</span>
               </button>
               <div className="flex min-w-[220px] flex-1 items-center rounded-lg border border-[#EDEBE9] px-2 text-[#605E5C] focus-within:border-[#009B9B]">
@@ -336,7 +335,7 @@ export function TicketListPage() {
                   <p className="mt-0.5 text-xs text-[#A19F9D]">{new Date(ticket.createdAt).toLocaleDateString('it-IT')}</p>
                 </div>
                 <StatusBadge status={ticket.status} />
-                <MoveRight className="h-4 w-4 shrink-0 text-[#A19F9D]" />
+                <ChevronRight className="h-4 w-4 shrink-0 text-[#A19F9D]" />
               </div>
             ))
           )}

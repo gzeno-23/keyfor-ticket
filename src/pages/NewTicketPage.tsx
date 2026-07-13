@@ -31,14 +31,14 @@ export function NewTicketPage() {
   return (
     <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-4 border-b border-[#EDEBE9] pb-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-3">
-          <BackButton to="/tickets" />
-          <div>
-            <h1 className="text-3xl font-light text-[#323130]">Nuovo Ticket</h1>
-            <p className="mt-1 text-sm text-[#605E5C]">Nuovo documento</p>
+        <div className="flex min-w-0 items-start gap-3">
+          <BackButton to="/tickets" className="mt-1 shrink-0" />
+          <div className="min-w-0 space-y-1">
+            <h1 className="truncate text-3xl font-light leading-tight text-[#323130]">Nuovo Ticket</h1>
+            <p className="text-sm leading-5 text-[#605E5C]">Nuovo documento</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"
             onClick={handleCancel}

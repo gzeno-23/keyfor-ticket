@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { AlertCircle, MoveLeft, Save, X } from 'lucide-react'
+import { AlertCircle, ChevronLeft, Save, X } from 'lucide-react'
 import { StatusBadge } from '@/components/ui/badges'
 import type { Status } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
@@ -56,20 +56,20 @@ export function TicketReviewPage() {
   return (
     <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-4 border-b border-[#EDEBE9] pb-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-3">
-          <BackButton />
-          <div>
-            <h1 className="text-3xl font-light text-[#323130]">Conferma ticket</h1>
-            <p className="mt-1 text-sm text-[#605E5C]">Nuovo documento</p>
+        <div className="flex min-w-0 items-start gap-3">
+          <BackButton className="mt-1 shrink-0" />
+          <div className="min-w-0 space-y-1">
+            <h1 className="truncate text-3xl font-light leading-tight text-[#323130]">Conferma ticket</h1>
+            <p className="text-sm leading-5 text-[#605E5C]">Nuovo documento</p>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => navigate(-1)}
             className="inline-flex min-h-10 items-center gap-1.5 rounded-md border border-[#EDEBE9] px-4 py-2 text-sm leading-none text-[#605E5C] hover:bg-[#F3F2F1]"
           >
-            <MoveLeft className="h-4 w-4 shrink-0" />
+            <ChevronLeft className="h-4 w-4 shrink-0" />
             Modifica
           </button>
           <button

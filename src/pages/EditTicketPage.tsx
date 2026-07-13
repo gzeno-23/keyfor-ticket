@@ -39,11 +39,11 @@ export function EditTicketPage() {
 
   return (
     <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
-      <div className="flex items-center gap-3 border-b border-[#EDEBE9] pb-4">
-        <BackButton to={`/tickets/${ticket.id}`} />
-        <div>
-          <h1 className="text-3xl font-light text-[#323130]">Modifica Ticket</h1>
-          <p className="mt-0.5 text-xs text-[#605E5C]">{ticket.id}</p>
+      <div className="flex items-start gap-3 border-b border-[#EDEBE9] pb-4">
+        <BackButton to={`/tickets/${ticket.id}`} className="mt-1 shrink-0" />
+        <div className="min-w-0 space-y-1">
+          <h1 className="truncate text-3xl font-light leading-tight text-[#323130]">Modifica Ticket</h1>
+          <p className="text-sm leading-5 text-[#605E5C]">{ticket.id}</p>
         </div>
       </div>
 
