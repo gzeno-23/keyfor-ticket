@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { ChevronRight, Plus, Search } from 'lucide-react'
+import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, Filter, FilterX, HelpCircle, Plus, Search } from 'lucide-react'
 import { StatusBadge } from '@/components/ui/badges'
 import { mockTickets, type Status, type Ticket } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
@@ -8,7 +8,7 @@ import { getRequestTypeColor } from '@/lib/request-type'
 import { handleHorizontalMouseDragScroll, handleHorizontalWheelScroll } from '@/lib/horizontal-wheel-scroll'
 import {
   TICKET_LIST_COLUMN_LABELS,
-  TICKET_LIST_COLUMN_ORDER,
+  setTicketListColumnOrder,
   setTicketListGroupingYear,
   useTicketListCustomization,
   type TicketListColumnKey,
@@ -102,13 +102,143 @@ const specialColumnWidths: Record<TicketListColumnKey, string> = {
   assignee: '220px',
   customerName: '1fr',
   createdAt: '140px',
+  updatedAt: '140px',
   solleciti: '100px',
   status: '120px',
 }
 
+type SortState = { col: TicketListColumnKey; dir: 'asc' | 'desc' } | null
+
+function ColumnHeaderMenu({
+  columnKey,
+  label,
+  sort,
+  filterValue,
+  onSort,
+  onFilter,
+  onClearFilter,
+  draggable,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnd,
+  isDragOver,
+}: {
+  columnKey: TicketListColumnKey
+  label: string
+  sort: SortState
+  filterValue: string
+  onSort: (col: TicketListColumnKey, dir: 'asc' | 'desc') => void
+  onFilter: (col: TicketListColumnKey) => void
+  onClearFilter: (col: TicketListColumnKey) => void
+  draggable?: boolean
+  onDragStart?: () => void
+  onDragOver?: (e: React.DragEvent) => void
+  onDrop?: () => void
+  onDragEnd?: () => void
+  isDragOver?: boolean
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  const isActive = sort?.col === columnKey
+  const hasFilter = filterValue !== ''
+
+  useEffect(() => {
+    if (!open) return
+    function onOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onOutside)
+    return () => document.removeEventListener('mousedown', onOutside)
+  }, [open])
+
+  return (
+    <div
+      ref={ref}
+      className={`group relative flex select-none items-center gap-1 ${isDragOver ? 'text-[#009B9B]' : ''}`}
+      draggable={draggable}
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      onDragEnd={onDragEnd}
+    >
+      <span className="cursor-grab truncate">{label}</span>
+      {isActive && (
+        sort!.dir === 'asc'
+          ? <ArrowUp className="h-3 w-3 shrink-0 text-[#009B9B]" />
+          : <ArrowDown className="h-3 w-3 shrink-0 text-[#009B9B]" />
+      )}
+      {hasFilter && !isActive && <Filter className="h-3 w-3 shrink-0 text-[#009B9B]" />}
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded transition-colors hover:bg-[#EDEBE9] ${open || isActive || hasFilter ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+      >
+        <ChevronDown className="h-3 w-3" />
+      </button>
+
+      {open && (
+        <div className="absolute left-0 top-full z-50 mt-1 min-w-[220px] rounded-md border border-[#EDEBE9] bg-white py-1 shadow-xl">
+          <button
+            type="button"
+            onClick={() => { onSort(columnKey, 'asc'); setOpen(false) }}
+            className={`flex w-full items-center gap-3 px-4 py-2 text-sm hover:bg-[#DEECF9] ${isActive && sort!.dir === 'asc' ? 'font-semibold text-[#009B9B]' : 'text-[#323130]'}`}
+          >
+            <ArrowUp className="h-4 w-4 shrink-0 text-[#009B9B]" />
+            Crescente
+          </button>
+          <button
+            type="button"
+            onClick={() => { onSort(columnKey, 'desc'); setOpen(false) }}
+            className={`flex w-full items-center gap-3 px-4 py-2 text-sm hover:bg-[#DEECF9] ${isActive && sort!.dir === 'desc' ? 'font-semibold text-[#009B9B]' : 'text-[#323130]'}`}
+          >
+            <ArrowDown className="h-4 w-4 shrink-0 text-[#009B9B]" />
+            Decrescente
+          </button>
+          <div className="my-1 border-t border-[#EDEBE9]" />
+          <button
+            type="button"
+            onClick={() => { onFilter(columnKey); setOpen(false) }}
+            className="flex w-full items-center gap-3 px-4 py-2 text-sm text-[#323130] hover:bg-[#DEECF9]"
+          >
+            <Filter className="h-4 w-4 shrink-0 text-[#605E5C]" />
+            Filtra...
+          </button>
+          <button
+            type="button"
+            disabled
+            className="flex w-full cursor-not-allowed items-center gap-3 px-4 py-2 text-sm text-[#A19F9D]"
+          >
+            <Filter className="h-4 w-4 shrink-0 text-[#A19F9D]" />
+            Filtra in base a questo valore
+          </button>
+          <button
+            type="button"
+            onClick={() => { onClearFilter(columnKey); setOpen(false) }}
+            disabled={!hasFilter}
+            className={`flex w-full items-center gap-3 px-4 py-2 text-sm ${hasFilter ? 'text-[#323130] hover:bg-[#DEECF9]' : 'cursor-not-allowed text-[#A19F9D]'}`}
+          >
+            <FilterX className="h-4 w-4 shrink-0" />
+            Cancella filtro
+          </button>
+          <div className="my-1 border-t border-[#EDEBE9]" />
+          <button
+            type="button"
+            disabled
+            className="flex w-full cursor-not-allowed items-center gap-3 px-4 py-2 text-sm text-[#A19F9D]"
+          >
+            <HelpCircle className="h-4 w-4 shrink-0" />
+            Guida rapida
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function TicketListPage() {
   const navigate = useNavigate()
-  const { visibleColumns, groupingMode, groupingYear } = useTicketListCustomization()
+  const { visibleColumns, groupingMode, groupingYear, columnOrder } = useTicketListCustomization()
   const [searchParams, setSearchParams] = useSearchParams()
   const [search, setSearch] = useState(searchParams.get('q') ?? '')
   const statusFilter = (searchParams.get('status') as Status | 'all') ?? 'all'
@@ -117,9 +247,57 @@ export function TicketListPage() {
   )
   const [groupingTabFilter, setGroupingTabFilter] = useState('all')
   const [isSearchOpen, setIsSearchOpen] = useState(Boolean(search))
+  const [dragOverCol, setDragOverCol] = useState<TicketListColumnKey | null>(null)
+  const draggedCol = useRef<TicketListColumnKey | null>(null)
+  const [sort, setSort] = useState<SortState>(null)
+  const [colFilters, setColFilters] = useState<Partial<Record<TicketListColumnKey, string>>>({})
+  const [filterPromptCol, setFilterPromptCol] = useState<TicketListColumnKey | null>(null)
+  const [filterInputValue, setFilterInputValue] = useState('')
   const isSpecialLayout = statusFilter === 'open' || statusFilter === 'closed'
   const bypassTypeFilterForNonAssigned =
     groupingMode === 'assignee' && normalizeTabValue(groupingTabFilter) === normalizeText('Non assegnato')
+
+  function handleColSort(col: TicketListColumnKey, dir: 'asc' | 'desc') {
+    setSort((prev) => prev?.col === col && prev.dir === dir ? null : { col, dir })
+  }
+
+  function handleColFilter(col: TicketListColumnKey) {
+    setFilterInputValue(colFilters[col] ?? '')
+    setFilterPromptCol(col)
+  }
+
+  function handleClearFilter(col: TicketListColumnKey) {
+    setColFilters((prev) => { const next = { ...prev }; delete next[col]; return next })
+  }
+
+  function handleColDragStart(col: TicketListColumnKey) {
+    draggedCol.current = col
+  }
+
+  function handleColDragOver(e: React.DragEvent, col: TicketListColumnKey) {
+    e.preventDefault()
+    setDragOverCol(col)
+  }
+
+  function handleColDrop(targetCol: TicketListColumnKey) {
+    const from = draggedCol.current
+    if (!from || from === targetCol) { setDragOverCol(null); return }
+    const newOrder = [...columnOrder]
+    const fromIdx = newOrder.indexOf(from)
+    const toIdx = newOrder.indexOf(targetCol)
+    if (fromIdx !== -1 && toIdx !== -1) {
+      newOrder.splice(fromIdx, 1)
+      newOrder.splice(toIdx, 0, from)
+      setTicketListColumnOrder(newOrder)
+    }
+    draggedCol.current = null
+    setDragOverCol(null)
+  }
+
+  function handleColDragEnd() {
+    draggedCol.current = null
+    setDragOverCol(null)
+  }
 
   useEffect(() => {
     const nextParams = new URLSearchParams()
@@ -154,7 +332,7 @@ export function TicketListPage() {
       : statusFilter === 'closed'
         ? 'Seleziona una richiesta chiusa per visualizzarla'
         : ''
-  const configuredColumns = TICKET_LIST_COLUMN_ORDER.filter((columnKey) => visibleColumns[columnKey])
+  const configuredColumns = columnOrder.filter((columnKey) => visibleColumns[columnKey])
   const safeColumns: TicketListColumnKey[] =
     configuredColumns.length === 0 ? ['requestType', 'assignee', 'customerName', 'createdAt', 'status'] : configuredColumns
   const effectiveGroupingMode = statusFilter === 'closed' && groupingMode === 'assignee' ? 'none' : groupingMode
@@ -166,7 +344,40 @@ export function TicketListPage() {
   const specialColumns = safeColumns
   const specialGridTemplateColumns = specialColumns.map((columnKey) => specialColumnWidths[columnKey]).join(' ')
   const filtered = applyGroupingTabFilter(filteredByTypeAndSearch, effectiveGroupingMode, groupingTabFilter, selectedGroupingYear)
-  const groupedSpecialTickets: { key: string; tickets: Ticket[] }[] = [{ key: 'all', tickets: filtered }]
+
+  // Apply column filters
+  const filteredWithColFilters = Object.entries(colFilters).reduce((acc, [col, val]) => {
+    if (!val) return acc
+    const v = val.toLowerCase()
+    return acc.filter((t) => {
+      if (col === 'requestType') return (t.requestType ?? '').toLowerCase().includes(v)
+      if (col === 'customerName') return t.customerName.toLowerCase().includes(v)
+      if (col === 'assignee') return t.assignee.toLowerCase().includes(v)
+      if (col === 'createdAt') return new Date(t.createdAt).toLocaleDateString('it-IT').includes(v)
+      if (col === 'updatedAt') return new Date(t.updatedAt).toLocaleDateString('it-IT').includes(v)
+      if (col === 'status') return t.status.toLowerCase().includes(v)
+      if (col === 'solleciti') return String(t.solleciti).includes(v)
+      return true
+    })
+  }, filtered)
+
+  // Apply sort
+  const sortedFiltered = sort
+    ? [...filteredWithColFilters].sort((a, b) => {
+        let aVal = ''
+        let bVal = ''
+        if (sort.col === 'requestType') { aVal = a.requestType ?? ''; bVal = b.requestType ?? '' }
+        else if (sort.col === 'customerName') { aVal = a.customerName; bVal = b.customerName }
+        else if (sort.col === 'assignee') { aVal = a.assignee; bVal = b.assignee }
+        else if (sort.col === 'createdAt') { aVal = a.createdAt; bVal = b.createdAt }
+        else if (sort.col === 'updatedAt') { aVal = a.updatedAt; bVal = b.updatedAt }
+        else if (sort.col === 'status') { aVal = a.status; bVal = b.status }
+        else if (sort.col === 'solleciti') { return sort.dir === 'asc' ? a.solleciti - b.solleciti : b.solleciti - a.solleciti }
+        return sort.dir === 'asc' ? aVal.localeCompare(bVal, 'it') : bVal.localeCompare(aVal, 'it')
+      })
+    : filteredWithColFilters
+
+  const groupedSpecialTickets: { key: string; tickets: Ticket[] }[] = [{ key: 'all', tickets: sortedFiltered }]
 
   useEffect(() => {
     if (availableYears.length > 0 && !availableYears.includes(groupingYear)) {
@@ -271,11 +482,24 @@ export function TicketListPage() {
         {/* Desktop table header - inside sticky area */}
         {isSpecialLayout && (
           <div className="mt-0 hidden rounded-t-2xl border border-b-0 border-[#EDEBE9] bg-[#FAF9F8] md:block">
-            <div className="grid px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]" style={{ gridTemplateColumns: specialGridTemplateColumns }}>
+            <div className="grid px-6 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]" style={{ gridTemplateColumns: specialGridTemplateColumns }}>
               {specialColumns.map((columnKey) => (
-                <span key={columnKey} className={columnKey === 'assignee' ? 'text-center' : ''}>
-                  {TICKET_LIST_COLUMN_LABELS[columnKey]}
-                </span>
+                <ColumnHeaderMenu
+                  key={columnKey}
+                  columnKey={columnKey}
+                  label={TICKET_LIST_COLUMN_LABELS[columnKey]}
+                  sort={sort}
+                  filterValue={colFilters[columnKey] ?? ''}
+                  onSort={handleColSort}
+                  onFilter={handleColFilter}
+                  onClearFilter={handleClearFilter}
+                  draggable
+                  onDragStart={() => handleColDragStart(columnKey)}
+                  onDragOver={(e) => handleColDragOver(e, columnKey)}
+                  onDrop={() => handleColDrop(columnKey)}
+                  onDragEnd={handleColDragEnd}
+                  isDragOver={dragOverCol === columnKey && draggedCol.current !== columnKey}
+                />
               ))}
             </div>
           </div>
@@ -316,7 +540,7 @@ export function TicketListPage() {
               Nessun ticket trovato con i filtri selezionati.
             </div>
           ) : (
-            filtered.map((ticket) => (
+            sortedFiltered.map((ticket) => (
               <div
                 key={ticket.id}
                 onClick={() => navigate(`/tickets/${ticket.id}`)}
@@ -347,6 +571,9 @@ export function TicketListPage() {
                   )}
                 </div>
                 {safeColumns.includes('status') && <StatusBadge status={ticket.status} />}
+                {safeColumns.includes('solleciti') && ticket.solleciti > 0 && (
+                  <SollecitiDots count={ticket.solleciti} />
+                )}
                 <ChevronRight className="h-4 w-4 shrink-0 text-[#A19F9D]" />
               </div>
             ))
@@ -395,11 +622,25 @@ export function TicketListPage() {
                 {safeColumns.map((columnKey) => (
                   <th
                     key={columnKey}
-                    className={`px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C] ${
+                    className={`px-6 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C] ${
                       columnKey === 'assignee' ? 'text-center' : 'text-left'
                     }`}
                   >
-                    {TICKET_LIST_COLUMN_LABELS[columnKey]}
+                    <ColumnHeaderMenu
+                      columnKey={columnKey}
+                      label={TICKET_LIST_COLUMN_LABELS[columnKey]}
+                      sort={sort}
+                      filterValue={colFilters[columnKey] ?? ''}
+                      onSort={handleColSort}
+                      onFilter={handleColFilter}
+                      onClearFilter={handleClearFilter}
+                      draggable
+                      onDragStart={() => handleColDragStart(columnKey)}
+                      onDragOver={(e) => handleColDragOver(e, columnKey)}
+                      onDrop={() => handleColDrop(columnKey)}
+                      onDragEnd={handleColDragEnd}
+                      isDragOver={dragOverCol === columnKey && draggedCol.current !== columnKey}
+                    />
                   </th>
                 ))}
               </tr>
@@ -412,12 +653,50 @@ export function TicketListPage() {
                   </td>
                 </tr>
               ) : (
-                filtered.map((ticket, index) => (
+                sortedFiltered.map((ticket, index) => (
                   <TicketListRow key={ticket.id} ticket={ticket} index={index} activeColumns={safeColumns} />
                 ))
               )}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Filter dialog */}
+      {filterPromptCol && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/30 p-4" onClick={() => setFilterPromptCol(null)}>
+          <div className="w-full max-w-sm rounded-lg border border-[#EDEBE9] bg-white p-5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-sm font-semibold text-[#201F1E]">Filtra per {TICKET_LIST_COLUMN_LABELS[filterPromptCol]}</h3>
+            <input
+              autoFocus
+              type="text"
+              value={filterInputValue}
+              onChange={(e) => setFilterInputValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  setColFilters((prev) => filterInputValue ? { ...prev, [filterPromptCol!]: filterInputValue } : (({ [filterPromptCol!]: _, ...rest }) => rest)(prev as Record<string, string>))
+                  setFilterPromptCol(null)
+                }
+                if (e.key === 'Escape') setFilterPromptCol(null)
+              }}
+              placeholder="Valore filtro..."
+              className="mt-3 w-full rounded-md border border-[#EDEBE9] px-3 py-2 text-sm text-[#323130] outline-none focus:border-[#009B9B]"
+            />
+            <div className="mt-4 flex justify-end gap-2">
+              <button type="button" onClick={() => setFilterPromptCol(null)} className="rounded-md border border-[#EDEBE9] px-4 py-2 text-sm text-[#605E5C] hover:bg-[#F3F2F1]">Annulla</button>
+              <button
+                type="button"
+                onClick={() => {
+                  const col = filterPromptCol!
+                  setColFilters((prev) => filterInputValue ? { ...prev, [col]: filterInputValue } : (({ [col]: _, ...rest }) => rest)(prev as Record<string, string>))
+                  setFilterPromptCol(null)
+                }}
+                className="rounded-md bg-[#009B9B] px-4 py-2 text-sm font-medium text-white hover:bg-[#007575]"
+              >
+                Applica
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -460,6 +739,7 @@ function renderSpecialLayoutCell(ticket: Ticket, columnKey: TicketListColumnKey)
   if (columnKey === 'assignee') return ticket.status !== 'open' ? ticket.assignee : ''
   if (columnKey === 'customerName') return <span className="text-[#323130]">{ticket.customerName}</span>
   if (columnKey === 'createdAt') return <span className="text-[#605E5C]">{new Date(ticket.createdAt).toLocaleDateString('it-IT')}</span>
+  if (columnKey === 'updatedAt') return <span className="text-[#605E5C]">{new Date(ticket.updatedAt).toLocaleDateString('it-IT')}</span>
   if (columnKey === 'solleciti') return <SollecitiDots count={ticket.solleciti} />
   return <StatusBadge status={ticket.status} />
 }
@@ -570,6 +850,14 @@ function TicketListRow({
           return (
             <td key={columnKey} className="px-6 py-3 align-top text-[#605E5C]">
               {new Date(ticket.createdAt).toLocaleDateString('it-IT')}
+            </td>
+          )
+        }
+
+        if (columnKey === 'updatedAt') {
+          return (
+            <td key={columnKey} className="px-6 py-3 align-top text-[#605E5C]">
+              {new Date(ticket.updatedAt).toLocaleDateString('it-IT')}
             </td>
           )
         }

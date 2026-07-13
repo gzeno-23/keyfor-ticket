@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react'
 
-export type TicketListColumnKey = 'requestType' | 'assignee' | 'customerName' | 'createdAt' | 'status' | 'solleciti'
+export type TicketListColumnKey = 'requestType' | 'assignee' | 'customerName' | 'createdAt' | 'updatedAt' | 'status' | 'solleciti'
 export type TicketListGroupingMode = 'none' | 'assignee' | 'requestType' | 'monthYear'
 
 export const TICKET_LIST_COLUMN_ORDER: TicketListColumnKey[] = [
@@ -8,6 +8,7 @@ export const TICKET_LIST_COLUMN_ORDER: TicketListColumnKey[] = [
   'assignee',
   'customerName',
   'createdAt',
+  'updatedAt',
   'solleciti',
   'status',
 ]
@@ -16,7 +17,8 @@ export const TICKET_LIST_COLUMN_LABELS: Record<TicketListColumnKey, string> = {
   requestType: 'Tipo richiesta',
   assignee: 'Presa in carico',
   customerName: 'Cliente',
-  createdAt: 'Data',
+  createdAt: 'Data creazione',
+  updatedAt: 'Aggiornamento',
   solleciti: 'Sollecito',
   status: 'Stato',
 }
@@ -26,6 +28,7 @@ interface TicketListCustomizationState {
   columns: TicketListColumnVisibility
   groupingMode: TicketListGroupingMode
   groupingYear: string
+  columnOrder: TicketListColumnKey[]
 }
 
 const STORAGE_KEY = 'keyfor-ticket-customization'
@@ -35,6 +38,7 @@ const DEFAULT_TICKET_LIST_COLUMNS: TicketListColumnVisibility = {
   assignee: true,
   customerName: true,
   createdAt: true,
+  updatedAt: true,
   solleciti: true,
   status: true,
 }
@@ -48,6 +52,7 @@ function getDefaultCustomizationState(): TicketListCustomizationState {
     columns: { ...DEFAULT_TICKET_LIST_COLUMNS },
     groupingMode: 'none',
     groupingYear: '',
+    columnOrder: [...TICKET_LIST_COLUMN_ORDER],
   }
 }
 
@@ -62,6 +67,7 @@ function readTicketListCustomizationFromStorage(): TicketListCustomizationState 
       columns?: Partial<TicketListColumnVisibility>
       groupingMode?: TicketListGroupingMode
       groupingYear?: string
+      columnOrder?: TicketListColumnKey[]
     }
     const parsedColumns = parsed.columns ?? {}
     const nextValue: TicketListColumnVisibility = {
@@ -69,6 +75,7 @@ function readTicketListCustomizationFromStorage(): TicketListCustomizationState 
       assignee: parsedColumns.assignee ?? DEFAULT_TICKET_LIST_COLUMNS.assignee,
       customerName: parsedColumns.customerName ?? DEFAULT_TICKET_LIST_COLUMNS.customerName,
       createdAt: parsedColumns.createdAt ?? DEFAULT_TICKET_LIST_COLUMNS.createdAt,
+      updatedAt: parsedColumns.updatedAt ?? DEFAULT_TICKET_LIST_COLUMNS.updatedAt,
       solleciti: parsedColumns.solleciti ?? DEFAULT_TICKET_LIST_COLUMNS.solleciti,
       status: parsedColumns.status ?? DEFAULT_TICKET_LIST_COLUMNS.status,
     }
@@ -78,10 +85,17 @@ function readTicketListCustomizationFromStorage(): TicketListCustomizationState 
       parsed.groupingMode === 'monthYear'
         ? parsed.groupingMode
         : 'none'
+    const validKeys = new Set<string>(TICKET_LIST_COLUMN_ORDER)
+    const parsedOrder = Array.isArray(parsed.columnOrder)
+      ? (parsed.columnOrder.filter((k) => validKeys.has(k)) as TicketListColumnKey[])
+      : []
+    const missingKeys = TICKET_LIST_COLUMN_ORDER.filter((k) => !parsedOrder.includes(k))
+    const columnOrder = parsedOrder.length > 0 ? [...parsedOrder, ...missingKeys] : [...TICKET_LIST_COLUMN_ORDER]
     return {
       columns: hasAtLeastOneColumnVisible(nextValue) ? nextValue : { ...DEFAULT_TICKET_LIST_COLUMNS },
       groupingMode: nextGroupingMode,
       groupingYear: typeof parsed.groupingYear === 'string' ? parsed.groupingYear : '',
+      columnOrder,
     }
   } catch {
     return getDefaultCustomizationState()
@@ -121,6 +135,7 @@ export function useTicketListCustomization() {
     visibleColumns: customization.columns,
     groupingMode: customization.groupingMode,
     groupingYear: customization.groupingYear,
+    columnOrder: customization.columnOrder,
   }
 }
 
@@ -129,6 +144,12 @@ export function setTicketListColumnVisibility(column: TicketListColumnKey, visib
   if (!hasAtLeastOneColumnVisible(nextColumns)) return
 
   ticketListCustomizationState = { ...ticketListCustomizationState, columns: nextColumns }
+  persistTicketListCustomization(ticketListCustomizationState)
+  emitTicketListColumnsChange()
+}
+
+export function setTicketListColumnOrder(columnOrder: TicketListColumnKey[]) {
+  ticketListCustomizationState = { ...ticketListCustomizationState, columnOrder }
   persistTicketListCustomization(ticketListCustomizationState)
   emitTicketListColumnsChange()
 }
