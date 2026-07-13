@@ -7,7 +7,7 @@ export function TeamPage() {
   ]
 
   return (
-    <div className="mx-auto max-w-[1600px] px-6 py-6">
+    <div className="w-full px-6 py-6 lg:px-8">
       <div className="border-b border-[#EDEBE9] pb-4">
         <p className="text-xs uppercase tracking-[0.18em] text-[#605E5C]">Dashboard / Team</p>
         <h1 className="mt-2 text-[28px] font-light text-[#323130]">Team</h1>

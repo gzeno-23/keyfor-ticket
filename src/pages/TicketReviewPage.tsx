@@ -54,7 +54,7 @@ export function TicketReviewPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
+    <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-4 border-b border-[#EDEBE9] pb-4 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-3">
           <BackButton />
@@ -67,25 +67,25 @@ export function TicketReviewPage() {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="flex items-center gap-1 border border-[#EDEBE9] px-4 py-2 text-sm text-[#605E5C] hover:bg-[#F3F2F1]"
+            className="inline-flex min-h-10 items-center gap-1.5 rounded-md border border-[#EDEBE9] px-4 py-2 text-sm leading-none text-[#605E5C] hover:bg-[#F3F2F1]"
           >
-            <MoveLeft className="h-4 w-4" />
+            <MoveLeft className="h-4 w-4 shrink-0" />
             Modifica
           </button>
           <button
             type="button"
             onClick={handleCancel}
-            className="flex items-center gap-1 border border-[#F3D6D8] px-4 py-2 text-sm text-[#A4262C] hover:bg-[#FDF3F4]"
+            className="inline-flex min-h-10 items-center gap-1.5 rounded-md border border-[#F3D6D8] px-4 py-2 text-sm leading-none text-[#A4262C] hover:bg-[#FDF3F4]"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4 shrink-0" />
             Annulla
           </button>
           <button
             type="button"
             onClick={handleSave}
-            className="flex items-center gap-1 bg-[#009B9B] px-4 py-2 text-sm font-medium text-white hover:bg-[#007575]"
+            className="inline-flex min-h-10 items-center gap-1.5 rounded-md bg-[#009B9B] px-4 py-2 text-sm font-medium leading-none text-white hover:bg-[#007575]"
           >
-            <Save className="h-4 w-4" />
+            <Save className="h-4 w-4 shrink-0" />
             Salva
           </button>
         </div>

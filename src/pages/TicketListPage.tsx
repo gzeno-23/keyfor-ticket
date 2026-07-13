@@ -194,7 +194,7 @@ export function TicketListPage() {
   }, [effectiveGroupingMode, groupingTabFilter, tabsForBar])
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pb-6 sm:px-6">
+    <div className="w-full px-4 pb-6 sm:px-6 lg:px-8">
       <div className="sticky top-14 z-20 bg-[#F8F9FA] pt-6">
         <div className={isSpecialLayout ? 'pb-4' : 'border-b border-[#EDEBE9] pb-4'}>
           <div className="flex items-center justify-between gap-4">

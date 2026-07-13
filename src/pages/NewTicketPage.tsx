@@ -29,7 +29,7 @@ export function NewTicketPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
+    <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-4 border-b border-[#EDEBE9] pb-4 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-3">
           <BackButton to="/tickets" />
@@ -42,14 +42,14 @@ export function NewTicketPage() {
           <button
             type="button"
             onClick={handleCancel}
-            className="border border-[#EDEBE9] px-4 py-2 text-sm text-[#605E5C] hover:bg-[#F3F2F1]"
+            className="inline-flex min-h-10 items-center justify-center rounded-md border border-[#EDEBE9] px-4 py-2 text-sm leading-none text-[#605E5C] hover:bg-[#F3F2F1]"
           >
             Annulla
           </button>
           <button
             type="submit"
             form="new-ticket-form"
-            className="bg-[#009B9B] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#007575]"
+            className="inline-flex min-h-10 items-center justify-center rounded-md bg-[#009B9B] px-4 py-2 text-sm font-medium leading-none text-white transition-colors hover:bg-[#007575]"
           >
             Salva
           </button>

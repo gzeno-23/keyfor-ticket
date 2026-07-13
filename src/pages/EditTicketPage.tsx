@@ -38,7 +38,7 @@ export function EditTicketPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
+    <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
       <div className="flex items-center gap-3 border-b border-[#EDEBE9] pb-4">
         <BackButton to={`/tickets/${ticket.id}`} />
         <div>
@@ -72,13 +72,13 @@ export function EditTicketPage() {
           <button
             type="button"
             onClick={handleCancel}
-            className="border border-[#EDEBE9] px-4 py-2 text-sm font-medium text-[#323130] hover:bg-[#F3F2F1]"
+            className="inline-flex min-h-10 items-center justify-center rounded-md border border-[#EDEBE9] px-4 py-2 text-sm font-medium leading-none text-[#323130] hover:bg-[#F3F2F1]"
           >
             Annulla
           </button>
           <button
             type="submit"
-            className="bg-[#009B9B] px-4 py-2 text-sm font-medium text-white hover:bg-[#007575]"
+            className="inline-flex min-h-10 items-center justify-center rounded-md bg-[#009B9B] px-4 py-2 text-sm font-medium leading-none text-white hover:bg-[#007575]"
           >
             Salva
           </button>

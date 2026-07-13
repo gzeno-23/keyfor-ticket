@@ -1,10 +1,11 @@
-import { useState, type ChangeEvent, type ReactNode } from 'react'
+import { useEffect, useState, type ChangeEvent, type ReactNode } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { CheckCircle2, Edit, Send, UserCheck, XCircle } from 'lucide-react'
+import { Bookmark, BookmarkCheck, CheckCircle2, Edit, Send, UserCheck, XCircle } from 'lucide-react'
 import { mockTickets, type Status } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
 import { StatusBadge } from '@/components/ui/badges'
 import { handleHorizontalMouseDragScroll, handleHorizontalWheelScroll } from '@/lib/horizontal-wheel-scroll'
+import { getBookmarked, setBookmarked } from '@/lib/bookmarks'
 
 interface Comment {
   text: string
@@ -38,6 +39,13 @@ export function TicketDetailPage() {
   const [activeTab, setActiveTab] = useState<TicketTab>('details')
   const [attachedFiles, setAttachedFiles] = useState<FileAttachment[]>([])
   const [attachedImages, setAttachedImages] = useState<ImageAttachment[]>([])
+  const bookmarkKey = id ? `ticket:${id}` : ''
+  const [isBookmarked, setIsBookmarked] = useState(() => (id ? getBookmarked(`ticket:${id}`) : false))
+
+  useEffect(() => {
+    if (!id) return
+    setIsBookmarked(getBookmarked(`ticket:${id}`))
+  }, [id])
 
   if (!ticket) {
     return (
@@ -65,6 +73,12 @@ export function TicketDetailPage() {
 
   const handleForward = () => {
     navigate('/team')
+  }
+
+  const handleToggleBookmark = () => {
+    const nextValue = !isBookmarked
+    setIsBookmarked(nextValue)
+    setBookmarked(bookmarkKey, nextValue)
   }
 
   const handleComment = () => {
@@ -122,7 +136,7 @@ export function TicketDetailPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pb-6 sm:px-6">
+    <div className="w-full px-4 pb-6 sm:px-6 lg:px-8">
       <div className="sticky top-14 z-20 bg-[#F8F9FA] pt-6">
         <div className="flex flex-col gap-4 border-b border-[#EDEBE9] pb-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
@@ -133,7 +147,16 @@ export function TicketDetailPage() {
           </div>
         </div>
 
-        <div className="mt-4 rounded-2xl border border-[#EDEBE9] bg-white px-4 py-3 text-sm">
+        <div className="relative mt-4 rounded-2xl border border-[#EDEBE9] bg-white px-4 py-3 pr-14 text-sm">
+          <button
+            type="button"
+            onClick={handleToggleBookmark}
+            className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#EDEBE9] text-[#605E5C] hover:bg-[#F3F2F1] hover:text-[#323130]"
+            aria-label={isBookmarked ? 'Rimuovi bookmark' : 'Aggiungi bookmark'}
+            title={isBookmarked ? 'Rimuovi bookmark' : 'Aggiungi bookmark'}
+          >
+            {isBookmarked ? <BookmarkCheck className="h-4 w-4 text-[#009B9B]" /> : <Bookmark className="h-4 w-4" />}
+          </button>
           <div className="grid gap-x-8 gap-y-2 sm:grid-cols-2">
             <div className="flex items-center gap-2">
               <p className="text-xs font-semibold text-[#201F1E]">Numero richiesta</p>

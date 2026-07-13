@@ -28,11 +28,11 @@ export function BackButton({ to = -1, className }: BackButtonProps) {
       type="button"
       onClick={handleBack}
       className={cn(
-        'flex h-10 w-10 items-center justify-center rounded-full bg-[#DDF1F4] text-[#201F1E] hover:bg-[#CFE8EC]',
+        'inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#DDF1F4] text-[#201F1E] hover:bg-[#CFE8EC]',
         className
       )}
     >
-      <MoveLeft className="h-3 w-3" />
+      <MoveLeft className="h-3.5 w-3.5 shrink-0" />
     </button>
   )
 }

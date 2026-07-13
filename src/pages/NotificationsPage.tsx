@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Bell } from 'lucide-react'
 import { BackButton } from '@/components/ui/back-button'
@@ -12,15 +11,8 @@ export function NotificationsPage() {
   const fromPathFromQuery = new URLSearchParams(location.search).get('from') ?? undefined
   const fromPath = fromPathFromState ?? fromPathFromQuery ?? '/hub'
 
-  useEffect(() => {
-    const firstUnread = notifications.find((item) => item.unread)
-    if (!firstUnread) return
-    markNotificationAsRead(firstUnread.id)
-    navigate(`/tickets/${firstUnread.ticketId}`)
-  }, [notifications, navigate])
-
   return (
-    <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
+    <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
       <div className="border-b border-[#EDEBE9] pb-4">
         <div className="flex items-center gap-3">
           <BackButton to={fromPath} />

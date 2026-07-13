@@ -25,10 +25,10 @@ export function LoginPage() {
         {/* Sign In button */}
         <button
           onClick={handleSignIn}
-          className="mt-4 flex items-center gap-3 bg-[#009B9B] hover:bg-[#007575] transition-colors text-white px-10 py-3 text-sm font-medium tracking-wide shadow"
+          className="mt-4 inline-flex items-center justify-center gap-2.5 bg-[#009B9B] px-10 py-3 text-sm font-medium leading-none tracking-wide text-white shadow transition-colors hover:bg-[#007575]"
         >
           Sign In
-          <MoveRight className="w-4 h-4" />
+          <MoveRight className="h-4 w-4 shrink-0" />
         </button>
       </div>
     </div>

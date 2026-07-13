@@ -224,7 +224,7 @@ export function RequestTypePage() {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto flex w-full max-w-2xl flex-col px-4 pb-6 sm:px-6">
+        <div className="flex w-full flex-col px-4 pb-6 sm:px-6 lg:px-8">
           <div className="sticky top-0 z-20 bg-[#F8F9FA] pt-6">
             <div className="pb-4">
               <div className="flex items-center gap-3">
@@ -258,7 +258,7 @@ export function RequestTypePage() {
             <div className="h-5 w-full bg-[#F8F9FA]" />
           </div>
 
-          <div className="mt-0 space-y-5">
+          <div className="mt-0 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {filteredRequestTypes.map(({ id, label, color, to }) => (
               <button
                 key={id}
@@ -267,13 +267,14 @@ export function RequestTypePage() {
                 className="w-full bg-white border border-[#EDEBE9] hover:border-[#009B9B] hover:shadow-md transition-all duration-200"
               >
                 <div className="h-1.5 w-full" style={{ backgroundColor: color }} />
-                <div className="flex items-center justify-between p-4">
-                  <p className="text-base font-medium text-[#323130] text-left">{label}</p>
+                <div className="flex min-h-[74px] items-center justify-between gap-3 p-4">
+                  <p className="flex-1 text-left text-base font-medium leading-snug text-[#323130]">{label}</p>
                   <div
-                    className="flex items-center gap-2 text-sm font-medium flex-shrink-0"
+                    className="inline-flex shrink-0 items-center gap-1.5 text-sm font-medium leading-none"
                     style={{ color }}
                   >
-                    Seleziona <MoveRight className="w-3.5 h-3.5" />
+                    <span>Seleziona</span>
+                    <MoveRight className="h-3.5 w-3.5 shrink-0" />
                   </div>
                 </div>
               </button>

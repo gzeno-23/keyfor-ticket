@@ -1,21 +1,22 @@
-import { useState, type ChangeEvent, type FormEvent } from 'react'
+import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Search, X } from 'lucide-react'
+import { Bookmark, BookmarkCheck, Search, X } from 'lucide-react'
 import { BackButton } from '@/components/ui/back-button'
 import { CancelConfirmDialog } from '@/components/ui/CancelConfirmDialog'
 import { handleHorizontalMouseDragScroll, handleHorizontalWheelScroll } from '@/lib/horizontal-wheel-scroll'
 import { getRequestTypeColor } from '@/lib/request-type'
+import { getBookmarked, setBookmarked } from '@/lib/bookmarks'
 import { useBodyScrollLock } from '@/lib/use-body-scroll-lock'
 
 // ── Mock BC data ──────────────────────────────────────────────────────────────
 const BC_CLIENTI = [
-  { codice: 'C001', nome: 'Alfa Distribuzione S.r.l.' },
-  { codice: 'C002', nome: 'Beta Forniture S.p.A.' },
-  { codice: 'C003', nome: 'Gamma Logistica S.r.l.' },
-  { codice: 'C004', nome: 'Delta Commerce S.r.l.' },
-  { codice: 'C005', nome: 'Epsilon Trading S.p.A.' },
-  { codice: 'C006', nome: 'Zeta Solutions S.r.l.' },
-  { codice: 'C007', nome: 'Eta Group S.p.A.' },
+  { codice: 'C001', nome: 'Alfa Distribuzione S.r.l.', citta: 'Milano' },
+  { codice: 'C002', nome: 'Beta Forniture S.p.A.', citta: 'Bologna' },
+  { codice: 'C003', nome: 'Gamma Logistica S.r.l.', citta: 'Torino' },
+  { codice: 'C004', nome: 'Delta Commerce S.r.l.', citta: 'Padova' },
+  { codice: 'C005', nome: 'Epsilon Trading S.p.A.', citta: 'Brescia' },
+  { codice: 'C006', nome: 'Zeta Solutions S.r.l.', citta: 'Verona' },
+  { codice: 'C007', nome: 'Eta Group S.p.A.', citta: 'Parma' },
 ]
 
 const BC_ARTICOLI = [
@@ -30,7 +31,7 @@ const BC_ARTICOLI = [
 ]
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-interface LookupItem { codice: string; label: string }
+interface LookupItem { codice: string; label: string; citta?: string }
 type DialogType = 'cliente' | 'articolo' | null
 type SpostaDataTab = 'details' | 'comments' | 'attachments'
 
@@ -55,11 +56,13 @@ interface NoteItem {
 // ── Page Dialog ───────────────────────────────────────────────────────────────
 function LookupDialog({
   title,
+  dialogType,
   items,
   onSelect,
   onClose,
 }: {
   title: string
+  dialogType: Exclude<DialogType, null>
   items: LookupItem[]
   onSelect: (item: LookupItem) => void
   onClose: () => void
@@ -72,19 +75,19 @@ function LookupDialog({
     ? items.filter(
         (i) =>
           i.label.toLowerCase().includes(normalizedQuery.toLowerCase()) ||
-          i.codice.toLowerCase().includes(normalizedQuery.toLowerCase())
+          i.codice.toLowerCase().includes(normalizedQuery.toLowerCase()) ||
+          i.citta?.toLowerCase().includes(normalizedQuery.toLowerCase())
       )
     : items
-
   return (
-    <div className="fixed inset-0 z-50 flex min-h-[100dvh] items-start justify-center bg-black/40 px-4 pt-20 overscroll-contain sm:pt-24" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex min-h-[100dvh] items-start justify-center bg-black/35 px-4 pt-20 overscroll-contain sm:pt-24" onClick={onClose}>
       <div
-        className="relative flex w-full max-w-lg flex-col bg-white shadow-2xl"
+        className="relative flex w-full max-w-lg flex-col border border-[#8A8886] bg-white shadow-2xl"
         style={{ maxHeight: 'calc(100dvh - 6rem)' }}
         onClick={(event) => event.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#EDEBE9] px-5 py-3">
+        <div className="flex items-center justify-between border-b border-[#D2D0CE] px-5 py-3">
           <h2 className="text-sm font-semibold text-[#323130]">{title}</h2>
           <button type="button" onClick={onClose} className="text-[#605E5C] hover:text-[#323130]">
             <X className="h-4 w-4" />
@@ -92,7 +95,7 @@ function LookupDialog({
         </div>
 
         {/* Search */}
-        <div className="flex items-center gap-2 border-b border-[#EDEBE9] px-4 py-2.5">
+        <div className="flex items-center gap-2 border-b border-[#D2D0CE] px-4 py-2.5">
           <Search className="h-4 w-4 shrink-0 text-[#A19F9D]" />
           <input
             type="text"
@@ -110,18 +113,24 @@ function LookupDialog({
 
         {/* List */}
         <div className="flex-1 overflow-y-auto">
+          {dialogType === 'cliente' && (
+            <div className="grid grid-cols-[22px_1fr_120px] border-b border-[#D2D0CE] bg-[#F3F2F1] px-4 py-2 text-xs text-[#605E5C]">
+              <span />
+              <span>Cliente</span>
+              <span>Città</span>
+            </div>
+          )}
+          {dialogType === 'articolo' && (
+            <div className="grid grid-cols-[22px_110px_1fr] border-b border-[#D2D0CE] bg-[#F3F2F1] px-4 py-2 text-xs text-[#605E5C]">
+              <span />
+              <span>Codice</span>
+              <span>Descrizione</span>
+            </div>
+          )}
+
           {filtered.length === 0 ? (
             <div className="px-4 py-6">
               <p className="text-center text-sm text-[#A19F9D]">Nessun risultato trovato</p>
-              {normalizedQuery && (
-                <button
-                  type="button"
-                  onClick={() => onSelect({ codice: '', label: normalizedQuery })}
-                  className="mt-3 w-full border border-[#EDEBE9] px-3 py-2 text-left text-sm text-[#009B9B] hover:bg-[#F3F2F1]"
-                >
-                  Inserisci "{normalizedQuery}"
-                </button>
-              )}
             </div>
           ) : (
             filtered.map((item) => (
@@ -129,12 +138,36 @@ function LookupDialog({
                 key={item.codice}
                 type="button"
                 onClick={() => onSelect(item)}
-                className="w-full border-b border-[#EDEBE9]/50 px-4 py-2.5 text-left text-sm text-[#323130] hover:bg-[#F3F2F1]"
+                className="w-full border-b border-[#E1DFDD] bg-white px-4 py-2.5 text-left text-sm text-[#201F1E] transition-colors hover:bg-[#A0DCE2]"
               >
-                {item.label}
+                {dialogType === 'cliente' ? (
+                  <span className="grid grid-cols-[22px_1fr_120px]">
+                    <span className="text-[#323130]" />
+                    <span>{item.label}</span>
+                    <span className="text-[#605E5C]">{item.citta ?? '-'}</span>
+                  </span>
+                ) : (
+                  <span className="grid grid-cols-[22px_110px_1fr]">
+                    <span className="text-[#323130]" />
+                    <span className="text-[#605E5C]">{item.codice}</span>
+                    <span>{item.label}</span>
+                  </span>
+                )}
               </button>
             ))
           )}
+        </div>
+
+        {/* Footer action in BC style */}
+        <div className="border-t border-[#D2D0CE] bg-[#F3F2F1] px-4 py-2">
+          <button
+            type="button"
+            onClick={() => normalizedQuery && onSelect({ codice: '', label: normalizedQuery })}
+            disabled={!normalizedQuery}
+            className="text-sm text-[#0078D4] hover:underline disabled:cursor-not-allowed disabled:text-[#A19F9D] disabled:no-underline"
+          >
+            + Inserisci "{normalizedQuery || '...'}"
+          </button>
         </div>
       </div>
     </div>
@@ -227,7 +260,7 @@ export function SpostaDataPage() {
   const [commentText, setCommentText] = useState('')
   const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false)
 
-  const clientiItems: LookupItem[] = BC_CLIENTI.map((c) => ({ codice: c.codice, label: c.nome }))
+  const clientiItems: LookupItem[] = BC_CLIENTI.map((c) => ({ codice: c.codice, label: c.nome, citta: c.citta }))
   const articoliItems: LookupItem[] = BC_ARTICOLI.map((a) => ({ codice: a.codice, label: `${a.codice} — ${a.descrizione}` }))
 
   const handleSelect = (field: 'cliente' | 'articolo') => (item: LookupItem) => {
@@ -372,24 +405,37 @@ export function SpostaDataPage() {
 
   const requestKey = pathname.split('/').pop() ?? 'sposta-data'
   const currentRequest = requestConfig[requestKey] ?? requestConfig['sposta-data']
+  const bookmarkKey = `create:${requestKey}`
+  const [isBookmarked, setIsBookmarked] = useState(() => getBookmarked(bookmarkKey))
   const currentRequestColor = getRequestTypeColor(currentRequest.label)
   const isDetailsComplete = Boolean(form.cliente && form.articolo && form.vecchiaData && form.nuovaData)
   useBodyScrollLock(isInfoOpen)
 
+  useEffect(() => {
+    setIsBookmarked(getBookmarked(bookmarkKey))
+  }, [bookmarkKey])
+
+  const handleToggleBookmark = () => {
+    const nextValue = !isBookmarked
+    setIsBookmarked(nextValue)
+    setBookmarked(bookmarkKey, nextValue)
+  }
+
   return (
-    <div className="mx-auto max-w-2xl px-4 pb-6 sm:px-6">
+    <div className="w-full px-4 pb-6 sm:px-6 lg:px-8">
       <div className="sticky top-14 z-20 bg-[#F8F9FA] pt-6">
-        <div className="flex items-center gap-3 pb-4">
-          <BackButton to="/request-type" />
+        <div className="flex items-center justify-between gap-3 pb-4">
+          <div className="flex items-center gap-3">
+            <BackButton to="/request-type" />
             <div>
               <h1 className="text-3xl font-light text-[#323130]">Nuova richiesta</h1>
-              <div className="mt-2 flex items-center gap-1">
+              <div className="mt-1.5 inline-flex items-center gap-1.5">
                 <span className="h-2 w-2 shrink-0 rounded-[2px]" style={{ backgroundColor: currentRequestColor }} />
                 <p className="text-sm text-[#605E5C]">{currentRequest.label}</p>
                 <button
                   type="button"
                   onClick={() => setIsInfoOpen(true)}
-                  className="inline-flex h-3 w-3 items-center justify-center self-center rounded-full border border-[#323130] text-[7px] font-semibold leading-none text-[#323130] translate-y-[1px]"
+                  className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full border border-[#323130] text-[8px] font-semibold leading-none text-[#323130]"
                   aria-label="Informazioni su Sposta Data"
                 >
                   i
@@ -397,6 +443,16 @@ export function SpostaDataPage() {
               </div>
             </div>
           </div>
+          <button
+            type="button"
+            onClick={handleToggleBookmark}
+            className="mt-1 inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#EDEBE9] text-[#605E5C] hover:bg-[#F3F2F1] hover:text-[#323130]"
+            aria-label={isBookmarked ? 'Rimuovi bookmark' : 'Aggiungi bookmark'}
+            title={isBookmarked ? 'Rimuovi bookmark' : 'Aggiungi bookmark'}
+          >
+            {isBookmarked ? <BookmarkCheck className="h-4 w-4 text-[#009B9B]" /> : <Bookmark className="h-4 w-4" />}
+          </button>
+        </div>
 
         <div
           onWheel={handleHorizontalWheelScroll}
@@ -595,6 +651,7 @@ export function SpostaDataPage() {
       {openDialog === 'cliente' && (
         <LookupDialog
           title="Seleziona cliente"
+          dialogType="cliente"
           items={clientiItems}
           onSelect={handleSelect('cliente')}
           onClose={() => setOpenDialog(null)}
@@ -603,6 +660,7 @@ export function SpostaDataPage() {
       {openDialog === 'articolo' && (
         <LookupDialog
           title="Seleziona articolo"
+          dialogType="articolo"
           items={articoliItems}
           onSelect={handleSelect('articolo')}
           onClose={() => setOpenDialog(null)}

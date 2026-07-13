@@ -87,7 +87,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       {/* Footer */}
       <div className="px-3 py-4 border-t border-[#EDEBE9]">
         <div className={cn('flex items-center gap-3', collapsed && 'justify-center')}>
-          <div className="w-8 h-8 rounded-full bg-[#008272] flex items-center justify-center text-xs font-bold text-white shrink-0">
+          <div className="w-8 h-8 rounded-full bg-[#009B9B] flex items-center justify-center text-xs font-bold text-white shrink-0">
             MR
           </div>
           {!collapsed && (

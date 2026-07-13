@@ -1,8 +1,11 @@
 import { useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Bell, Settings } from 'lucide-react'
+import { Bell, ChevronRight, Plus, Settings } from 'lucide-react'
 import { UserProfileMenu } from '@/components/layout/UserProfileMenu'
+import { mockTickets } from '@/data/mock-tickets'
+import { listBookmarkedKeys } from '@/lib/bookmarks'
 import { resetNotificationsForDemo, useNotifications } from '@/lib/notifications'
+import { getRequestTypeColor } from '@/lib/request-type'
 
 const HUB_CHOICES = [
   {
@@ -26,7 +29,7 @@ const HUB_CHOICES = [
 ] as const
 
 type HubChoiceId = (typeof HUB_CHOICES)[number]['id']
-type HubStyle = 'classic' | 'business'
+type HubStyle = 'classic' | 'business' | 'spotlight'
 
 const HUB_STYLE_STORAGE_KEY = 'keyfor-hub-style-v2'
 const DEFAULT_HUB_STYLE: HubStyle = 'classic'
@@ -42,12 +45,41 @@ const HUB_COLORS: Record<HubStyle, Record<HubChoiceId, string>> = {
     manage: '#0078D4',
     history: '#5C2D91',
   },
+  spotlight: {
+    new: '#00A3A3',
+    manage: '#4A90E2',
+    history: '#8E7CC3',
+  },
 }
+
+const REQUEST_TYPE_TO_ID: Record<string, string> = {
+  'Sposta Data': 'sposta-data',
+  'Non Conformità': 'non-conformita',
+  Sollecito: 'sollecito',
+  'Giacenza Articolo': 'giacenza-articolo',
+  'Reso Merce': 'reso-merce',
+  'Variazione Prezzo': 'variazione-prezzo',
+  'Blocco Ordine': 'blocco-ordine',
+  'Sblocco Ordine': 'sblocco-ordine',
+  'Verifica Pagamento': 'verifica-pagamento',
+  'Aggiornamento Anagrafica': 'aggiornamento-anagrafica',
+  'Richiesta Fattura': 'richiesta-fattura',
+  'Reclamo Trasporto': 'reclamo-trasporto',
+  'Priorità Consegna': 'priorita-consegna',
+  'Richiesta Documenti': 'richiesta-documenti',
+  'Cambio Vettore': 'cambio-vettore',
+}
+
+const REQUEST_TYPE_ID_TO_LABEL: Record<string, string> = Object.fromEntries(
+  Object.entries(REQUEST_TYPE_TO_ID).map(([label, id]) => [id, label])
+)
+
+type FavoriteLink = { label: string; to: string }
 
 function readHubStyleFromStorage(): HubStyle {
   if (typeof window === 'undefined') return DEFAULT_HUB_STYLE
   const rawValue = window.localStorage.getItem(HUB_STYLE_STORAGE_KEY)
-  return rawValue === 'classic' || rawValue === 'business' ? rawValue : DEFAULT_HUB_STYLE
+  return rawValue === 'classic' || rawValue === 'business' || rawValue === 'spotlight' ? rawValue : DEFAULT_HUB_STYLE
 }
 
 function persistHubStyle(value: HubStyle) {
@@ -76,6 +108,45 @@ export function HubPage() {
       })),
     [hubStyle]
   )
+
+  const favoriteLinksByChoice = useMemo<Record<HubChoiceId, FavoriteLink[]>>(() => {
+    const links: Record<HubChoiceId, FavoriteLink[]> = { new: [], manage: [], history: [] }
+    const bookmarkedKeys = listBookmarkedKeys()
+
+    bookmarkedKeys.forEach((key) => {
+      if (key.startsWith('create:')) {
+        const requestTypeId = key.replace('create:', '')
+        const requestTypeLabel = REQUEST_TYPE_ID_TO_LABEL[requestTypeId] ?? requestTypeId
+        links.new.push({ label: requestTypeLabel, to: `/richieste/${requestTypeId}` })
+        return
+      }
+
+      if (key.startsWith('ticket:')) {
+        const ticketId = key.replace('ticket:', '')
+        const ticket = mockTickets.find((item) => item.id === ticketId)
+        if (!ticket?.requestType) return
+
+        const requestTypeId = REQUEST_TYPE_TO_ID[ticket.requestType]
+        const status = ticket.status === 'closed' ? 'closed' : 'open'
+        const to = requestTypeId ? `/tickets?status=${status}&type=${requestTypeId}` : `/tickets?status=${status}`
+
+        if (status === 'closed') {
+          links.history.push({ label: ticket.requestType, to })
+        } else {
+          links.manage.push({ label: ticket.requestType, to })
+        }
+      }
+    })
+
+    const dedupe = (items: FavoriteLink[]) =>
+      Array.from(new Map(items.map((item) => [item.label, item])).values())
+
+    return {
+      new: dedupe(links.new),
+      manage: dedupe(links.manage),
+      history: dedupe(links.history),
+    }
+  }, [])
 
   const handleStyleChange = (style: HubStyle) => {
     setHubStyle(style)
@@ -117,7 +188,7 @@ export function HubPage() {
           >
             <Settings className="h-4 w-4" />
           </button>
-          <UserProfileMenu accentColor="#00828E" onLogout={handleLogout} />
+          <UserProfileMenu accentColor="#009B9B" onLogout={handleLogout} />
         </div>
       </header>
 
@@ -131,38 +202,128 @@ export function HubPage() {
               className="flex-1 w-full transition-all duration-200 hover:brightness-95"
               style={{ backgroundColor: color }}
             >
-              <div className="h-full w-full flex flex-col items-center justify-center gap-4 py-6">
-                <div className="w-20 h-20 rounded-full bg-white/90 flex items-center justify-center">
-                  <img src={iconSrc} alt="" className="h-10 w-10" />
+              <div className="h-full w-full px-4 py-6">
+                <div className="flex h-full w-full flex-col items-center justify-center gap-3">
+                  <div className="w-20 h-20 rounded-full bg-white/90 flex items-center justify-center">
+                    <img src={iconSrc} alt="" className="h-10 w-10" />
+                  </div>
+                  <p className="text-center text-base sm:text-lg font-bold text-white">{label}</p>
+                  {favoriteLinksByChoice[id].length > 0 && (
+                    <div className="mt-1 flex max-w-full flex-wrap items-center justify-center gap-x-3 gap-y-1">
+                      {favoriteLinksByChoice[id].slice(0, 4).map((favorite) => (
+                        <button
+                          key={`${id}-${favorite.label}`}
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            navigate(favorite.to)
+                          }}
+                          className="inline-flex max-w-full items-center gap-1.5 truncate text-sm leading-none text-white/95 hover:underline"
+                        >
+                          {id === 'new' ? <Plus className="h-3 w-3 shrink-0" /> : <ChevronRight className="h-3 w-3 shrink-0" />}
+                          <span className="truncate">{favorite.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <div className="h-1" />
                 </div>
-                <p className="text-base sm:text-lg font-bold text-white">{label}</p>
               </div>
             </button>
           ))}
         </div>
-      ) : (
+      ) : hubStyle === 'business' ? (
         <div className="flex-1 w-full px-4 py-4 sm:px-6 sm:py-6">
-          <div className="mx-auto grid h-full min-h-[calc(100dvh-4.5rem)] w-full max-w-6xl grid-rows-[repeat(3,minmax(0,1fr))] gap-4 md:min-h-0 md:grid-cols-3 md:grid-rows-1">
-          {styledChoices.map(({ id, iconSrc, label, color, to }) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => navigate(to)}
-              className="h-full min-h-0 rounded-2xl border p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
-              style={{
-                background: `linear-gradient(160deg, ${color}3D 0%, ${color}1F 100%)`,
-                borderColor: `${color}80`,
-              }}
-            >
-              <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white shadow-sm">
-                  <img src={iconSrc} alt="" className="h-7 w-7" />
+          <div className="grid h-full min-h-[calc(100dvh-4.5rem)] w-full grid-rows-[repeat(3,minmax(0,1fr))] gap-4 md:min-h-0 md:grid-cols-3 md:grid-rows-1">
+            {styledChoices.map(({ id, iconSrc, label, color, to }) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => navigate(to)}
+                className="h-full min-h-0 rounded-2xl border p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                style={{
+                  background: `linear-gradient(160deg, ${color}3D 0%, ${color}1F 100%)`,
+                  borderColor: `${color}80`,
+                }}
+              >
+                <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white shadow-sm">
+                    <img src={iconSrc} alt="" className="h-7 w-7" />
+                  </div>
+                  <p className="text-lg font-semibold text-[#201F1E]">{label}</p>
+                  {favoriteLinksByChoice[id].length > 0 && (
+                    <div className="mt-1 flex w-full flex-wrap gap-x-4 gap-y-1 p-1 text-left">
+                      {favoriteLinksByChoice[id].slice(0, 4).map((favorite) => (
+                        <button
+                          key={`${id}-${favorite.label}`}
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            navigate(favorite.to)
+                          }}
+                          className="inline-flex max-w-full items-center gap-1.5 truncate text-sm leading-none text-[#0078D4] hover:underline"
+                        >
+                          {id === 'new' ? <Plus className="h-3 w-3 shrink-0" /> : <ChevronRight className="h-3 w-3 shrink-0" />}
+                          <span className="truncate">{favorite.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <p className="text-lg font-semibold text-[#201F1E]">{label}</p>
-                <p className="text-sm text-[#323130]">Apri sezione</p>
-              </div>
-            </button>
-          ))}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="flex-1 w-full bg-[#F8F9FA] px-4 py-4 sm:px-6 sm:py-6">
+          <div className="grid h-full min-h-[calc(100dvh-4.5rem)] w-full gap-4 md:grid-cols-6 md:grid-rows-[minmax(0,1.15fr)_minmax(0,1fr)]">
+            {styledChoices.map(({ id, iconSrc, label, color, to }) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => navigate(to)}
+                className={`group relative overflow-hidden rounded-2xl border border-[#D2D0CE] bg-white text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
+                  id === 'new' ? 'md:col-span-6 md:row-span-1' : 'md:col-span-3 md:row-span-1'
+                }`}
+                style={{ backgroundColor: `${color}18` }}
+              >
+                <div className="absolute inset-x-0 top-0 h-1.5" style={{ backgroundColor: color }} />
+                <div className="absolute right-0 top-0 h-24 w-24 rounded-full blur-2xl" style={{ backgroundColor: `${color}44` }} />
+                <div className="relative flex h-full min-h-[190px] flex-col justify-between p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className={`font-semibold text-[#201F1E] ${id === 'new' ? 'text-2xl' : 'text-xl'}`}>{label}</p>
+                    </div>
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#E1DFDD] bg-white">
+                      <img src={iconSrc} alt="" className="h-6 w-6" />
+                    </div>
+                  </div>
+
+                  {favoriteLinksByChoice[id].length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
+                      {favoriteLinksByChoice[id].slice(0, 4).map((favorite) => (
+                        <button
+                          key={`${id}-${favorite.label}`}
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            navigate(favorite.to)
+                          }}
+                          className="inline-flex max-w-full items-center gap-1.5 truncate rounded-full px-2.5 py-1 text-xs font-medium leading-none hover:brightness-95"
+                          style={{
+                            backgroundColor: `${getRequestTypeColor(favorite.label, color)}22`,
+                            color: getRequestTypeColor(favorite.label, color),
+                          }}
+                        >
+                          {id === 'new' ? <Plus className="h-3 w-3 shrink-0" /> : <ChevronRight className="h-3 w-3 shrink-0" />}
+                          <span className="truncate">{favorite.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </button>
+            ))}
           </div>
         </div>
       )}
@@ -184,6 +345,7 @@ export function HubPage() {
                 [
                   { key: 'business', label: 'Business Central (Nuovo)' },
                   { key: 'classic', label: 'Classico a fasce' },
+                  { key: 'spotlight', label: 'Spotlight moderno' },
                 ] as { key: HubStyle; label: string }[]
               ).map((item) => (
                 <label key={item.key} className="flex items-center justify-between gap-3 rounded-md border border-[#EDEBE9] px-3 py-2">
