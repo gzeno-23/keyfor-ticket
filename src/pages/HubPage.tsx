@@ -47,8 +47,8 @@ const HUB_COLORS: Record<HubStyle, Record<HubChoiceId, string>> = {
   },
   spotlight: {
     new: '#00A3A3',
-    manage: '#F28C28',
-    history: '#6B7280',
+    manage: '#2E86C1',
+    history: '#9C6CC3',
   },
 }
 
@@ -233,14 +233,14 @@ export function HubPage() {
           ))}
         </div>
       ) : hubStyle === 'business' ? (
-        <div className="flex min-h-0 w-full flex-1 overflow-hidden px-4 py-4 sm:px-6 sm:py-6">
-          <div className="grid h-full min-h-0 w-full grid-rows-[repeat(3,minmax(0,1fr))] gap-4 md:min-h-[calc(100dvh-4.5rem)] md:grid-cols-3 md:grid-rows-1">
+        <div className="flex min-h-0 w-full flex-1 overflow-hidden px-4 py-4 sm:px-6 sm:py-6 md:flex-none md:overflow-visible">
+          <div className="grid h-full min-h-0 w-full grid-rows-[repeat(3,minmax(0,1fr))] gap-4 md:h-auto md:min-h-0 md:grid-cols-3 md:grid-rows-1">
             {styledChoices.map(({ id, iconSrc, label, color, to }) => (
               <button
                 key={id}
                 type="button"
                 onClick={() => navigate(to)}
-                className="h-full min-h-0 rounded-2xl border p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                className="h-full min-h-0 rounded-2xl border p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md md:h-[320px]"
                 style={{
                   background: `linear-gradient(160deg, ${color}3D 0%, ${color}1F 100%)`,
                   borderColor: `${color}80`,
@@ -343,9 +343,9 @@ export function HubPage() {
             <div className="mt-4 space-y-2">
               {(
                 [
-                  { key: 'business', label: 'Business Central (Nuovo)' },
-                  { key: 'classic', label: 'Classico a fasce' },
-                  { key: 'spotlight', label: 'Spotlight moderno' },
+                  { key: 'classic', label: 'Tema 1 (Predefinito)' },
+                  { key: 'business', label: 'Tema 2' },
+                  { key: 'spotlight', label: 'Tema 3' },
                 ] as { key: HubStyle; label: string }[]
               ).map((item) => (
                 <label key={item.key} className="flex items-center justify-between gap-3 rounded-md border border-[#EDEBE9] px-3 py-2">
