@@ -1,6 +1,6 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Bookmark, BookmarkCheck, Search, X } from 'lucide-react'
+import { Bookmark, Search, X } from 'lucide-react'
 import { BackButton } from '@/components/ui/back-button'
 import { CancelConfirmDialog } from '@/components/ui/CancelConfirmDialog'
 import { handleHorizontalMouseDragScroll, handleHorizontalWheelScroll } from '@/lib/horizontal-wheel-scroll'
@@ -422,7 +422,7 @@ export function SpostaDataPage() {
   }
 
   return (
-    <div className="w-full px-4 pb-6 sm:px-6 lg:px-8">
+    <div className="w-full px-4 pb-6 sm:px-6 lg:px-8 xl:px-16 2xl:px-32">
       <div className="sticky top-14 z-20 bg-[#F8F9FA] pt-6">
         <div className="flex items-center justify-between gap-3 pb-4">
           <div className="flex min-w-0 items-start gap-3">
@@ -446,11 +446,13 @@ export function SpostaDataPage() {
           <button
             type="button"
             onClick={handleToggleBookmark}
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#EDEBE9] text-[#605E5C] hover:bg-[#F3F2F1] hover:text-[#323130]"
+            className={`inline-flex h-9 w-9 shrink-0 items-center justify-center transition-colors ${
+              isBookmarked ? 'text-[#009B9B]' : 'text-[#605E5C] hover:text-[#323130]'
+            }`}
             aria-label={isBookmarked ? 'Rimuovi bookmark' : 'Aggiungi bookmark'}
             title={isBookmarked ? 'Rimuovi bookmark' : 'Aggiungi bookmark'}
           >
-            {isBookmarked ? <BookmarkCheck className="h-4 w-4 text-[#009B9B]" /> : <Bookmark className="h-4 w-4" />}
+            <Bookmark className={`h-[18px] w-[18px] stroke-[1.8] ${isBookmarked ? 'fill-current text-[#009B9B]' : ''}`} />
           </button>
         </div>
 

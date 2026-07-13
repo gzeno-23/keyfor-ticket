@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react'
 
-export type TicketListColumnKey = 'requestType' | 'assignee' | 'customerName' | 'createdAt' | 'status'
+export type TicketListColumnKey = 'requestType' | 'assignee' | 'customerName' | 'createdAt' | 'status' | 'solleciti'
 export type TicketListGroupingMode = 'none' | 'assignee' | 'requestType' | 'monthYear'
 
 export const TICKET_LIST_COLUMN_ORDER: TicketListColumnKey[] = [
@@ -8,6 +8,7 @@ export const TICKET_LIST_COLUMN_ORDER: TicketListColumnKey[] = [
   'assignee',
   'customerName',
   'createdAt',
+  'solleciti',
   'status',
 ]
 
@@ -16,6 +17,7 @@ export const TICKET_LIST_COLUMN_LABELS: Record<TicketListColumnKey, string> = {
   assignee: 'Presa in carico',
   customerName: 'Cliente',
   createdAt: 'Data',
+  solleciti: 'Sollecito',
   status: 'Stato',
 }
 
@@ -33,6 +35,7 @@ const DEFAULT_TICKET_LIST_COLUMNS: TicketListColumnVisibility = {
   assignee: true,
   customerName: true,
   createdAt: true,
+  solleciti: true,
   status: true,
 }
 
@@ -66,6 +69,7 @@ function readTicketListCustomizationFromStorage(): TicketListCustomizationState 
       assignee: parsedColumns.assignee ?? DEFAULT_TICKET_LIST_COLUMNS.assignee,
       customerName: parsedColumns.customerName ?? DEFAULT_TICKET_LIST_COLUMNS.customerName,
       createdAt: parsedColumns.createdAt ?? DEFAULT_TICKET_LIST_COLUMNS.createdAt,
+      solleciti: parsedColumns.solleciti ?? DEFAULT_TICKET_LIST_COLUMNS.solleciti,
       status: parsedColumns.status ?? DEFAULT_TICKET_LIST_COLUMNS.status,
     }
     const nextGroupingMode: TicketListGroupingMode =

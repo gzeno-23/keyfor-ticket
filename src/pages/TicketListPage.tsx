@@ -102,6 +102,7 @@ const specialColumnWidths: Record<TicketListColumnKey, string> = {
   assignee: '220px',
   customerName: '1fr',
   createdAt: '140px',
+  solleciti: '100px',
   status: '120px',
 }
 
@@ -319,7 +320,7 @@ export function TicketListPage() {
               <div
                 key={ticket.id}
                 onClick={() => navigate(`/tickets/${ticket.id}`)}
-                className="flex cursor-pointer items-center gap-3 px-4 py-3 hover:bg-[#F3F2F1]"
+                className="flex cursor-pointer items-center gap-3 px-4 py-3 hover:bg-[#DEECF9]"
               >
                 <div className="min-w-0 flex-1">
                   {safeColumns.includes('requestType') ? (
@@ -368,7 +369,7 @@ export function TicketListPage() {
                     <Link
                       key={ticket.id}
                       to={`/tickets/${ticket.id}`}
-                      className={`grid px-6 py-3 text-sm hover:bg-[#F3F2F1] ${index % 2 === 0 ? 'bg-white' : 'bg-[#FCFBFA]'}`}
+                      className={`grid px-6 py-3 text-sm hover:bg-[#DEECF9] ${index % 2 === 0 ? 'bg-white' : 'bg-[#FCFBFA]'}`}
                       style={{ gridTemplateColumns: specialGridTemplateColumns }}
                     >
                       {specialColumns.map((columnKey) => (
@@ -424,6 +425,26 @@ export function TicketListPage() {
   )
 }
 
+function SollecitiDots({ count }: { count: number }) {
+  if (count === 0) return null
+  const color = '#F59E0B'
+  if (count <= 3) {
+    return (
+      <span className="flex items-center gap-0.5">
+        {Array.from({ length: count }).map((_, i) => (
+          <span key={i} className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
+        ))}
+      </span>
+    )
+  }
+  return (
+    <span className="inline-flex items-center gap-1">
+      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
+      <span className="text-sm font-semibold text-[#323130]">{count}</span>
+    </span>
+  )
+}
+
 function renderSpecialLayoutCell(ticket: Ticket, columnKey: TicketListColumnKey) {
   if (columnKey === 'requestType') {
     return (
@@ -439,6 +460,7 @@ function renderSpecialLayoutCell(ticket: Ticket, columnKey: TicketListColumnKey)
   if (columnKey === 'assignee') return ticket.status !== 'open' ? ticket.assignee : ''
   if (columnKey === 'customerName') return <span className="text-[#323130]">{ticket.customerName}</span>
   if (columnKey === 'createdAt') return <span className="text-[#605E5C]">{new Date(ticket.createdAt).toLocaleDateString('it-IT')}</span>
+  if (columnKey === 'solleciti') return <SollecitiDots count={ticket.solleciti} />
   return <StatusBadge status={ticket.status} />
 }
 
@@ -512,7 +534,7 @@ function TicketListRow({
   activeColumns: TicketListColumnKey[]
 }) {
   return (
-    <tr className={index % 2 === 0 ? 'bg-white' : 'bg-[#FCFBFA]'}>
+    <tr className={`cursor-pointer hover:bg-[#DEECF9] ${index % 2 === 0 ? 'bg-white' : 'bg-[#FCFBFA]'}`}>
       {activeColumns.map((columnKey) => {
         if (columnKey === 'requestType') {
           return (
@@ -548,6 +570,14 @@ function TicketListRow({
           return (
             <td key={columnKey} className="px-6 py-3 align-top text-[#605E5C]">
               {new Date(ticket.createdAt).toLocaleDateString('it-IT')}
+            </td>
+          )
+        }
+
+        if (columnKey === 'solleciti') {
+          return (
+            <td key={columnKey} className="px-6 py-3 align-top">
+              <SollecitiDots count={ticket.solleciti} />
             </td>
           )
         }

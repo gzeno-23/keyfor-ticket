@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
 import { resetNotificationsForDemo } from '@/lib/notifications'
+import { getPostLoginMessage } from '@/lib/post-login-message'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -32,7 +33,8 @@ export function LoginPage() {
 
   const handleSignIn = () => {
     resetNotificationsForDemo()
-    navigate('/hub', { replace: true })
+    const loginMessage = getPostLoginMessage()
+    navigate('/hub', { replace: true, state: loginMessage ? { loginMessage } : undefined })
   }
 
   return (

@@ -32,6 +32,7 @@ export interface Ticket {
   createdAt: string
   updatedAt: string
   tags: string[]
+  solleciti: number
 }
 
 const CUSTOMERS = [
@@ -93,6 +94,7 @@ function buildTicket(index: number, status: 'open' | 'in_progress' | 'closed'): 
     createdAt: buildDate(index, 0),
     updatedAt: buildDate(index, status === 'closed' ? 2 : 1),
     tags: [toTag(requestType), TAG_POOL[index % TAG_POOL.length], TAG_POOL[(index + 3) % TAG_POOL.length]],
+    solleciti: [0, 0, 1, 2, 0, 3, 1, 5, 0, 2, 0, 4, 1, 0, 2][index % 15],
   }
 }
 

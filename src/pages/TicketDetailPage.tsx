@@ -1,6 +1,6 @@
 import { useEffect, useState, type ChangeEvent, type ReactNode } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Bookmark, BookmarkCheck, CheckCircle2, Edit, Send, UserCheck, XCircle } from 'lucide-react'
+import { Bookmark, CheckCircle2, Edit, Send, UserCheck, XCircle } from 'lucide-react'
 import { mockTickets, type Status } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
 import { StatusBadge } from '@/components/ui/badges'
@@ -152,11 +152,13 @@ export function TicketDetailPage() {
           <button
             type="button"
             onClick={handleToggleBookmark}
-            className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#EDEBE9] text-[#605E5C] hover:bg-[#F3F2F1] hover:text-[#323130]"
+            className={`absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center transition-colors ${
+              isBookmarked ? 'text-[#009B9B]' : 'text-[#605E5C] hover:text-[#323130]'
+            }`}
             aria-label={isBookmarked ? 'Rimuovi bookmark' : 'Aggiungi bookmark'}
             title={isBookmarked ? 'Rimuovi bookmark' : 'Aggiungi bookmark'}
           >
-            {isBookmarked ? <BookmarkCheck className="h-4 w-4 text-[#009B9B]" /> : <Bookmark className="h-4 w-4" />}
+            <Bookmark className={`h-[18px] w-[18px] stroke-[1.8] ${isBookmarked ? 'fill-current text-[#009B9B]' : ''}`} />
           </button>
           <div className="grid gap-x-8 gap-y-2 sm:grid-cols-2">
             <div className="flex items-center gap-2">

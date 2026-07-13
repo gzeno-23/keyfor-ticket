@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Bell, ChevronRight, Plus, Settings } from 'lucide-react'
 import { UserProfileMenu } from '@/components/layout/UserProfileMenu'
@@ -94,6 +94,15 @@ export function HubPage() {
   const [isCustomizationOpen, setIsCustomizationOpen] = useState(false)
   const [hubStyle, setHubStyle] = useState<HubStyle>(() => readHubStyleFromStorage())
   const currentPath = `${location.pathname}${location.search}`
+  const loginMessageFromState = ((location.state as { loginMessage?: string } | null)?.loginMessage ?? '').trim()
+  const [postLoginMessage, setPostLoginMessage] = useState(loginMessageFromState)
+  const [isPostLoginMessageOpen, setIsPostLoginMessageOpen] = useState(Boolean(loginMessageFromState))
+
+  useEffect(() => {
+    if (!loginMessageFromState) return
+    setPostLoginMessage(loginMessageFromState)
+    setIsPostLoginMessageOpen(true)
+  }, [loginMessageFromState])
 
   const handleLogout = () => {
     resetNotificationsForDemo()
@@ -210,7 +219,7 @@ export function HubPage() {
                   <p className="text-center text-base sm:text-lg font-bold text-white">{label}</p>
                   {favoriteLinksByChoice[id].length > 0 && (
                     <div className="mt-1 flex max-w-full flex-wrap items-center justify-center gap-x-3 gap-y-1">
-                      {favoriteLinksByChoice[id].slice(0, 4).map((favorite) => (
+                      {favoriteLinksByChoice[id].map((favorite, index) => (
                         <button
                           key={`${id}-${favorite.label}`}
                           type="button"
@@ -218,12 +227,19 @@ export function HubPage() {
                             event.stopPropagation()
                             navigate(favorite.to)
                           }}
-                          className="inline-flex max-w-full items-center gap-1.5 truncate text-sm leading-none text-white/95 hover:underline"
+                          className={`${index >= 4 ? 'hidden md:inline-flex' : 'inline-flex'} max-w-full items-center gap-1.5 truncate rounded-full bg-white/55 px-2.5 py-1 text-sm leading-none text-[#201F1E] hover:bg-white/65`}
                         >
-                          {id === 'new' ? <Plus className="h-3 w-3 shrink-0" /> : <ChevronRight className="h-4 w-4 shrink-0" />}
+                          {id === 'new' ? (
+                            <Plus className="h-3 w-3 shrink-0" style={{ color: getRequestTypeColor(favorite.label, color) }} />
+                          ) : (
+                            <ChevronRight className="h-4 w-4 shrink-0" style={{ color: getRequestTypeColor(favorite.label, color) }} />
+                          )}
                           <span className="truncate">{favorite.label}</span>
                         </button>
                       ))}
+                      {favoriteLinksByChoice[id].length > 4 && (
+                        <span className="inline-flex rounded-full bg-white/55 px-2.5 py-1 text-sm leading-none text-[#201F1E] md:hidden">...</span>
+                      )}
                     </div>
                   )}
                   <div className="h-1" />
@@ -246,14 +262,16 @@ export function HubPage() {
                   borderColor: `${color}80`,
                 }}
               >
-                <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white shadow-sm">
-                    <img src={iconSrc} alt="" className="h-7 w-7" />
+                <div className="flex h-full flex-col items-center justify-between text-center">
+                  <div className="mt-2 flex flex-col items-center gap-4">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white shadow-sm">
+                      <img src={iconSrc} alt="" className="h-7 w-7" />
+                    </div>
+                    <p className="text-lg font-semibold text-[#201F1E]">{label}</p>
                   </div>
-                  <p className="text-lg font-semibold text-[#201F1E]">{label}</p>
                   {favoriteLinksByChoice[id].length > 0 && (
-                    <div className="mt-1 flex w-full flex-wrap gap-x-4 gap-y-1 p-1 text-left">
-                      {favoriteLinksByChoice[id].slice(0, 4).map((favorite) => (
+                    <div className="mt-6 flex w-full flex-wrap justify-center gap-x-3 gap-y-2 pb-1 text-left">
+                      {favoriteLinksByChoice[id].map((favorite, index) => (
                         <button
                           key={`${id}-${favorite.label}`}
                           type="button"
@@ -261,12 +279,19 @@ export function HubPage() {
                             event.stopPropagation()
                             navigate(favorite.to)
                           }}
-                          className="inline-flex max-w-full items-center gap-1.5 truncate text-sm leading-none text-[#0078D4] hover:underline"
+                          className={`${index >= 4 ? 'hidden md:inline-flex' : 'inline-flex'} max-w-full items-center gap-1.5 truncate rounded-full bg-white/55 px-2.5 py-1 text-sm leading-none text-[#201F1E] hover:bg-white/65`}
                         >
-                          {id === 'new' ? <Plus className="h-3 w-3 shrink-0" /> : <ChevronRight className="h-4 w-4 shrink-0" />}
+                          {id === 'new' ? (
+                            <Plus className="h-3 w-3 shrink-0" style={{ color: getRequestTypeColor(favorite.label, color) }} />
+                          ) : (
+                            <ChevronRight className="h-4 w-4 shrink-0" style={{ color: getRequestTypeColor(favorite.label, color) }} />
+                          )}
                           <span className="truncate">{favorite.label}</span>
                         </button>
                       ))}
+                      {favoriteLinksByChoice[id].length > 4 && (
+                        <span className="inline-flex rounded-full bg-white/55 px-2.5 py-1 text-sm leading-none text-[#201F1E] md:hidden">...</span>
+                      )}
                     </div>
                   )}
                 </div>
@@ -275,16 +300,14 @@ export function HubPage() {
           </div>
         </div>
       ) : (
-        <div className="flex min-h-0 w-full flex-1 overflow-hidden bg-[#F8F9FA] px-4 py-4 sm:px-6 sm:py-6">
-          <div className="grid h-full min-h-0 w-full gap-4 md:min-h-[calc(100dvh-4.5rem)] md:grid-cols-6 md:grid-rows-[minmax(0,1.15fr)_minmax(0,1fr)]">
+        <div className="flex min-h-0 w-full flex-1 overflow-hidden bg-[#F8F9FA] px-4 py-4 sm:px-6 sm:py-6 md:flex-none md:overflow-visible">
+          <div className="grid h-full min-h-[calc(100dvh-4.5rem)] w-full gap-4 md:h-auto md:min-h-0 md:grid-cols-3 md:grid-rows-1">
             {styledChoices.map(({ id, iconSrc, label, color, to }) => (
               <button
                 key={id}
                 type="button"
                 onClick={() => navigate(to)}
-                className={`group relative overflow-hidden rounded-2xl border border-[#D2D0CE] bg-white text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
-                  id === 'new' ? 'md:col-span-6 md:row-span-1' : 'md:col-span-3 md:row-span-1'
-                }`}
+                className="group relative h-full min-h-0 overflow-hidden rounded-2xl border border-[#D2D0CE] bg-white text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md md:h-[320px]"
                 style={{ backgroundColor: `${color}18` }}
               >
                 <div className="absolute inset-x-0 top-0 h-1.5" style={{ backgroundColor: color }} />
@@ -301,7 +324,7 @@ export function HubPage() {
 
                   {favoriteLinksByChoice[id].length > 0 && (
                     <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
-                      {favoriteLinksByChoice[id].slice(0, 4).map((favorite) => (
+                      {favoriteLinksByChoice[id].map((favorite, index) => (
                         <button
                           key={`${id}-${favorite.label}`}
                           type="button"
@@ -309,16 +332,23 @@ export function HubPage() {
                             event.stopPropagation()
                             navigate(favorite.to)
                           }}
-                          className="inline-flex max-w-full items-center gap-1.5 truncate rounded-full px-2.5 py-1 text-xs font-medium leading-none hover:brightness-95"
+                          className={`${index >= 4 ? 'hidden md:inline-flex' : 'inline-flex'} max-w-full items-center gap-1.5 truncate rounded-full px-2.5 py-1 text-xs font-medium leading-none hover:brightness-95`}
                           style={{
-                            backgroundColor: `${getRequestTypeColor(favorite.label, color)}22`,
-                            color: getRequestTypeColor(favorite.label, color),
+                            backgroundColor: 'rgba(255, 255, 255, 0.55)',
+                            color: '#201F1E',
                           }}
                         >
-                          {id === 'new' ? <Plus className="h-3 w-3 shrink-0" /> : <ChevronRight className="h-4 w-4 shrink-0" />}
+                          {id === 'new' ? (
+                            <Plus className="h-3 w-3 shrink-0" style={{ color: getRequestTypeColor(favorite.label, color) }} />
+                          ) : (
+                            <ChevronRight className="h-4 w-4 shrink-0" style={{ color: getRequestTypeColor(favorite.label, color) }} />
+                          )}
                           <span className="truncate">{favorite.label}</span>
                         </button>
                       ))}
+                      {favoriteLinksByChoice[id].length > 4 && (
+                        <span className="inline-flex rounded-full bg-white/55 px-2.5 py-1 text-xs font-medium leading-none text-[#201F1E] md:hidden">...</span>
+                      )}
                     </div>
                   )}
                 </div>
@@ -365,6 +395,27 @@ export function HubPage() {
               <button
                 type="button"
                 onClick={() => setIsCustomizationOpen(false)}
+                className="rounded-md bg-[#009B9B] px-4 py-2 text-sm font-medium text-white hover:bg-[#007575]"
+              >
+                Chiudi
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isPostLoginMessageOpen && postLoginMessage && (
+        <div className="fixed inset-0 z-[65] flex items-center justify-center bg-black/30 p-4" onClick={() => setIsPostLoginMessageOpen(false)}>
+          <div
+            className="w-full max-w-md rounded-lg border border-[#EDEBE9] bg-white p-5 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h2 className="text-base font-semibold text-[#323130]">Messaggio</h2>
+            <p className="mt-2 text-sm leading-6 text-[#605E5C]">{postLoginMessage}</p>
+            <div className="mt-5 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setIsPostLoginMessageOpen(false)}
                 className="rounded-md bg-[#009B9B] px-4 py-2 text-sm font-medium text-white hover:bg-[#007575]"
               >
                 Chiudi
