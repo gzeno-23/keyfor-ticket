@@ -222,7 +222,7 @@ export function HubPage() {
                   </div>
                   <p className="text-center text-base sm:text-lg font-bold text-white">{label}</p>
                   {favoriteLinksByChoice[id].length > 0 && (
-                    <div className="mt-1 flex max-w-full flex-wrap items-center justify-center gap-x-3 gap-y-1">
+                    <div className="mt-1 grid w-full grid-cols-2 gap-2 md:flex md:max-w-full md:flex-wrap md:items-center md:justify-center md:gap-x-3 md:gap-y-1">
                       {favoriteLinksByChoice[id].map((favorite, index) => (
                         <button
                           key={`${id}-${favorite.label}`}
@@ -231,7 +231,7 @@ export function HubPage() {
                             event.stopPropagation()
                             navigate(favorite.to)
                           }}
-                          className={`${index >= 4 ? 'hidden md:inline-flex' : 'inline-flex'} max-w-full items-center gap-1.5 truncate rounded-full bg-white/55 px-2.5 py-1 text-sm leading-none text-[#201F1E] hover:bg-white/65`}
+                          className={`${index >= (favoriteLinksByChoice[id].length > 4 ? 3 : 4) ? 'hidden md:inline-flex' : 'inline-flex'} w-full items-center justify-center gap-1.5 truncate rounded-full bg-white/55 px-2.5 py-1 text-sm leading-none text-[#201F1E] hover:bg-white/65 md:w-auto md:max-w-full`}
                         >
                           {id === 'new' ? (
                             <Plus className="h-3 w-3 shrink-0" style={{ color: getRequestTypeColor(favorite.label, color) }} />
@@ -242,7 +242,7 @@ export function HubPage() {
                         </button>
                       ))}
                       {favoriteLinksByChoice[id].length > 4 && (
-                        <span className="inline-flex rounded-full bg-white/55 px-2.5 py-1 text-sm leading-none text-[#201F1E] md:hidden">...</span>
+                        <span className="inline-flex w-full items-center justify-center rounded-full bg-white/55 px-2.5 py-1 text-sm leading-none text-[#201F1E] md:hidden">...</span>
                       )}
                     </div>
                   )}
@@ -274,7 +274,7 @@ export function HubPage() {
                     <p className="text-lg font-semibold text-[#201F1E]">{label}</p>
                   </div>
                   {favoriteLinksByChoice[id].length > 0 && (
-                    <div className="mt-6 flex w-full flex-wrap justify-center gap-x-3 gap-y-2 pb-1 text-left">
+                    <div className="mt-6 grid w-full grid-cols-2 gap-2 pb-1 text-left md:flex md:flex-wrap md:justify-center md:gap-x-3 md:gap-y-2">
                       {favoriteLinksByChoice[id].map((favorite, index) => (
                         <button
                           key={`${id}-${favorite.label}`}
@@ -283,7 +283,7 @@ export function HubPage() {
                             event.stopPropagation()
                             navigate(favorite.to)
                           }}
-                          className={`${index >= 4 ? 'hidden md:inline-flex' : 'inline-flex'} max-w-full items-center gap-1.5 truncate rounded-full bg-white/55 px-2.5 py-1 text-sm leading-none text-[#201F1E] hover:bg-white/65`}
+                          className={`${index >= (favoriteLinksByChoice[id].length > 4 ? 3 : 4) ? 'hidden md:inline-flex' : 'inline-flex'} w-full items-center justify-center gap-1.5 truncate rounded-full bg-white/55 px-2.5 py-1 text-sm leading-none text-[#201F1E] hover:bg-white/65 md:w-auto md:max-w-full`}
                         >
                           {id === 'new' ? (
                             <Plus className="h-3 w-3 shrink-0" style={{ color: getRequestTypeColor(favorite.label, color) }} />
@@ -294,7 +294,7 @@ export function HubPage() {
                         </button>
                       ))}
                       {favoriteLinksByChoice[id].length > 4 && (
-                        <span className="inline-flex rounded-full bg-white/55 px-2.5 py-1 text-sm leading-none text-[#201F1E] md:hidden">...</span>
+                        <span className="inline-flex w-full items-center justify-center rounded-full bg-white/55 px-2.5 py-1 text-sm leading-none text-[#201F1E] md:hidden">...</span>
                       )}
                     </div>
                   )}
@@ -327,7 +327,7 @@ export function HubPage() {
                   </div>
 
                   {favoriteLinksByChoice[id].length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
+                    <div className="mt-3 grid grid-cols-2 gap-2 md:flex md:flex-wrap md:gap-x-4 md:gap-y-1">
                       {favoriteLinksByChoice[id].map((favorite, index) => (
                         <button
                           key={`${id}-${favorite.label}`}
@@ -336,7 +336,7 @@ export function HubPage() {
                             event.stopPropagation()
                             navigate(favorite.to)
                           }}
-                          className={`${index >= 4 ? 'hidden md:inline-flex' : 'inline-flex'} max-w-full items-center gap-1.5 truncate rounded-full px-2.5 py-1 text-xs font-medium leading-none hover:brightness-95`}
+                          className={`${index >= (favoriteLinksByChoice[id].length > 4 ? 3 : 4) ? 'hidden md:inline-flex' : 'inline-flex'} w-full items-center justify-center gap-1.5 truncate rounded-full px-2.5 py-1 text-xs font-medium leading-none hover:brightness-95 md:w-auto md:max-w-full`}
                           style={{
                             backgroundColor: 'rgba(255, 255, 255, 0.55)',
                             color: '#201F1E',
@@ -351,7 +351,7 @@ export function HubPage() {
                         </button>
                       ))}
                       {favoriteLinksByChoice[id].length > 4 && (
-                        <span className="inline-flex rounded-full bg-white/55 px-2.5 py-1 text-xs font-medium leading-none text-[#201F1E] md:hidden">...</span>
+                        <span className="inline-flex w-full items-center justify-center rounded-full bg-white/55 px-2.5 py-1 text-xs font-medium leading-none text-[#201F1E] md:hidden">...</span>
                       )}
                     </div>
                   )}
