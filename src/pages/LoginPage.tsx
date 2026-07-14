@@ -48,9 +48,9 @@ export function LoginPage() {
           className="h-full w-full object-contain"
         />
       </div>
-      <h1 className="mt-5 text-4xl font-semibold leading-none tracking-widest uppercase text-[#201F1E]" aria-label="Key Ticket">
-        <span className="block text-center">Key</span>
-        <span className="mt-1 block text-center">Ticket</span>
+      <h1 className="mt-5 text-4xl font-normal leading-none tracking-widest uppercase" aria-label="Key Ticket">
+        <span className="text-[#201F1E]">Key </span>
+        <span className="text-[#009B9B]">Ticket</span>
       </h1>
       <button
         onClick={handleSignIn}
