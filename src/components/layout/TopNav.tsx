@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react'
-import { ChevronLeft, Bell, Settings } from 'lucide-react'
+import { ChevronLeft, Bell, Settings, ArrowUp, ArrowDown } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { UserProfileMenu } from './UserProfileMenu'
 import { mockTickets } from '@/data/mock-tickets'
 import { resetNotificationsForDemo, useNotifications } from '@/lib/notifications'
 import {
   resetTicketListCustomization,
+  setTicketListColumnOrder,
   setTicketListColumnVisibility,
   setTicketListGroupingMode,
   setTicketListGroupingYear,
   TICKET_LIST_COLUMN_LABELS,
-  TICKET_LIST_COLUMN_ORDER,
+  type TicketListColumnKey,
   type TicketListGroupingMode,
   useTicketListCustomization,
 } from '@/lib/ticket-list-customization'
@@ -19,7 +20,7 @@ export function TopNav() {
   const location = useLocation()
   const navigate = useNavigate()
   const { unreadCount } = useNotifications()
-  const { visibleColumns, groupingMode, groupingYear } = useTicketListCustomization()
+  const { visibleColumns, groupingMode, groupingYear, columnOrder } = useTicketListCustomization()
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const currentPath = `${location.pathname}${location.search}`
   const statusParam = new URLSearchParams(location.search).get('status')
@@ -43,6 +44,17 @@ export function TopNav() {
   const handleLogout = () => {
     resetNotificationsForDemo()
     navigate('/login')
+  }
+
+  const moveColumn = (columnKey: TicketListColumnKey, direction: 'up' | 'down') => {
+    const currentIndex = columnOrder.indexOf(columnKey)
+    if (currentIndex === -1) return
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
+    if (targetIndex < 0 || targetIndex >= columnOrder.length) return
+    const nextOrder = [...columnOrder]
+    const [moved] = nextOrder.splice(currentIndex, 1)
+    nextOrder.splice(targetIndex, 0, moved)
+    setTicketListColumnOrder(nextOrder)
   }
 
   return (
@@ -113,15 +125,35 @@ export function TopNav() {
                     </button>
                   </div>
                   <div className="mt-2 space-y-2">
-                    {TICKET_LIST_COLUMN_ORDER.map((columnKey) => (
+                    {columnOrder.map((columnKey, index) => (
                       <label key={columnKey} className="flex items-center justify-between gap-3 rounded-md border border-[#EDEBE9] px-3 py-2">
                         <span className="text-sm text-[#323130]">{TICKET_LIST_COLUMN_LABELS[columnKey]}</span>
-                        <input
-                          type="checkbox"
-                          checked={visibleColumns[columnKey]}
-                          onChange={(event) => setTicketListColumnVisibility(columnKey, event.target.checked)}
-                          className="h-4 w-4 accent-[#009B9B]"
-                        />
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => moveColumn(columnKey, 'up')}
+                            disabled={index === 0}
+                            className={`inline-flex h-6 w-6 items-center justify-center rounded border border-[#EDEBE9] transition-colors ${index === 0 ? 'cursor-not-allowed text-[#C8C6C4]' : 'text-[#605E5C] hover:bg-[#F3F2F1]'}`}
+                            title="Sposta su"
+                          >
+                            <ArrowUp className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => moveColumn(columnKey, 'down')}
+                            disabled={index === columnOrder.length - 1}
+                            className={`inline-flex h-6 w-6 items-center justify-center rounded border border-[#EDEBE9] transition-colors ${index === columnOrder.length - 1 ? 'cursor-not-allowed text-[#C8C6C4]' : 'text-[#605E5C] hover:bg-[#F3F2F1]'}`}
+                            title="Sposta giù"
+                          >
+                            <ArrowDown className="h-3.5 w-3.5" />
+                          </button>
+                          <input
+                            type="checkbox"
+                            checked={visibleColumns[columnKey]}
+                            onChange={(event) => setTicketListColumnVisibility(columnKey, event.target.checked)}
+                            className="ml-1 h-4 w-4 accent-[#009B9B]"
+                          />
+                        </div>
                       </label>
                     ))}
                   </div>

@@ -49,7 +49,7 @@ export function LoginPage() {
               />
             </div>
             <h1 className="mt-5 text-4xl font-semibold tracking-widest uppercase" aria-label="Key Ticket">
-              <span className="text-[#201F1E]">Key </span>
+              <span className="text-[#605E5C]">Key </span>
               <span className="text-[#009B9B]">T</span>
               <span className="text-[#D83B01]">i</span>
               <span className="text-[#FFB900]">c</span>

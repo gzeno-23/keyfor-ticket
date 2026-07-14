@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { ArrowDown, ArrowUp, Bookmark, ChevronDown, ChevronRight, Plus, Search } from 'lucide-react'
+import { ArrowDown, ArrowUp, ArrowUpDown, Bookmark, ChevronRight, Plus, Search } from 'lucide-react'
 import { StatusBadge } from '@/components/ui/badges'
 import { mockTickets, type Status, type Ticket } from '@/data/mock-tickets'
 import { BackButton } from '@/components/ui/back-button'
@@ -101,6 +101,10 @@ function normalizeTabValue(value: string) {
   return normalizeText(value.replace(/-/g, ' '))
 }
 
+function getShortYearLabel(year: string) {
+  return year.length >= 2 ? year.slice(-2) : year
+}
+
 const specialColumnWidths: Record<TicketListColumnKey, string> = {
   requestType: 'minmax(140px, 1.2fr)',
   title: 'minmax(170px, 1.45fr)',
@@ -137,22 +141,10 @@ function ColumnHeaderMenu({
   onDragEnd?: () => void
   isDragOver?: boolean
 }) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
   const isActive = sort?.col === columnKey
-
-  useEffect(() => {
-    if (!open) return
-    function onOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
-    }
-    document.addEventListener('mousedown', onOutside)
-    return () => document.removeEventListener('mousedown', onOutside)
-  }, [open])
 
   return (
     <div
-      ref={ref}
       className={`group relative flex w-full select-none items-center justify-start gap-1 ${isDragOver ? 'text-[#009B9B]' : ''}`}
       draggable={draggable}
       onDragStart={onDragStart}
@@ -161,39 +153,18 @@ function ColumnHeaderMenu({
       onDragEnd={onDragEnd}
     >
       <span className="cursor-grab truncate">{label}</span>
-      {isActive && (
-        sort!.dir === 'asc'
-          ? <ArrowUp className="h-3 w-3 shrink-0 text-[#009B9B]" />
-          : <ArrowDown className="h-3 w-3 shrink-0 text-[#009B9B]" />
-      )}
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex h-5 w-5 shrink-0 items-center justify-center rounded transition-colors hover:bg-[#EDEBE9]"
-        title="Ordina"
+        onClick={() => onSort(columnKey, isActive && sort?.dir === 'asc' ? 'desc' : 'asc')}
+        className={`ml-auto flex h-5 w-5 shrink-0 items-center justify-center rounded transition-colors hover:bg-[#EDEBE9] ${isActive ? 'text-[#009B9B]' : 'text-[#605E5C]'}`}
+        title={isActive && sort?.dir === 'asc' ? 'Ordine decrescente' : 'Ordine crescente'}
       >
-        <ChevronDown className="h-3 w-3 text-[#605E5C]" />
+        {isActive ? (
+          sort!.dir === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
+        ) : (
+          <ArrowUpDown className="h-3 w-3" />
+        )}
       </button>
-      {open && (
-        <div className="absolute left-0 top-full z-50 mt-1 min-w-[180px] rounded-md border border-[#EDEBE9] bg-white py-1 shadow-xl">
-          <button
-            type="button"
-            onClick={() => { onSort(columnKey, 'asc'); setOpen(false) }}
-            className={`flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-[#DEECF9] ${isActive && sort?.dir === 'asc' ? 'text-[#009B9B] font-semibold' : 'text-[#323130]'}`}
-          >
-            <ArrowUp className="h-4 w-4 shrink-0" />
-            Crescente
-          </button>
-          <button
-            type="button"
-            onClick={() => { onSort(columnKey, 'desc'); setOpen(false) }}
-            className={`flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-[#DEECF9] ${isActive && sort?.dir === 'desc' ? 'text-[#009B9B] font-semibold' : 'text-[#323130]'}`}
-          >
-            <ArrowDown className="h-4 w-4 shrink-0" />
-            Decrescente
-          </button>
-        </div>
-      )}
     </div>
   )
 }
@@ -215,6 +186,7 @@ export function TicketListPage() {
   const [dragOverCol, setDragOverCol] = useState<TicketListColumnKey | null>(null)
   const draggedCol = useRef<TicketListColumnKey | null>(null)
   const [sort, setSort] = useState<SortState>(null)
+  const lastWrittenSearchRef = useRef<string | null>(null)
   const isSpecialLayout = statusFilter === 'open' || statusFilter === 'closed'
   const bypassTypeFilterForNonAssigned =
     groupingMode === 'assignee' && normalizeTabValue(groupingTabFilter) === normalizeText('Non assegnato')
@@ -286,7 +258,7 @@ export function TicketListPage() {
   const showNonAssignedTab = statusFilter !== 'closed'
   const groupingTabs = getGroupingTabs(filteredByTypeAndSearch, effectiveGroupingMode, mockTickets, showNonAssignedTab)
   const groupingTabsWithYear: DynamicTab[] = effectiveGroupingMode === 'monthYear'
-    ? groupingTabs.map((t) => t.id === 'all' ? t : { ...t, label: `${t.label} ${selectedGroupingYear}` })
+    ? groupingTabs.map((t) => t.id === 'all' ? t : { ...t, label: `${t.label} ${getShortYearLabel(selectedGroupingYear)}` })
     : groupingTabs
   const tabsForBar: DynamicTab[] = effectiveGroupingMode === 'none' ? requestTypeTabs : groupingTabsWithYear
   const activeTabId = effectiveGroupingMode === 'none' ? requestTypeFilter : groupingTabFilter
@@ -313,8 +285,13 @@ export function TicketListPage() {
         nextParams.set('year', selectedGroupingYear)
       }
     }
-    setSearchParams(nextParams, { replace: true })
-  }, [search, setSearchParams, statusFilter, requestTypeFilter, effectiveGroupingMode, groupingTabFilter, selectedGroupingYear])
+    const nextSearch = nextParams.toString()
+    const currentSearch = searchParams.toString()
+    if (nextSearch !== currentSearch) {
+      lastWrittenSearchRef.current = nextSearch
+      setSearchParams(nextParams, { replace: true })
+    }
+  }, [search, setSearchParams, searchParams, statusFilter, requestTypeFilter, effectiveGroupingMode, groupingTabFilter, selectedGroupingYear])
 
   // Apply sort
   const sortedFiltered = sort
@@ -336,12 +313,19 @@ export function TicketListPage() {
   const groupedSpecialTickets: { key: string; tickets: Ticket[] }[] = [{ key: 'all', tickets: sortedFiltered }]
 
   useEffect(() => {
+    const currentSearch = searchParams.toString()
+    if (lastWrittenSearchRef.current !== null) {
+      if (lastWrittenSearchRef.current === currentSearch) {
+        lastWrittenSearchRef.current = null
+      }
+      return
+    }
     if (groupingParam === 'assignee' || groupingParam === 'requestType' || groupingParam === 'monthYear') {
       if (groupingMode !== groupingParam) setTicketListGroupingMode(groupingParam)
       if (tabParam) setGroupingTabFilter(tabParam)
       if (groupingParam === 'monthYear' && yearParam) setTicketListGroupingYear(yearParam)
     }
-  }, [groupingMode, groupingParam, tabParam, yearParam])
+  }, [groupingMode, groupingParam, tabParam, yearParam, searchParams])
 
   useEffect(() => {
     if (availableYears.length > 0 && !availableYears.includes(groupingYear)) {
@@ -383,7 +367,7 @@ export function TicketListPage() {
     <div className="w-full px-4 pb-6 sm:px-6 lg:px-8">
       <div className="sticky top-14 z-20 bg-[#F8F9FA] pt-6">
         <div className={isSpecialLayout ? 'pb-4' : 'border-b border-[#EDEBE9] pb-4'}>
-          <div className="flex items-start gap-3">
+          <div className="flex items-start justify-between gap-3">
             <div className="flex min-w-0 items-start gap-3">
               <BackButton className="mt-1 shrink-0" />
               <div className="min-w-0 space-y-1">
@@ -391,6 +375,19 @@ export function TicketListPage() {
                 {pageSubtitle && <p className="text-sm leading-5 text-[#605E5C]">{pageSubtitle}</p>}
               </div>
             </div>
+            {isSpecialLayout && (
+              <button
+                type="button"
+                onClick={handleToggleTabBookmark}
+                className={`mt-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors ${
+                  isTabBookmarked ? 'text-[#009B9B]' : 'text-[#605E5C] hover:bg-[#EDEBE9] hover:text-[#323130]'
+                }`}
+                aria-label={isTabBookmarked ? `Rimuovi bookmark da ${activeTabLabel}` : `Aggiungi bookmark a ${activeTabLabel}`}
+                title={isTabBookmarked ? `Rimuovi bookmark da ${activeTabLabel}` : `Aggiungi bookmark a ${activeTabLabel}`}
+              >
+                <Bookmark className={`h-[18px] w-[18px] stroke-[1.8] ${isTabBookmarked ? 'fill-current text-[#009B9B]' : ''}`} />
+              </button>
+            )}
           </div>
         </div>
 
@@ -424,17 +421,6 @@ export function TicketListPage() {
                   </button>
                 ))}
               </div>
-              <button
-                type="button"
-                onClick={handleToggleTabBookmark}
-                className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors ${
-                  isTabBookmarked ? 'text-[#009B9B]' : 'text-[#605E5C] hover:bg-[#EDEBE9] hover:text-[#323130]'
-                }`}
-                aria-label={isTabBookmarked ? `Rimuovi bookmark da ${activeTabLabel}` : `Aggiungi bookmark a ${activeTabLabel}`}
-                title={isTabBookmarked ? `Rimuovi bookmark da ${activeTabLabel}` : `Aggiungi bookmark a ${activeTabLabel}`}
-              >
-                <Bookmark className={`h-[18px] w-[18px] stroke-[1.8] ${isTabBookmarked ? 'fill-current text-[#009B9B]' : ''}`} />
-              </button>
             </div>
             <div className="h-px w-full bg-[#EDEBE9]" />
             <div className="h-4 w-full bg-[#F8F9FA]" />
