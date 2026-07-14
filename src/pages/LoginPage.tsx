@@ -59,10 +59,10 @@ export function LoginPage() {
             </h1>
             <button
               onClick={handleSignIn}
-              className="mt-7 inline-flex items-center justify-center gap-2 rounded-md bg-[#009B9B] px-6 py-2.5 text-sm font-medium leading-none tracking-wide text-white shadow transition-colors hover:bg-[#007575]"
+              className="mt-7 inline-flex self-center items-center justify-center gap-0.5 rounded-md bg-[#009B9B] px-6 py-2.5 text-sm font-medium leading-none tracking-wide text-white shadow transition-colors hover:bg-[#007575]"
             >
               Sign In
-              <ChevronRight className="h-4 w-4 shrink-0" />
+              <ChevronRight className="relative top-px h-4 w-4 -ml-0.5 shrink-0" />
             </button>
           </div>
       </div>
