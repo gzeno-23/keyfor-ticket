@@ -140,6 +140,17 @@ export function HubPage() {
     const bookmarkedKeys = listBookmarkedKeys()
 
     bookmarkedKeys.forEach((key) => {
+      if (key.startsWith('create:')) {
+        const [, requestTypeId = ''] = key.split(':')
+        if (!requestTypeId) return
+        const label = REQUEST_TYPE_ID_TO_LABEL[requestTypeId] ?? requestTypeId
+        links.new.push({
+          label,
+          to: `/richieste/${requestTypeId}`,
+        })
+        return
+      }
+
       if (key.startsWith('tickets-tab:')) {
         const [, rawStatus = 'open', mode = 'none', rawValue = 'all', rawYear = ''] = key.split(':')
         const status = rawStatus === 'closed' ? 'closed' : 'open'
@@ -151,12 +162,18 @@ export function HubPage() {
           to = `${to}&type=${rawValue}`
         } else if (mode === 'assignee') {
           label = rawValue === 'all' ? 'Tutte assegnazioni' : rawValue
+          to = `${to}&grouping=assignee&tab=${encodeURIComponent(rawValue)}`
+        } else if (mode === 'requestType') {
+          label = rawValue === 'all' ? 'Tutte tipologie' : rawValue
+          to = `${to}&grouping=requestType&tab=${encodeURIComponent(rawValue)}`
         } else if (mode === 'monthYear') {
           if (rawValue === 'all') {
             label = rawYear ? `Tutti i mesi ${rawYear}` : 'Tutti i mesi'
+            to = `${to}&grouping=monthYear&tab=all${rawYear ? `&year=${encodeURIComponent(rawYear)}` : ''}`
           } else {
             const monthLabel = MONTH_LABELS[rawValue] ?? `Mese ${rawValue}`
             label = rawYear ? `${monthLabel} ${rawYear}` : monthLabel
+            to = `${to}&grouping=monthYear&tab=${encodeURIComponent(rawValue)}${rawYear ? `&year=${encodeURIComponent(rawYear)}` : ''}`
           }
         }
 

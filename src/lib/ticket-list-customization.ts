@@ -20,7 +20,7 @@ export const TICKET_LIST_COLUMN_LABELS: Record<TicketListColumnKey, string> = {
   assignee: 'Presa in carico',
   customerName: 'Cliente',
   createdAt: 'Data creazione',
-  updatedAt: 'Aggiornamento',
+  updatedAt: 'Ult. aggiornamento',
   solleciti: 'Sollecito',
   status: 'Stato',
 }

@@ -11,6 +11,7 @@ import { isTicketRead } from '@/lib/ticket-read-state'
 import {
   TICKET_LIST_COLUMN_LABELS,
   setTicketListColumnOrder,
+  setTicketListGroupingMode,
   setTicketListGroupingYear,
   useTicketListCustomization,
   type TicketListColumnKey,
@@ -101,14 +102,14 @@ function normalizeTabValue(value: string) {
 }
 
 const specialColumnWidths: Record<TicketListColumnKey, string> = {
-  requestType: '1fr',
-  title: '1.2fr',
-  assignee: '220px',
-  customerName: '1fr',
-  createdAt: '140px',
-  updatedAt: '140px',
-  solleciti: '100px',
-  status: '120px',
+  requestType: 'minmax(140px, 1.2fr)',
+  title: 'minmax(170px, 1.45fr)',
+  assignee: 'minmax(155px, 1.1fr)',
+  customerName: 'minmax(165px, 1.2fr)',
+  createdAt: 'minmax(112px, 0.9fr)',
+  updatedAt: 'minmax(132px, 0.95fr)',
+  solleciti: 'minmax(82px, 0.65fr)',
+  status: 'minmax(108px, 0.95fr)',
 }
 
 type SortState = { col: TicketListColumnKey; dir: 'asc' | 'desc' } | null
@@ -201,12 +202,15 @@ export function TicketListPage() {
   const navigate = useNavigate()
   const { visibleColumns, groupingMode, groupingYear, columnOrder } = useTicketListCustomization()
   const [searchParams, setSearchParams] = useSearchParams()
+  const groupingParam = searchParams.get('grouping')
+  const tabParam = searchParams.get('tab')
+  const yearParam = searchParams.get('year')
   const [search, setSearch] = useState(searchParams.get('q') ?? '')
   const statusFilter = (searchParams.get('status') as Status | 'all') ?? 'all'
   const [requestTypeFilter, setRequestTypeFilter] = useState<RequestTypeFilter>(
     (searchParams.get('type') as RequestTypeFilter | null) ?? 'all'
   )
-  const [groupingTabFilter, setGroupingTabFilter] = useState('all')
+  const [groupingTabFilter, setGroupingTabFilter] = useState(tabParam ?? 'all')
   const [isSearchOpen, setIsSearchOpen] = useState(Boolean(search))
   const [dragOverCol, setDragOverCol] = useState<TicketListColumnKey | null>(null)
   const draggedCol = useRef<TicketListColumnKey | null>(null)
@@ -247,14 +251,6 @@ export function TicketListPage() {
     draggedCol.current = null
     setDragOverCol(null)
   }
-
-  useEffect(() => {
-    const nextParams = new URLSearchParams()
-    if (search) nextParams.set('q', search)
-    if (statusFilter !== 'all') nextParams.set('status', statusFilter)
-    if (requestTypeFilter !== 'all') nextParams.set('type', requestTypeFilter)
-    setSearchParams(nextParams, { replace: true })
-  }, [search, setSearchParams, statusFilter, requestTypeFilter])
 
   const filteredByTypeAndSearch = mockTickets.filter((ticket) => {
     const normalizedRequestType = normalizeText(ticket.requestType ?? '')
@@ -304,6 +300,22 @@ export function TicketListPage() {
   const specialGridTemplateColumns = specialColumns.map((columnKey) => specialColumnWidths[columnKey]).join(' ')
   const filtered = applyGroupingTabFilter(filteredByTypeAndSearch, effectiveGroupingMode, groupingTabFilter, selectedGroupingYear)
 
+  useEffect(() => {
+    const nextParams = new URLSearchParams()
+    if (search) nextParams.set('q', search)
+    if (statusFilter !== 'all') nextParams.set('status', statusFilter)
+    if (effectiveGroupingMode === 'none') {
+      if (requestTypeFilter !== 'all') nextParams.set('type', requestTypeFilter)
+    } else {
+      nextParams.set('grouping', effectiveGroupingMode)
+      nextParams.set('tab', groupingTabFilter)
+      if (effectiveGroupingMode === 'monthYear' && selectedGroupingYear) {
+        nextParams.set('year', selectedGroupingYear)
+      }
+    }
+    setSearchParams(nextParams, { replace: true })
+  }, [search, setSearchParams, statusFilter, requestTypeFilter, effectiveGroupingMode, groupingTabFilter, selectedGroupingYear])
+
   // Apply sort
   const sortedFiltered = sort
     ? [...filtered].sort((a, b) => {
@@ -322,6 +334,14 @@ export function TicketListPage() {
     : filtered
 
   const groupedSpecialTickets: { key: string; tickets: Ticket[] }[] = [{ key: 'all', tickets: sortedFiltered }]
+
+  useEffect(() => {
+    if (groupingParam === 'assignee' || groupingParam === 'requestType' || groupingParam === 'monthYear') {
+      if (groupingMode !== groupingParam) setTicketListGroupingMode(groupingParam)
+      if (tabParam) setGroupingTabFilter(tabParam)
+      if (groupingParam === 'monthYear' && yearParam) setTicketListGroupingYear(yearParam)
+    }
+  }, [groupingMode, groupingParam, tabParam, yearParam])
 
   useEffect(() => {
     if (availableYears.length > 0 && !availableYears.includes(groupingYear)) {
@@ -447,7 +467,7 @@ export function TicketListPage() {
         {/* Desktop table header - inside sticky area */}
         {isSpecialLayout && (
           <div className="mt-0 hidden rounded-t-2xl border border-b-0 border-[#EDEBE9] bg-[#FAF9F8] md:block">
-            <div className="grid px-6 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C]" style={{ gridTemplateColumns: specialGridTemplateColumns }}>
+            <div className="grid px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#605E5C]" style={{ gridTemplateColumns: specialGridTemplateColumns }}>
               {specialColumns.map((columnKey) => (
                 <ColumnHeaderMenu
                   key={columnKey}
@@ -554,7 +574,7 @@ export function TicketListPage() {
         <div className="mt-0 hidden rounded-b-2xl border border-t-0 border-[#EDEBE9] bg-white md:block">
           <div className="divide-y divide-[#EDEBE9]">
             {filtered.length === 0 ? (
-              <div className="px-6 py-16 text-center text-sm text-[#605E5C]">
+              <div className="px-4 py-16 text-center text-sm text-[#605E5C]">
                 Nessun ticket trovato con i filtri selezionati.
               </div>
             ) : (
@@ -564,7 +584,7 @@ export function TicketListPage() {
                     <Link
                       key={ticket.id}
                       to={`/tickets/${ticket.id}`}
-                      className={`grid px-6 py-3 text-sm hover:bg-[#DEECF9] ${index % 2 === 0 ? 'bg-white' : 'bg-[#FCFBFA]'}`}
+                      className={`grid px-4 py-3 text-sm hover:bg-[#DEECF9] ${index % 2 === 0 ? 'bg-white' : 'bg-[#FCFBFA]'}`}
                       style={{ gridTemplateColumns: specialGridTemplateColumns }}
                     >
                       {specialColumns.map((columnKey) => (
@@ -590,7 +610,7 @@ export function TicketListPage() {
                 {safeColumns.map((columnKey) => (
                   <th
                     key={columnKey}
-                    className={`px-6 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#605E5C] ${
+                    className={`px-6 py-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#605E5C] ${
                       'text-left'
                     }`}
                   >

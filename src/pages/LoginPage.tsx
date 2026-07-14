@@ -38,26 +38,33 @@ export function LoginPage() {
   }
 
   return (
-    <div className="fixed inset-0 flex w-full flex-col items-center justify-center overflow-hidden bg-[#F8F9FA] px-4">
-      <div className="flex flex-col items-center gap-5">
-        {/* Logo */}
-        <div className="w-36 h-36 flex items-center justify-center">
-          <img src={`${import.meta.env.BASE_URL}login-symbol.png`} alt="Key Ticket logo" className="w-full h-full object-contain" />
-        </div>
-
-        {/* Title */}
-        <h1 className="text-4xl font-extralight tracking-widest text-[#323130] uppercase">
-          Key Ticket
-        </h1>
-
-        {/* Sign In button */}
-        <button
-          onClick={handleSignIn}
-          className="mt-4 inline-flex items-center justify-center gap-2.5 bg-[#009B9B] px-10 py-3 text-sm font-medium leading-none tracking-wide text-white shadow transition-colors hover:bg-[#007575]"
-        >
-          Sign In
-          <ChevronRight className="h-4 w-4 shrink-0" />
-        </button>
+    <div className="fixed inset-0 grid place-items-center bg-[#F8F9FA] px-4">
+      <div className="w-full max-w-[420px] px-2">
+          <div className="flex flex-col items-center text-center">
+            <div className="h-32 w-32">
+              <img
+                src={`${import.meta.env.BASE_URL}login-symbol.png`}
+                alt="Key Ticket logo"
+                className="h-full w-full object-contain"
+              />
+            </div>
+            <h1 className="mt-5 text-4xl font-semibold tracking-widest uppercase" aria-label="Key Ticket">
+              <span className="text-[#201F1E]">Key </span>
+              <span className="text-[#009B9B]">T</span>
+              <span className="text-[#D83B01]">i</span>
+              <span className="text-[#FFB900]">c</span>
+              <span className="text-[#0078D4]">k</span>
+              <span className="text-[#5C2D91]">e</span>
+              <span className="text-[#498205]">t</span>
+            </h1>
+            <button
+              onClick={handleSignIn}
+              className="mt-7 inline-flex items-center justify-center gap-2 rounded-md bg-[#009B9B] px-6 py-2.5 text-sm font-medium leading-none tracking-wide text-white shadow transition-colors hover:bg-[#007575]"
+            >
+              Sign In
+              <ChevronRight className="h-4 w-4 shrink-0" />
+            </button>
+          </div>
       </div>
     </div>
   )
